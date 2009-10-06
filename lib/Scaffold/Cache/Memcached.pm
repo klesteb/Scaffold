@@ -22,23 +22,23 @@ sub clear($) {
 
 }
 
-sub lock($) {
-    my ($self) = @_;
+sub incr($$) {
+    my ($self, $key) = @_;
 
     my $namespace = $self->namespace;
-    my $lock = $namespace . ':' . LOCK;
+    my $skey = $namespace . ':' . $key;
 
-    return $self->handle->incr($lock);
+    return $self->handle->incr($skey);
 
 }
 
-sub unlock($) {
-    my ($self) = @_;
+sub decr($$) {
+    my ($self, $key) = @_;
 
     my $namespace = $self->namespace;
-    my $lock = $namespace . ':' . LOCK;
+    my $skey = $namespace . ':' . $key;
 
-    return $self->handle->decr($lock);
+    return $self->handle->decr($skey);
 
 }
 
