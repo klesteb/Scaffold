@@ -50,32 +50,6 @@ sub delete($$) {
 
 }
 
-sub try_lock($) {
-    my ($self) = @_;
-
-    my $namespace = $self->namespace;
-    my $lock = $namespace . ':' . LOCK;
-
-    if (my $rc = $self->handle->get($lock)) {
-
-        return FALSE;
-
-    }
-
-    return TRUE;
-
-}
-
-sub init_lock($) {
-    my ($self) = @_;
-
-    my $namespace = $self->namespace;
-    my $lock = $namespace . ':' . LOCK;
-
-    $self->handle->set($lock, 0);
-
-}
-
 sub clear($) {
     my ($self) = @_;
 
@@ -86,13 +60,14 @@ sub purge($) {
 
 }
 
-sub lock($) {
-    my ($self) = @_;
+sub incr($$) {
+    my ($self, $key) = @_;
+    
 
 }
 
-sub unlock($) {
-    my ($self) = @_;
+sub decr($$) {
+    my ($self, $key) = @_;
     
 }
 
