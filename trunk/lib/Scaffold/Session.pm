@@ -6,11 +6,11 @@ use warnings;
 our $VERSION = '0.01';
 
 use Scaffold::Class
-  version  => $VERSION,
-  base     => 'Scaffold::Base',
-  accesors => 'id, user, address',
-  mutators => 'create, access, age',
-  as_text  => '_to_string',
+  version   => $VERSION,
+  base      => 'Scaffold::Base',
+  accessors => 'id, user, address',
+  mutators  => 'create, access, age',
+  as_text   => '_to_string',
 ;
 
 # ----------------------------------------------------------------------
@@ -19,9 +19,9 @@ use Scaffold::Class
 
 sub has_info($) {
     my ($self) = @_;
-    
-    return $self->user;
-    
+
+    return (my $x = $self->user);
+
 }
 
 sub creation_age($) {
@@ -71,8 +71,8 @@ sub init {
     $self->{id}      = $self->config('-id');
     $self->{user}    = $self->config('-user');
     $self->{address} = $self->config('-address');
-    $self->{create}  = time();
-    $self->{access}  = time();
+    $self->{create}  = $self->config('-create') || time();
+    $self->{access}  = $self->config('-access') || time();
 
     return $self;
 
@@ -84,7 +84,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Session::Store - The class for Sessions in Scaffold
+Scaffold::Session - The class for Sessions in Scaffold
 
 =head1 SYNOPSIS
 
