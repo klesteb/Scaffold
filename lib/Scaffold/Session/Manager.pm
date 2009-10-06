@@ -1,14 +1,16 @@
-package Scaffold::SessionManager;
+package Scaffold::Session::Manager;
 
 use strict;
 use warnings;
 
 our $VERSION = '0.01';
 
+use Scaffold::Session;
+
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  accessors => 'storage session',
+  accessors => 'cache session address username',
   constants => {
       ACCESS_TIME_RESOLUTION => 1,
   }
@@ -18,6 +20,28 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
+sub get_session($$) {
+    my ($self, $id) = @_;
+
+    my $session;
+
+    if (! ($session = $self->cache->get($id))) {
+
+	if (! ($session = $self->storage->load($id))) {
+
+	    $session = Scaffold::Session->new(
+		-id => '',
+		-user => '',
+		-address => ''
+	    );
+
+	}
+	
+    }
+
+    return $session;
+
+}
 
 # ----------------------------------------------------------------------
 # Private Methods
@@ -27,10 +51,11 @@ sub init {
     my ($self, $config) = @_;
 
     $self->{config} = $config;
-    
-    $self->{session} = $self->config('-session');
-    $self->{storeage} = $self->config('-storage');
-    
+
+    $self->{cache}   = $self->config('-cache');
+    $self->{storage} = $self->config('-storage');
+    $self->{cookie}  = $self->config('-cookie');
+
     return $self;
 
 }

@@ -3,7 +3,7 @@ package Scaffold::Class;
 use Badger::Class
   uber     => 'Badger::Class',
   constant => {
-      CONSTANTS => 'Scaffold::Constants,
+      CONSTANTS => 'Scaffold::Constants',
   }
 ;
 
