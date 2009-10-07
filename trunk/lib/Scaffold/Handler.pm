@@ -234,21 +234,13 @@ sub _process_template($) {
     my ($self) = @_;
 
     my $page;
+    my $input = $self->stash->view;
 
-    if (defined($self->scaffold->template)) {
+    if (defined($self->scaffold->render)) {
 
 	if (! $self->template_diabled) {
 
-	    $self->scaffold->template->engine->process(
-		$self->stash->view->template,
-		{
-		    self => $self,
-		    site => $self,
-		    view => $self->stash->view,
-		},
-		\$page
-	    ) or $self->throw_msg(TEMPLATE, 'template', $self->scaffold->template->engine->error);
-
+	    my $page = $self->scaffold->render->engine->process($input);
 	    $self->stash->output($page);
 
 	} else {

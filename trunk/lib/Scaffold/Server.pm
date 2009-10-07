@@ -6,6 +6,7 @@ use warning;
 our $VERSION = '0.01';
 
 use HTTP::Engine;
+use Scaffold::Render;
 use HTTP::Engine::Response;
 use Scaffold::Cache::FastMmap;
 use Scaffold::Session::Manager;
@@ -14,7 +15,7 @@ use Scaffold::Session::Store::Cache;
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  accessors => 'engine cache session database req res',
+  accessors => 'engine cache session render database req res',
   messages => {
       'nomod' => 'module not defined for %s',
   }
@@ -96,6 +97,16 @@ sub init {
 	    -storage  => Scaffols::Session::Store::Cache->new(),
 	    -scaffold => $self,
 	);
+
+    }
+
+    if (my $render = $self->config('-render')) {
+
+	$self->{render} = $render;
+
+    } else {
+
+	$self->{render} = Scaffold::Render->new();
 
     }
 
