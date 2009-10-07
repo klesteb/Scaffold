@@ -1,24 +1,44 @@
-package Scaffold::Render;
+package Scaffold::Render::TT;
 
 use strict;
 use warnings;
 
 our $VERSION = '0.01';
 
+use Template;
+
 use Scaffold::Class
   version  => $VERSION,
   base     => 'Scaffold::Base',
   accessor => 'engine',
+  messages => {
+      'template' => "unable to initialize Template Toolkit, reason: %s",
+  },
+  constants => {
+      TEMPLATE => 'scaffold.render.tt',
+  }
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub process($) {
+sub process($$) {
     my ($self, $input) = @_;
 
-    return $input->data;
+    my $page;
+
+    $self->scaffold->render->engine->process(
+	$input->template,
+	{
+	    self => $self,
+	    site => $self,
+	    view => $input,
+	},
+	\$page
+    ) or $self->throw_msg(TEMPLATE, 'template', $self->scaffold->render->engine->error);
+
+    return $page;
 
 }
 
@@ -30,7 +50,16 @@ sub init {
     my ($self, $config) = @_;
 
     $self->{config} = $config;
-    $self->{engine} = $self;
+
+    my @wrappers = split(':', $self->config('-wrappers'));
+    my @defaults = split(':', $self->config('-defaults'));
+    my @include_paths = split(':', $self->config('-include_paths'));
+
+    $self->{engine} = Template->new(
+	WRAPPER      => \@wrappers,
+	INCLUDE_PATH => \@include_paths,
+	DEFAULT      => \@defaules
+    ) or $self->throw_msg(TEMPLATE, 'template', $Template::ERROR);
 
     return $self;
 
@@ -42,7 +71,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Render - The base Renderer.
+Scaffold::Render::TT - Use the Template Toolkit to render pages.
 
 =head1 SYNOPSIS
 
