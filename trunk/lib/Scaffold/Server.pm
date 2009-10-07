@@ -5,14 +5,59 @@ use warning;
 
 our $VERSION = '0.01';
 
+use HTTP::Engine;
+
 use Scaffold::Class
-  version => $VERSION,
-  base    => 'Scaffold::Base',
+  version   => $VERSION,
+  base      => 'Scaffold::Base',
+  accessors => 'engine cache session database',
+  messages => {
+      'nomod' => 'module not defined for %s',
+  }
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
+
+sub dispatch($$) {
+    my ($self, $request) = @_;
+
+    my $response = HTTP::Engine::Response->new();
+    my $locations = $self->config('-locations');
+
+    my @path = (split( m|/|, $request->uri||'' ));
+
+    while (@path) {
+
+        $self->{config}->{location} = join('/', @path);
+
+        if (defined $locations->{$self->{config}->{location}}) {
+            my $mod = $locations->{$self->{config}->{location}}; 
+
+            $self->throw_msg('scaffold.server.dispatch', 'nomod', $self->{config}->{location});
+                unless $mod;
+
+            eval "use $mod";
+            if ( $@ ) { die $@; }
+
+            return $mod->handler($self, $request, $response);
+
+        }
+
+        pop(@path);
+
+    } # end while path
+
+    $self->{config}->{location} = '/';
+    my $mod = $locations->{ '/' }; 
+
+    eval "use $mod" if $mod;
+    if ( $@ ) { die $@; }
+
+    return $mod->handler($self, $request, $response);
+
+}
 
 # ----------------------------------------------------------------------
 # Private Methods
@@ -21,8 +66,18 @@ use Scaffold::Class
 sub init {
     my ($self, $config) = @_;
 
-    $self->{config} = $config;
+    $self->{config}  = $config;
+    $self->{cache}   = $self->config('-cache');
+    $self->{session} = $self->config('-session');
     
+    $self->{engine} = HTTP::Engine->new(
+	interface => {
+	    module => $self->config('-engine'),
+	    handler => sub {
+		$self->dispatch();
+	    }
+	}
+    );
 
     return $self;
 
