@@ -6,6 +6,10 @@ use warning;
 our $VERSION = '0.01';
 
 use HTTP::Engine;
+use HTTP::Engine::Response;
+use Scaffold::Cache::FastMmap;
+use Scaffold::Session::Manager;
+use Scaffold::Session::Store::Cache;
 
 use Scaffold::Class
   version   => $VERSION,
@@ -33,6 +37,7 @@ sub dispatch($$) {
         $self->{config}->{location} = join('/', @path);
 
         if (defined $locations->{$self->{config}->{location}}) {
+
             my $mod = $locations->{$self->{config}->{location}}; 
 
             $self->throw_msg('scaffold.server.dispatch', 'nomod', $self->{config}->{location});
@@ -67,9 +72,30 @@ sub init {
     my ($self, $config) = @_;
 
     $self->{config}  = $config;
-    $self->{cache}   = $self->config('-cache');
-    $self->{session} = $self->config('-session');
-    
+
+    if (my $cache = $self->config('-cache')) {
+
+	$self->{cache} = $cache;
+
+    } else {
+
+	$self->{cache} = Scaffold::Cache::FastMmap->new();
+
+    }
+
+    if (my $session = $self->config('-session')) {
+
+	$self->{session} = $session;
+
+    } else {
+
+	$self->{session} = Scaffold::Session::Manager->new(
+	    -session => Scaffold::Session::Base->new(),
+	    -storage => Scaffols::Session::Store::Cache->new(),
+	);
+
+    }
+
     $self->{engine} = HTTP::Engine->new(
 	interface => {
 	    module => $self->config('-engine'),
