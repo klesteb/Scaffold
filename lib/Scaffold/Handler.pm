@@ -6,93 +6,174 @@ use strict;
 our $VERSION = '0.01';
 
 use Switch;
+use Scaffold::Stash;
 use Badger::Exception;
 use Scaffold::Constants ':state';
+
+use Scaffold::Class
+  version   => $VERSION,
+  base      => 'Badger::Prototype',
+  accessors => 'stash scaffold page_title',
+  mutators  => 'is_declined template_disabled',
+  messages => {
+      'declined'          => '%s',
+      'redirect'          => "%s",
+      'moved_permanently' => "%s",
+      'template'          => "%s",
+  },
+  constants => {
+      DECLINED   => 'scaffold.handler.declined',
+      REDIRECT   => 'scaffold.handler.redirect',
+      MOVED_PERM => 'scaffold.handler.moved_permanently',
+      TEMPLATE   => 'scaffold.handler.template',
+  }
+;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub handler($$$$) {
-    my ($class, $sobj, $request, $response) - @_;
+sub handler($$) {
+    my ($class, $sobj) = @_;
+
+    $class = $class->prototype() unless ref $class;
+    $class->{stash} = Scaffold::Stash->new();
+    $class->{scaffold} = $sobj;
+    $class->{page_title} = $class->scaffold->req->uri;
+
+    my $state = STATE_PRE_ACTION;
+    my @p = $class->_cleanroot($class->scaffold->req->uri);
+    my $p1 = ( shift(@P) || 'main');
+
+    my $action = 'do_' . $p1;
+
+    $class->scaffold->res->status('200');
+    $class->stash->cookies($class->scaffold->req->cookie);
 
     eval {
 
         while ($state) {
 
             switch ($state) {
-                case STATE_CACHED_PAGES {
-                    $state = cached_pages($self);
-                }
                 case STATE_PRE_ACTION {
-                    $state = pre_action($self, $plugin_callbacks);
+                    $state = $class->_pre_action($plugin_callbacks);
                 }
                 case STATE_ACTION {
-                    $state = perform_action($self);
+                    $state = $class->_perform_action($action, $p1, @p);
                 }
                 case STATE_POST_ACTION {
-                    $state = post_action($self, $plugin_callbacks);
+                    $state = $class->_post_action($plugin_callbacks);
                 }
-                case STATE_PRE_PROCESS {
-                    $state = pre_process($self, $plugin_callbacks);
+                case STATE_PRE_TEMPLATE {
+                    $state = $class->_pre_template($plugin_callbacks);
                 }
-                case STATE_PROCESS {
-                    $state = process_template($self);
+                case STATE_TEMPLATE {
+                    $state = $class->_process_template();
                 }
-                case STATE_POST_PROCESS {
-                    $state = post_process($self, $plugin_callbacks);
+                case STATE_POST_TEMPLATE {
+                    $state = $class->_post_template($plugin_callbacks);
                 }
             };
 
         }
 
+	$class->scaffold->res->body($class->stash->output);
+
     }; if (my $ex = $@) {
 
-        my $ref = ref($X);
+        my $ref = ref($ex);
 
-        if ($ref && $X->isa('Gantry::Exception::Redirect')) {
+        if ($ref && $ex->isa('Badger::Exception')) {
 
-            $self->header_out('location', "$X");
-            $self->redirect_response();
-            $status = $self->status_const('REDIRECT');
+	    my $type = $ex->type;
+	    my $info = $ex->info;
 
-        } elsif ($ref && $X->isa('Gantry::Exception::RedirectPermanently')) {
+	    switch ($type) {
+		case MOVED_PERM {
+		    $class->scaffold->res->status('301');
+		    $class->scaffold->res->headers->header('location' => $info);
+		    $class->scaffold->res->body("");
+		}
+		case REDIRECT {
+		    $class->scaffold->res->status('302');
+		    $class->scaffold->res->headers->header('location' => $info);
+		    $class->scaffold->res->body("");
+		}
+		case TEMPLATE {
+		    $class->scaffold->res->status('500');
+		    $class->scaffold->res->body($self->_custom_error($info));
+		}
+		case DECLINED {
+		    $class->scaffold->res->status('404');
+		    $class->scaffold->res->body($self->_custom_error(
+			"Declined - undefined method<br />"
+			. "<span style='font-size: .8em'>"
+			. "Method: $action<br />"
+			. "Location: " . $current_location . "<br />"
+			. "Module: " . (
+			    $self->locations->{ $current_location }
+			    || 'No module defined for this location' )
+			. "</span>"
+			)
+		    );
 
-            $self->header_out('location', "$X");
-            $self->redirect_response();
-            $status = $self->status_const('MOVED_PERMANENTLY');
+		}
+		else {
+		    if ($class->can('exception_handler')) {
 
-        } elsif ($ref && $X->isa('Gantry::Exception::Declined')) {
+			$class->exception_handler($ex);
 
-            $status = $self->declined_response($self->action());
+		    } else {
 
-        } elsif ($ref && $X->isa('Gantry::Exception')) {
+			warn "Unexpected exception caught:\n";
+			warn "  type = " . $type. "\n";
+			warn "  message = " . $info . "\n";
 
-            if ($self->can('exception_handler')) {
+			$class->scaffold->res->status('500');
+			$class->scaffold->res->body("");
 
-                $status = $self->exception_handler($X);
+		    }
 
-            } else {
+		}
 
-                warn "Unexpected exception caught:\n";
-                warn "  status = " . $X->status . "\n";
-                warn "  message = " . $X->message . "\n";
-                $status = 500;
+	    };
 
-            }
+	} else {
 
-        } else {
+	    $class->scaffold->res->body($self->_custom_error());
 
-            # Call do_error and return
-
-            $self->do_error($X);
-            $status = $self->cast_custom_error($self->custom_error($X), $X);
-
-        }
+	}
 
     }
 
-    return $response;
+    foreach my $cookie (@$class->stash->cookies) {
+
+	$class->scaffold->res->headers->header('set-cookie' => $cookie);
+
+    }
+
+    return $class->scaffold->res;
+
+}
+
+sub redirect($$) {
+    my ($self, $url) = @_;
+
+    $self->throw_msg(REDIRECT, 'redirect', $url);
+
+}
+
+sub moved_permanently($$) {
+    my ($self, $url) = @_;
+
+    $self->throw_msg(MOVED_PERM, 'moved_permanently', $url);
+
+}
+
+sub declined($) {
+    my ($self) = @_;
+
+    $self->throw_msg(DECLINED, 'declined', "");
     
 }
 
@@ -100,7 +181,219 @@ sub handler($$$$) {
 # Private Methods
 # ----------------------------------------------------------------------
 
-__END__
+sub _cleanroot {
+    my ($self, $uri, $root) = @_;
+
+    $uri =~ s!^$root!!g;
+    $uri =~ s/\/\//\//g;
+    $uri =~ s/^\///;
+
+    return(split('/', $uri));
+
+}
+
+sub _pre_action($$) {
+    my ($self, @actions) = @_;
+
+}
+
+sub _perform_action {
+    my ($self, $action , $p1, @p) = @_;
+
+    my $output;
+
+    if ($self->can($action)) {
+
+        $self->$action(@p);
+
+    } elsif ($self->can('do_default')) {
+
+        $self->do_default($p1, @p);
+
+    } else {
+
+        $self->declined();
+
+    }
+
+    $self->declined() if ($self->is_declined);
+
+}
+
+sub _post_action($$) {
+    my ($self, @actions) = @_;
+
+}
+
+sub _pre_template($$) {
+    my ($self, @actions) = @_;
+
+}
+
+sub _process_template($) {
+    my ($self) = @_;
+
+    my $page;
+
+    if (defined($self->scaffold->template)) {
+
+	if (! $self->template_diabled) {
+
+	    $self->scaffold->template->engine->process(
+		$self->stash->view->template,
+		{
+		    self => $self,
+		    site => $self,
+		    view => $self->stash->view,
+		},
+		\$page
+	    ) or $self->throw_msg(TEMPLATE, 'template', $self->scaffold->template->engine->error);
+
+	    $self->stash->output($page);
+
+	} else {
+
+	    $self->stash->output($self->stash->view->data);
+
+	}
+
+    } else {
+
+	$self->stash->output($self->stash->view->data);
+
+    }
+
+}
+
+sub _post_template($$) {
+    my ($self, @actions) = @_;
+    
+}
+
+sub _trim {
+    my $spaces = $1;
+
+    my $new_sp = " " x int( length($spaces) / 4 );
+    return( "\n$new_sp" );
+}
+
+sub _custom_error {
+    my ($self, @err) = @_;
+
+    eval "use Data::Dumper";
+
+    my $die_msg    = join( "\n", @err );
+    my $param_dump = Dumper($self->scaffold->req->param);
+
+    $param_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
+    $param_dump =~ s/</&lt;/g;
+
+    my $request_dump  = Dumper($self);
+    my $response_dump = '';
+
+    $request_dump =~ s/(?:^|\n)(\s+)/&trim( $1 )/ge;
+    $request_dump =~ s/</&lt;/g;
+
+    my $status = $self->scaffold->res->status || 'Bad Request';
+    my $page = $self->_error_page();
+
+    $page =~ s/##DIE_MESSAGE##/$die_msg/sg;
+    $page =~ s/##PARAM_DUMP##/$param_dump/sg;
+    $page =~ s/##REQUEST_DUMP##/$request_dump/sg;
+    $page =~ s/##RESPONSE_DUMP##/$response_dump/sg;
+    $page =~ s/##STATUS##/$status/sg;
+    $page =~ s/##PAGE_TITLE##/$self->page_title/sge;
+
+    return $page;
+
+}
+
+sub _error_page($) {
+    my ($self) = @_;
+    
+    return( qq!
+    <html>
+    <head>
+        <title>##PAGE_TITLE## ##STATUS##</title>
+        <style type="text/css">
+            body {
+                font-family: "Bitstream Vera Sans", "Trebuchet MS", Verdana,
+                            Tahoma, Arial, helvetica, sans-serif;
+                color: #ddd;
+                background-color: #eee;
+                margin: 0px;
+                padding: 0px;
+            }
+            div.box {
+                background-color: #ccc;
+                border: 1px solid #aaa;
+                padding: 4px;
+                margin: 10px;
+                -moz-border-radius: 10px;
+            }
+            div.error {
+                font: 20px Tahoma;
+                background-color: #88003A;
+                border: 1px solid #755;
+                padding: 8px;
+                margin: 4px;
+                margin-bottom: 10px;
+                -moz-border-radius: 10px;
+            }
+            div.infos {
+                font: 9px Tahoma;
+                background-color: #779;
+                border: 1px solid #575;
+                padding: 8px;
+                margin: 4px;
+                margin-bottom: 10px;
+                -moz-border-radius: 10px;
+            }
+            .head {
+                font: 12px Tahoma;
+            }
+            div.name {
+                font: 12px Tahoma;
+                background-color: #66B;
+                border: 1px solid #557;
+                padding: 8px;
+                margin: 4px;
+                -moz-border-radius: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="box">
+            <div class="error">##DIE_MESSAGE##</div>
+            <div class="infos"><br/>
+    
+    <div class="head"><u>site.params</u></div>
+    <br />
+    <pre>
+##PARAM_DUMP##
+    </pre>
+    
+    <div class="head"><u>site</u></div><br/>
+    <pre>
+##REQUEST_DUMP##
+    </pre>
+    <div class="head"><u>Response</u></div><br/>
+    <pre>
+##RESPONSE_DUMP##
+    </pre>
+    
+    </div>
+    
+        <div class="name">Running on Scaffold $Scaffold::Base::VERSION</div>
+    </div>
+    </body>
+    </html>! );
+    
+}
+
+1;
+
+  __END__
 
 =head1 NAME
 

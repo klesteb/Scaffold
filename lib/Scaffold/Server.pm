@@ -14,7 +14,7 @@ use Scaffold::Session::Store::Cache;
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  accessors => 'engine cache session database',
+  accessors => 'engine cache session database req res',
   messages => {
       'nomod' => 'module not defined for %s',
   }
@@ -27,7 +27,9 @@ use Scaffold::Class
 sub dispatch($$) {
     my ($self, $request) = @_;
 
-    my $response = HTTP::Engine::Response->new();
+    $self->{req} = $request;
+    $self->{res} = HTTP::Engine::Response->new();
+
     my $locations = $self->config('-locations');
 
     my @path = (split( m|/|, $request->uri||'' ));
@@ -46,7 +48,7 @@ sub dispatch($$) {
             eval "use $mod";
             if ( $@ ) { die $@; }
 
-            return $mod->handler($self, $request, $response);
+            return $mod->handler($self);
 
         }
 
@@ -60,7 +62,7 @@ sub dispatch($$) {
     eval "use $mod" if $mod;
     if ( $@ ) { die $@; }
 
-    return $mod->handler($self, $request, $response);
+    return $mod->handler($self);
 
 }
 
@@ -90,8 +92,9 @@ sub init {
     } else {
 
 	$self->{session} = Scaffold::Session::Manager->new(
-	    -session => Scaffold::Session::Base->new(),
-	    -storage => Scaffols::Session::Store::Cache->new(),
+	    -session  => Scaffold::Session::Base->new(),
+	    -storage  => Scaffols::Session::Store::Cache->new(),
+	    -scaffold => $self,
 	);
 
     }
