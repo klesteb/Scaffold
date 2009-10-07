@@ -77,7 +77,7 @@ sub handler($$) {
 
         }
 
-	$class->scaffold->res->body($class->stash->output);
+        $class->scaffold->res->body($class->stash->output);
 
     }; if (my $ex = $@) {
 
@@ -85,70 +85,70 @@ sub handler($$) {
 
         if ($ref && $ex->isa('Badger::Exception')) {
 
-	    my $type = $ex->type;
-	    my $info = $ex->info;
+            my $type = $ex->type;
+            my $info = $ex->info;
 
-	    switch ($type) {
-		case MOVED_PERM {
-		    $class->scaffold->res->status('301');
-		    $class->scaffold->res->headers->header('location' => $info);
-		    $class->scaffold->res->body("");
-		}
-		case REDIRECT {
-		    $class->scaffold->res->status('302');
-		    $class->scaffold->res->headers->header('location' => $info);
-		    $class->scaffold->res->body("");
-		}
-		case TEMPLATE {
-		    $class->scaffold->res->status('500');
-		    $class->scaffold->res->body($self->_custom_error($info));
-		}
-		case DECLINED {
-		    $class->scaffold->res->status('404');
-		    $class->scaffold->res->body($self->_custom_error(
-			"Declined - undefined method<br />"
-			. "<span style='font-size: .8em'>"
-			. "Method: $action<br />"
-			. "Location: " . $current_location . "<br />"
-			. "Module: " . (
-			    $self->locations->{ $current_location }
-			    || 'No module defined for this location' )
-			. "</span>"
-			)
-		    );
+            switch ($type) {
+                case MOVED_PERM {
+                    $class->scaffold->res->status('301');
+                    $class->scaffold->res->headers->header('location' => $info);
+                    $class->scaffold->res->body("");
+                }
+                case REDIRECT {
+                    $class->scaffold->res->status('302');
+                    $class->scaffold->res->headers->header('location' => $info);
+                    $class->scaffold->res->body("");
+                }
+                case TEMPLATE {
+                    $class->scaffold->res->status('500');
+                    $class->scaffold->res->body($self->_custom_error($info));
+                }
+                case DECLINED {
+                    $class->scaffold->res->status('404');
+                    $class->scaffold->res->body($self->_custom_error(
+                        "Declined - undefined method<br />"
+                        . "<span style='font-size: .8em'>"
+                        . "Method: $action<br />"
+                        . "Location: " . $current_location . "<br />"
+                        . "Module: " . (
+                            $self->locations->{ $current_location }
+                            || 'No module defined for this location' )
+                        . "</span>"
+                        )
+                    );
 
-		}
-		else {
-		    if ($class->can('exception_handler')) {
+                }
+                else {
+                    if ($class->can('exception_handler')) {
 
-			$class->exception_handler($ex);
+                        $class->exception_handler($ex);
 
-		    } else {
+                    } else {
 
-			warn "Unexpected exception caught:\n";
-			warn "  type = " . $type. "\n";
-			warn "  message = " . $info . "\n";
+                        warn "Unexpected exception caught:\n";
+                        warn "  type = " . $type. "\n";
+                        warn "  message = " . $info . "\n";
 
-			$class->scaffold->res->status('500');
-			$class->scaffold->res->body("");
+                        $class->scaffold->res->status('500');
+                        $class->scaffold->res->body("");
 
-		    }
+                    }
 
-		}
+                }
 
-	    };
+            };
 
-	} else {
+        } else {
 
-	    $class->scaffold->res->body($self->_custom_error());
+            $class->scaffold->res->body($self->_custom_error());
 
-	}
+        }
 
     }
 
     foreach my $cookie (@$class->stash->cookies) {
 
-	$class->scaffold->res->headers->header('set-cookie' => $cookie);
+        $class->scaffold->res->headers->header('set-cookie' => $cookie);
 
     }
 
@@ -233,25 +233,25 @@ sub _pre_template($$) {
 sub _process_template($) {
     my ($self) = @_;
 
-    my $page;
     my $input = $self->stash->view;
+    my $page = $self->stash->view->data;
 
     if (defined($self->scaffold->render)) {
 
-	if (! $self->template_diabled) {
+        if (! $input->template_diabled) {
 
-	    my $page = $self->scaffold->render->engine->process($input);
-	    $self->stash->output($page);
+            $page = $self->scaffold->render->engine->process($input);
+            $self->stash->output($page);
 
-	} else {
+        } else {
 
-	    $self->stash->output($self->stash->view->data);
+            $self->stash->output($page);
 
-	}
+        }
 
     } else {
 
-	$self->stash->output($self->stash->view->data);
+        $self->stash->output($page);
 
     }
 

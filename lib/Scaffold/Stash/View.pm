@@ -8,7 +8,7 @@ our $VERSION = '0.01';
 use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Base',
-  mutators => 'title template data'
+  mutators => 'title template data template_disabled template_default'
 ;
 
 1;

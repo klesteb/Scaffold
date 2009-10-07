@@ -8,7 +8,7 @@ our $VERSION = '0.01';
 use Scaffold::Class
   version  => $VERSION,
   base     => 'Scaffold::Base',
-  mutators => 'data',
+  mutators => 'data state flags',
 ;
 
 1;
