@@ -64,13 +64,13 @@ sub handler($$) {
                 case STATE_POST_ACTION {
                     $state = $class->_post_action($plugin_callbacks);
                 }
-                case STATE_PRE_TEMPLATE {
+                case STATE_PRE_RENDER {
                     $state = $class->_pre_template($plugin_callbacks);
                 }
-                case STATE_TEMPLATE {
+                case STATE_RENDER {
                     $state = $class->_process_template();
                 }
-                case STATE_POST_TEMPLATE {
+                case STATE_POST_RENDER {
                     $state = $class->_post_template($plugin_callbacks);
                 }
             };

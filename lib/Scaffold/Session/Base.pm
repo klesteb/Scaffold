@@ -1,4 +1,4 @@
-package Scaffold::Session;
+package Scaffold::Session::Base;
 
 use strict;
 use warnings;
@@ -45,7 +45,7 @@ sub access_time($$) {
 
     if (($now - $self->access) > $resolution) {
 
-	$self->access($now);
+        $self->access($now);
 
     }
 
@@ -59,7 +59,7 @@ sub _to_string($) {
     my ($self) = @_;
 
     return sprintf("%s;%s;%s;%s;%s", 
-	$self->id, $self->user, $self->address, $self->create, $self->access);
+        $self->id, $self->user, $self->address, $self->create, $self->access);
 
 }
 
@@ -84,7 +84,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Session - The class for Sessions in Scaffold
+Scaffold::Session::Base - The class for Sessions in Scaffold
 
 =head1 SYNOPSIS
 
