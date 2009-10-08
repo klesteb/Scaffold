@@ -6,29 +6,29 @@ use warnings;
 use base 'Badger::Constants';
 
 use constant {
-    LOCK                => '__LOCK__',
-    STATE_PRE_ACTION    => 1,
-    STATE_ACTION        => 2,
-    STATE_POST_ACTION   => 3,
-    STATE_PRE_TEMPLATE  => 4,
-    STATE_TEMPLATE      => 5,
-    STATE_POST_TEMPLATE => 6,
-    STATE_FINI          => 7,
+    LOCK              => '__LOCK__',
+    STATE_PRE_ACTION  => 1,
+    STATE_ACTION      => 2,
+    STATE_POST_ACTION => 3,
+    STATE_PRE_RENDER  => 4,
+    STATE_RENDER      => 5,
+    STATE_POST_RENDER => 6,
+    STATE_FINI        => 7,
 };
 
 our $EXPORT_ALL = 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
-                   STATE_PRE_PROCESS STATE_PROCESS STATE_POST_PROCESS 
+                   STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
                    STATE_FINI'
 ;
 
 our $EXPORT_ANY = 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
-                   STATE_PRE_PROCESS STATE_PROCESS STATE_POST_PROCESS 
+                   STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
                    STATE_FINI'
 ;
 
 our $EXPORT_TAGS = {
     state => 'STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
-              STATE_PRE_PROCESS STATE_PROCESS STATE_POST_PROCESS 
+              STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
               STATE_FINI',
 };
 
