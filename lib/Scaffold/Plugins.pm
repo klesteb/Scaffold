@@ -1,4 +1,4 @@
-package Scaffold::Plugin;
+package Scaffold::Plugins;
 
 use strict;
 use warnings;
