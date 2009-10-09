@@ -8,7 +8,10 @@ main: {
 
     my $server = Scaffold::Server->new(
         -engine => {
-            module => 'CGI',
+            module => 'ServerSimple',
+            args => {
+                port => 8080,
+            }
         },
         -locataions => {
             '/'       => 'Site::Root',
@@ -25,10 +28,16 @@ main: {
             -server => 'localhost',
             -port   => '12211',
         ),
-        -session => Scaffold::Session::Base->new(
-            -storage => Scaffold::Session::Store::Cache->new(
+        -session => {
+            -store => HTTP::Session::Store::Memcached->new(
+                memd => Cache::Memcached->new(
+                    servers => ['127.0.0.1:11211']
+                ),
+            ),
+            -state => HTTP::Session::State::Cookie->new(
+                cookie_key => ''
             )
-        )
+        }
     );
 
     $server->engine->run();

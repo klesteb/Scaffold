@@ -16,6 +16,16 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
+sub update($$$) {
+    my ($self, $key, $value) = @_;
+
+    my $namespace = $self->namespace;
+    my $skey = $namespace . ':' . $key;
+
+    return $self->handle->get_and_set($skey, $value);
+
+}
+
 sub purge($) {
     my ($self) = @_;
 
@@ -35,7 +45,7 @@ sub incr($$) {
     my $namespace = $self->namespace;
     my $skey = $namespace . ':' . $key;
 
-    $self->handle->get_and_set($key, 1);
+    $self->handle->get_and_set($skey, 1);
 
 }
 
@@ -43,7 +53,7 @@ sub decr($) {
     my ($self) = @_;
 
     my $namespace = $self->namespace;
-    my $key = $namespace . ':' . $key;
+    my $skey = $namespace . ':' . $key;
 
     $self->handle->get_and_set($skey, 0);
 

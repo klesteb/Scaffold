@@ -5,60 +5,67 @@ use warnings;
 
 our $VERSION = '0.01';
 
-use Scaffold::Session;
+use HTTP::Session;
+use HTTP::Session::State::Cookie;
+use Scaffold::Session::Store::Cache;
 
 use Scaffold::Class
-  version   => $VERSION,
-  base      => 'Scaffold::Base',
-  accessors => 'cache session address username',
-  constants => {
-      ACCESS_TIME_RESOLUTION => 1,
-  }
+  version  => $VERSION,
+  base     => 'Scaffold::Plugins',
+  constant => 'SESSION_ID :plugins',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub get_session($$) {
-    my ($self, $id) = @_;
+sub pre_action($$) {
+    my ($self, $sobj) = @_;
 
-    my $session;
+    my ($user, $address, $create ,$access);
 
-    if (! ($session = $self->cache->get($id))) {
+    my $session = HTTP::Session->new(
+        store => Scaffold::Session::Store::Cache->new(
+            cache     => $sobj->scaffold->cache,
+            namespace => $sobj->scaffold->config('configs')->{namespace}
+        ),
+        state => HTTP::Session::State::Cookies->new(
+            cookie_key => SESSION_ID
+        ),
+        request => $sobj->scaffold->req
+    );
 
-	if (! ($session = $self->storage->load($id))) {
+    $user    = $session->get('user');
+    $address = $session->get('address');
+    $create  = $session->get('address');
+    $access  = $session->get('access');
 
-	    $session = Scaffold::Session->new(
-		-id => '',
-		-user => '',
-		-address => ''
-	    );
+    $session->set('user', $sobj->scaffold->req->user) if (not $user);
+    $session->set('address', $sobj->scaffold->req->address) if (not $address);
+    $session->set('create', time()) if (not $create);
+    $session->set('access', time()) if (not $access);
 
-	}
-	
-    }
+    $sobj->scaffold->session = $session;
 
-    return $session;
+    return PLUGIN_NEXT;
+
+}
+
+sub post_render($$) {
+    my ($self, $sobj) = @_;
+
+    my $session = $sobj->scaffold->session;
+
+    $session->set('access', time());
+    $session->finalize();
+
+    return PLUGIN_NEXT;
 
 }
 
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub init {
-    my ($self, $config) = @_;
-
-    $self->{config} = $config;
-
-    $self->{cache}   = $self->config('-cache');
-    $self->{storage} = $self->config('-storage');
-    $self->{cookie}  = $self->config('-cookie');
-
-    return $self;
-
-}
 
 1;
 

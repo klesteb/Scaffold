@@ -1,4 +1,4 @@
-package Scaffold::Session::Store;
+package Scaffold::Cache::Manager;
 
 use strict;
 use warnings;
@@ -6,32 +6,22 @@ use warnings;
 our $VERSION = '0.01';
 
 use Scaffold::Class
-  version => $VERSION,
-  base    => 'Scaffold::Base',
+  version   => $VERSION,
+  base      => 'Scaffold::Plugins',
+  constants => ':plugins',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub save($$$) {
-    my ($self, $id, $session) = @_;
+sub pre_action($$) {
+    my ($self, $sobj) = @_;
 
-}
+    $sobj->scaffold->cache->purge();
 
-sub load($$) {
-    my ($self, $id) = @_;
+    return PLUGIN_NEXT;
 
-}
-
-sub purge($$) {
-    my ($self, $minutes) = @_;
-
-}
-
-sub all($) {
-    my ($self) = @_;
-    
 }
 
 # ----------------------------------------------------------------------
@@ -40,11 +30,11 @@ sub all($) {
 
 1;
 
-__END__
+  __END__
 
 =head1 NAME
 
-Scaffold::Session::Store - The base  storage class for Session management in Scaffold
+Scaffold::Cache::Manager - Maintain the cache subsystem
 
 =head1 SYNOPSIS
 
