@@ -61,11 +61,13 @@ sub init {
 
     $self->{namespace} = "";
     $self->{config}  = $config;
-    $self->{expires} = $self->config('-expires') || '3600';
+    $self->{expires} = $self->config('expires') || '3600';
 
-    my $rehash   = $self->config('-rehash') || 'no';
-    my $servers  = $self->config('-servers') || '127.0.0.1:11211';
-    my $compress = $self->config('-compress_threshold') || '1000';
+    my $rehash   = $self->config('rehash') || 'no';
+    my $servers  = $self->config('servers') || '127.0.0.1:11211';
+    my $compress = $self->config('compress_threshold') || '1000';
+
+    $self->{namespace} = $self->config('namespace');
 
     eval {
 

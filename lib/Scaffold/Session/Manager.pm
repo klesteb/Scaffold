@@ -27,7 +27,6 @@ sub pre_action($$) {
     my $session = HTTP::Session->new(
         store => Scaffold::Session::Store::Cache->new(
             cache     => $sobj->scaffold->cache,
-            namespace => $sobj->scaffold->config('configs')->{namespace}
         ),
         state => HTTP::Session::State::Cookies->new(
             cookie_key => SESSION_ID

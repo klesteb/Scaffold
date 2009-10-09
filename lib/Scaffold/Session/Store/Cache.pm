@@ -8,7 +8,7 @@ our $VERSION = '0.01';
 use base 'Class::Accessor::Fast';
 use Scaffold::Constants 'LOCK';
 
-__PACKAGE__->mk_ro_accessors(qw/cache namespace expires/);
+__PACKAGE__->mk_ro_accessors(qw/cache expires/);
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -20,7 +20,7 @@ sub new {
 
     # check required parameters
 
-    for (qw/cache namespace/) {
+    for (qw/cache/) {
 
         Carp::croak "missing parameter $_" unless $args{$_};
 
@@ -41,7 +41,6 @@ sub select {
 
     my $data;
 
-    $self->cache->namespace($self->namespace);
     $data = $self->cache->get($session_id);
 
     return $data;
@@ -51,7 +50,6 @@ sub select {
 sub insert {
     my ($self, $session_id, $data) = @_;
 
-    $self->cache->namespace($self->namespace);
     $self->cache->set($session_id, $data);
 
 }
@@ -59,7 +57,6 @@ sub insert {
 sub update {
     my ($self, $session_id, $data) = @_;
 
-    $self->cache->namespace($self->namespace);
     $self->cache->replace($session_id, $data);
 
 }
@@ -67,7 +64,6 @@ sub update {
 sub delete {
     my ($self, $session_id) = @_;
 
-    $self->cache->namespace($self->namespace);
     $self->cache->delete($session_id);
 
 }
