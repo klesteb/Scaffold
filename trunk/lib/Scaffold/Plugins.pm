@@ -8,6 +8,7 @@ our $VERSION = '0.01';
 use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Base',
+  constants => ':plugins',
 ;
 
 # ----------------------------------------------------------------------
@@ -15,22 +16,30 @@ use Scaffold::Class
 # ----------------------------------------------------------------------
 
 sub pre_action($$) {
-    my ($class, $sobj) = @_;
+    my ($self, $sobj) = @_;
+
+    return PLUGIN_NEXT;
 
 }
 
 sub post_action($$) {
-    my ($class, $sobj) = @_;
+    my ($self, $sobj) = @_;
+
+    return PLUGIN_NEXT;
 
 }
 
 sub pre_render($$) {
-    my ($class, $sobj) = @_;
+    my ($self, $sobj) = @_;
+
+    return PLUGIN_NEXT;
 
 }
 
 sub post_render($$) {
-    my ($class, $sobj) = @_;
+    my ($self, $sobj) = @_;
+
+    return PLUGIN_NEXT;
 
 }
 
@@ -44,7 +53,7 @@ sub post_render($$) {
 
 =head1 NAME
 
-Scaffold::Plugin - The base class for plugins
+Scaffold::Plugins - The base class for plugins
 
 =head1 SYNOPSIS
 

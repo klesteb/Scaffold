@@ -7,6 +7,7 @@ use base 'Badger::Constants';
 
 use constant {
     LOCK              => '__LOCK__',
+    #
     STATE_PRE_ACTION  => 1,
     STATE_ACTION      => 2,
     STATE_POST_ACTION => 3,
@@ -14,22 +15,26 @@ use constant {
     STATE_RENDER      => 5,
     STATE_POST_RENDER => 6,
     STATE_FINI        => 7,
+    #
+    PLUGIN_NEXT       => 1,
+    PLUGIN_ABORT      => 2
 };
 
 our $EXPORT_ALL = 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
                    STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-                   STATE_FINI'
+                   STATE_FINI PLUGIN_NEXT PLUGIN_ABORT'
 ;
 
 our $EXPORT_ANY = 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
                    STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-                   STATE_FINI'
+                   STATE_FINI PLUGIN_NEXT PLUGIN_ABORT'
 ;
 
 our $EXPORT_TAGS = {
-    state => 'STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
-              STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-              STATE_FINI',
+    state   => 'STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
+                STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
+                STATE_FINI',
+    plugins => 'PLUGIN_NEXT PLUGIN_ABORT',
 };
 
 1;

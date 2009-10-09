@@ -16,6 +16,16 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
+sub update($$$) {
+    my ($self, $key, $value) = @_;
+
+    my $namespace = $self->namespace;
+    my $skey = $namespace . ':' . $key;
+
+    return $self->handle->replace($skey, $value);
+
+}
+
 sub clear($) {
 
     return $self->handle->flush_all();

@@ -8,16 +8,18 @@ our $VERSION = '0.01';
 use HTTP::Engine;
 use Scaffold::Render;
 use HTTP::Engine::Response;
+use Scaffold::Cache::Manager;
 use Scaffold::Cache::FastMmap;
 use Scaffold::Session::Manager;
-use Scaffold::Session::Store::Cache;
 
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  accessors => 'engine cache session render database req res',
+  accessors => 'engine cache session render database plugins req res',
+  filesystem => 'File',
   messages => {
-      'nomod' => 'module not defined for %s',
+      'nomod'  => "module not defined for %s",
+      'noplug' => "plugin %s not initialized because: %s",
   }
 ;
 
@@ -74,50 +76,71 @@ sub dispatch($$) {
 sub init {
     my ($self, $config) = @_;
 
-    $self->{config}  = $config;
+    my $engine;
+    my $plugins;
 
-    if (my $cache = $self->config('-cache')) {
+    $self->{config} = $config;
 
-	$self->{cache} = $cache;
+    if (my $cache = $self->config('cache')) {
 
-    } else {
-
-	$self->{cache} = Scaffold::Cache::FastMmap->new();
-
-    }
-
-    if (my $session = $self->config('-session')) {
-
-	$self->{session} = $session;
+        $self->{cache} = $cache;
 
     } else {
 
-	$self->{session} = Scaffold::Session::Manager->new(
-	    -session  => Scaffold::Session::Base->new(),
-	    -storage  => Scaffols::Session::Store::Cache->new(),
-	    -scaffold => $self,
-	);
+        $self->{cache} = Scaffold::Cache::FastMmap->new();
 
     }
 
-    if (my $render = $self->config('-render')) {
+    if (my $render = $self->config('render')) {
 
-	$self->{render} = $render;
+        $self->{render} = $render;
 
     } else {
 
-	$self->{render} = Scaffold::Render->new();
+        $self->{render} = Scaffold::Render->new();
 
     }
+
+    $engine = $self->config('engine');
 
     $self->{engine} = HTTP::Engine->new(
-	interface => {
-	    module => $self->config('-engine'),
-	    handler => sub {
-		$self->dispatch();
-	    }
-	}
+        interface => {
+            module => $engine->{module},
+            (defined($engine->{args}) ? args => $engine->{args), {}),
+            handler => sub {
+                $self->dispatch();
+            }
+        }
     );
+
+    # load the default plugins
+
+    push(@$self->plugins, Scaffold::Cache::Manager->new());
+    push(@$self->plugins, Scaffold::Session::Manager->new());
+
+    # load the specified plugins
+
+    $plugins = $self->config('plugins');
+
+    foreach my $plugin (@$plugins) {
+
+        eval {
+
+            my @path = split('::', $plugin);
+            my $plug = File(@path);
+
+            require $plug . '.pm';
+            $plug->import();
+
+            push(@$self->plugins, $plug->new());
+
+        }; if (my $ex = $@) {
+
+            $self->throw_msg('scaffold.server', 'noplug', $plugin, $@);
+
+        }
+
+    }
 
     return $self;
 

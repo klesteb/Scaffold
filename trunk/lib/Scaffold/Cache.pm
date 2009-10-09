@@ -50,6 +50,11 @@ sub delete($$) {
 
 }
 
+sub update($$$) {
+    my ($self, $key, $value) = @_;
+    
+}
+    
 sub clear($) {
     my ($self) = @_;
 
