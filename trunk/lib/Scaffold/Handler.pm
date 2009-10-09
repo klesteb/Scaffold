@@ -8,7 +8,7 @@ our $VERSION = '0.01';
 use Switch;
 use Scaffold::Stash;
 use Badger::Exception;
-use Scaffold::Constants ':state';
+use Scaffold::Constants ':state :plugins';
 
 use Scaffold::Class
   version   => $VERSION,
@@ -146,12 +146,6 @@ sub handler($$) {
 
     }
 
-    foreach my $cookie (@$class->stash->cookies) {
-
-        $class->scaffold->res->headers->header('set-cookie' => $cookie);
-
-    }
-
     return $class->scaffold->res;
 
 }
@@ -192,8 +186,24 @@ sub _cleanroot {
 
 }
 
-sub _pre_action($$) {
-    my ($self, @actions) = @_;
+sub _pre_action($) {
+    my ($self) = @_;
+
+    my $pstatus;
+    my $status = STATE_ACTION;
+
+    if (my $plugins = $self->scaffold->plugins) {
+
+        foreach my $plugin (@$plugins) {
+
+            $pstatus = $plugin->pre_action($self);
+            last if ($pstatus != PLUGIN_NEXT);
+
+        }
+
+    }
+
+    return $status;
 
 }
 
@@ -218,29 +228,63 @@ sub _perform_action {
 
     $self->declined() if ($self->is_declined);
 
-}
-
-sub _post_action($$) {
-    my ($self, @actions) = @_;
+    return STATE_POST_ACTION;
 
 }
 
-sub _pre_template($$) {
-    my ($self, @actions) = @_;
+sub _post_action($) {
+    my ($self);
+
+    my $pstatus;
+    my $status = STATE_PRE_RENDER;
+
+    if (my $plugins = $self->scaffold->plugins) {
+
+        foreach my $plugin (@$plugins) {
+
+            $pstatus = $plugin->post_action($self);
+            last if ($pstatus != PLUGIN_NEXT);
+
+        }
+
+    }
+
+    return $status;
 
 }
 
-sub _process_template($) {
+sub _pre_render($) {
+    my ($self) = @_;
+
+    my $pstatus;
+    my $status = STATE_RENDER;
+
+    if (my $plugins = $self->scaffold->plugins) {
+
+        foreach my $plugin (@$plugins) {
+
+            $pstatus = $plugin->pre_render($self);
+            last if ($pstatus != PLUGIN_NEXT);
+
+        }
+
+    }
+
+    return $status;
+
+}
+
+sub _process_render($) {
     my ($self) = @_;
 
     my $input = $self->stash->view;
     my $page = $self->stash->view->data;
 
-    if (defined($self->scaffold->render)) {
+    if (my $render = $self->scaffold->render)) {
 
         if (! $input->template_diabled) {
 
-            $page = $self->scaffold->render->engine->process($input);
+            $page = $render->engine->process($input);
             $self->stash->output($page);
 
         } else {
@@ -257,9 +301,25 @@ sub _process_template($) {
 
 }
 
-sub _post_template($$) {
+sub _post_render($) {
     my ($self, @actions) = @_;
-    
+
+    my $pstatus;
+    my $status = STATE_FINI;
+
+    if (my $plugins = $self->scaffold->plugins) {
+
+        foreach my $plugin (@plugins) {
+
+            $pstatus = $plugin->post_render($self);
+            last if ($pstatus != PLUGIN_NEXT);
+
+        }
+
+    }
+
+    return $status;
+
 }
 
 sub _trim {

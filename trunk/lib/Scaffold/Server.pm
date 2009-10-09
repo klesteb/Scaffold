@@ -19,7 +19,7 @@ use Scaffold::Class
   filesystem => 'File',
   messages => {
       'nomod'  => "module not defined for %s",
-      'noplug' => "plugin %s not initialized because: %s",
+      'noplug' => "plugin %s not initialized, because: %s",
   }
 ;
 
@@ -33,7 +33,7 @@ sub dispatch($$) {
     $self->{req} = $request;
     $self->{res} = HTTP::Engine::Response->new();
 
-    my $locations = $self->config('-locations');
+    my $locations = $self->config('locations');
 
     my @path = (split( m|/|, $request->uri||'' ));
 
@@ -81,6 +81,8 @@ sub init {
 
     $self->{config} = $config;
 
+    # init caching
+
     if (my $cache = $self->config('cache')) {
 
         $self->{cache} = $cache;
@@ -91,6 +93,10 @@ sub init {
 
     }
 
+    push(@$self->plugins, Scaffold::Cache::Manager->new());
+
+    # init rendering
+
     if (my $render = $self->config('render')) {
 
         $self->{render} = $render;
@@ -98,6 +104,30 @@ sub init {
     } else {
 
         $self->{render} = Scaffold::Render->new();
+
+    }
+
+    # init session handling
+
+    if (my $session = $self->config('session')) {
+
+        $self->_init_plugin($session);
+
+    } else {
+
+        $self->_init_plugin('Scaffold::Session::Manager');
+
+    }
+
+    # load the other plugins
+
+    if ($plugins = $self->config('plugins')) {
+
+        foreach my $plugin (@$plugins) {
+
+            $self->_init_plugin($plugin);
+
+        }
 
     }
 
@@ -113,36 +143,23 @@ sub init {
         }
     );
 
-    # load the default plugins
+    return $self;
 
-    push(@$self->plugins, Scaffold::Cache::Manager->new());
-    push(@$self->plugins, Scaffold::Session::Manager->new());
+}
 
-    # load the specified plugins
+sub _init_plugin($$) {
+    my ($self, $plugin) = @_;
 
-    $plugins = $self->config('plugins');
+    eval {
 
-    foreach my $plugin (@$plugins) {
+        my $obj = $self->load($plugin)
+        push(@$self->plugins, $obj);
 
-        eval {
+    }; if (my $ex = $@) {
 
-            my @path = split('::', $plugin);
-            my $plug = File(@path);
-
-            require $plug . '.pm';
-            $plug->import();
-
-            push(@$self->plugins, $plug->new());
-
-        }; if (my $ex = $@) {
-
-            $self->throw_msg('scaffold.server', 'noplug', $plugin, $@);
-
-        }
+        $self->throw_msg('scaffold.server', 'noplug', $plugin, $@);
 
     }
-
-    return $self;
 
 }
 
