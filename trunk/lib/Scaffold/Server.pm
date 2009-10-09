@@ -18,8 +18,9 @@ use Scaffold::Class
   accessors => 'engine cache session render database plugins req res',
   filesystem => 'File',
   messages => {
-      'nomod'  => "module not defined for %s",
-      'noplug' => "plugin %s not initialized, because: %s",
+      'nomodule'  => "handler not defined for %s",
+      'noplugin'  => "plugin %s not initialized, because: %s",
+      'nohandler' => "handler %s for location %s was not loaded, because: %s"
   }
 ;
 
@@ -39,33 +40,31 @@ sub dispatch($$) {
 
     while (@path) {
 
-        $self->{config}->{location} = join('/', @path);
+	$self->{config}->{location} = join('/', @path);
 
-        if (defined $locations->{$self->{config}->{location}}) {
+	if (defined $locations->{$self->{config}->{location}}) {
 
-            my $mod = $locations->{$self->{config}->{location}}; 
+	    my $mod = $locations->{$self->{config}->{location}}; 
 
-            $self->throw_msg('scaffold.server.dispatch', 'nomod', $self->{config}->{location});
+	    $self->throw_msg('scaffold.server.dispatch', 'nomodule', $self->{config}->{location});
                 unless $mod;
 
-            eval "use $mod";
-            if ( $@ ) { die $@; }
+	    my $class = $self->_init_handler($mod, $self->{config}->{location});
 
-            return $mod->handler($self);
+	    return $class->handler($self);
 
-        }
+	}
 
-        pop(@path);
+	pop(@path);
 
     } # end while path
 
     $self->{config}->{location} = '/';
-    my $mod = $locations->{ '/' }; 
+    my $mod = $locations->{'/'}; 
 
-    eval "use $mod" if $mod;
-    if ( $@ ) { die $@; }
+    my $class = $self->_init_handler($mod, $self->{config}->{location});
 
-    return $mod->handler($self);
+    return $class->handler($self);
 
 }
 
@@ -89,7 +88,9 @@ sub init {
 
     } else {
 
-        $self->{cache} = Scaffold::Cache::FastMmap->new();
+        $self->{cache} = Scaffold::Cache::FastMmap->new(
+	    namespace => $self->config('configs')->{namespace} || 'scaffold';
+	);
 
     }
 
@@ -160,6 +161,23 @@ sub _init_plugin($$) {
         $self->throw_msg('scaffold.server', 'noplug', $plugin, $@);
 
     }
+
+}
+
+sub _init_handler($$) {
+    my ($self, $handler, $location) = @_;
+
+    eval {
+
+        my $obj = $self->load($handler)
+
+    }; if (my $ex = $@) {
+
+        $self->throw_msg('scaffold.server', 'nohandler', $handler, $location, $@);
+
+    }
+
+    return $okj;
 
 }
 

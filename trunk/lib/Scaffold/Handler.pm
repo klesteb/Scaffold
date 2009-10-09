@@ -37,6 +37,7 @@ sub handler($$) {
     my ($class, $sobj) = @_;
 
     $class = $class->prototype() unless ref $class;
+
     $class->{stash} = Scaffold::Stash->new();
     $class->{scaffold} = $sobj;
     $class->{page_title} = $class->scaffold->req->uri;
@@ -65,13 +66,13 @@ sub handler($$) {
                     $state = $class->_post_action($plugin_callbacks);
                 }
                 case STATE_PRE_RENDER {
-                    $state = $class->_pre_template($plugin_callbacks);
+                    $state = $class->_pre_render($plugin_callbacks);
                 }
                 case STATE_RENDER {
-                    $state = $class->_process_template();
+                    $state = $class->_process_render();
                 }
                 case STATE_POST_RENDER {
-                    $state = $class->_post_template($plugin_callbacks);
+                    $state = $class->_post_render($plugin_callbacks);
                 }
             };
 
@@ -277,6 +278,7 @@ sub _pre_render($) {
 sub _process_render($) {
     my ($self) = @_;
 
+    my $status = STATE_POST_RENDER;
     my $input = $self->stash->view;
     my $page = $self->stash->view->data;
 
@@ -298,6 +300,8 @@ sub _process_render($) {
         $self->stash->output($page);
 
     }
+
+    return $status;
 
 }
 

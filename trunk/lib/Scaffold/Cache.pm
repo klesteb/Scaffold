@@ -9,7 +9,7 @@ use Scaffold::Class
   version  => $VERSION,
   base     => 'Scaffold::Base',
   mutators => 'handle namespace expires',
-  constant => 'TRUE FALSE LOCK',
+  constant => 'TRUE FALSE',
   messages => {
       'noload' => 'unable to load module; reason: %s',
   },

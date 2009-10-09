@@ -68,11 +68,13 @@ sub init {
 
     $self->{namespace} = "";
     $self->{config}  = $config;
-    $self->{expires} = $self->config('-expires') || '1h';
+    $self->{expires} = $self->config('expires') || '1h';
 
-    my $num_pages  = $self->config('-pages') || '256';
-    my $page_size  = $self->config('-pagesize') || '256k';
-    my $share_file = $self->config('-filename') || '/tmp/scaffold.cache';
+    my $num_pages  = $self->config('pages') || '256';
+    my $page_size  = $self->config('pagesize') || '256k';
+    my $share_file = $self->config('filename') || '/tmp/scaffold.cache';
+
+    $self->{namespace} = $self->config('namespace');
 
     eval {
 
