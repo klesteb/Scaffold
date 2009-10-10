@@ -1,4 +1,4 @@
-package Scaffold::Plugins;
+package Scaffold::Render::Default;
 
 use strict;
 use warnings;
@@ -6,41 +6,18 @@ use warnings;
 our $VERSION = '0.01';
 
 use Scaffold::Class
-  version   => $VERSION,
-  base      => 'Scaffold::Base',
-  constants => ':plugins',
-  accessors => 'scaffold',
+  version => $VERSION,
+  base    => 'Scaffold::Render'
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub pre_action($$) {
-    my ($self, $sobj) = @_;
+sub process($$) {
+    my ($self, $input) = @_;
 
-    return PLUGIN_NEXT;
-
-}
-
-sub post_action($$) {
-    my ($self, $sobj) = @_;
-
-    return PLUGIN_NEXT;
-
-}
-
-sub pre_render($$) {
-    my ($self, $sobj) = @_;
-
-    return PLUGIN_NEXT;
-
-}
-
-sub post_render($$) {
-    my ($self, $sobj) = @_;
-
-    return PLUGIN_NEXT;
+    return $input->data;
 
 }
 
@@ -50,11 +27,11 @@ sub post_render($$) {
 
 1;
 
-  __END__
+__END__
 
 =head1 NAME
 
-Scaffold::Plugins - The base class for plugins
+Scaffold::Render::Default - Default render..
 
 =head1 SYNOPSIS
 

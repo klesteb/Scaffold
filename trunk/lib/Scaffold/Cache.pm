@@ -61,7 +61,7 @@ sub clear($) {
 }
 
 sub purge($) {
-    my ($self} = @_;
+    my ($self) = @_;
 
 }
 

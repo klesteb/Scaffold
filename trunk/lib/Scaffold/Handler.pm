@@ -7,73 +7,81 @@ our $VERSION = '0.01';
 
 use Switch;
 use Scaffold::Stash;
-use Badger::Exception;
-use Scaffold::Constants ':state :plugins';
 
 use Scaffold::Class
   version   => $VERSION,
-  base      => 'Badger::Prototype',
+  base      => 'Scaffold::Base',
   accessors => 'stash scaffold page_title',
-  mutators  => 'is_declined template_disabled',
+  mutators  => 'is_declined',
+  constants => ':state :plugins',
   messages => {
       'declined'          => '%s',
       'redirect'          => "%s",
       'moved_permanently' => "%s",
-      'template'          => "%s",
+      'render'            => "%s",
   },
-  constants => {
+  constant => {
       DECLINED   => 'scaffold.handler.declined',
       REDIRECT   => 'scaffold.handler.redirect',
       MOVED_PERM => 'scaffold.handler.moved_permanently',
-      TEMPLATE   => 'scaffold.handler.template',
+      RENDER     => 'scaffold.handler.render',
   }
 ;
+
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
 sub handler($$) {
-    my ($class, $sobj) = @_;
-
-    $class = $class->prototype() unless ref $class;
+    my ($class, $sobj, $location, $module) = @_;
 
     $class->{stash} = Scaffold::Stash->new();
     $class->{scaffold} = $sobj;
-    $class->{page_title} = $class->scaffold->req->uri;
+
+    my $configs = $class->scaffold->config('configs');
+    my $uri = $class->scaffold->req->request_uri || '/';
+    my $root = $configs->{'app_rootp'} || '/';
+
+    $class->{page_title} = $uri;
 
     my $state = STATE_PRE_ACTION;
-    my @p = $class->_cleanroot($class->scaffold->req->uri);
-    my $p1 = ( shift(@P) || 'main');
+    my @p = $class->_cleanroot($uri, $root);
+    my $p1 = ( shift(@p) || 'main');
 
     my $action = 'do_' . $p1;
-
+    
     $class->scaffold->res->status('200');
     $class->stash->cookies($class->scaffold->req->cookie);
 
     eval {
 
-        while ($state) {
+        LOOP: 
+	while ($state) {
 
             switch ($state) {
                 case STATE_PRE_ACTION {
-                    $state = $class->_pre_action($plugin_callbacks);
+                    $state = $class->_pre_action();
                 }
                 case STATE_ACTION {
                     $state = $class->_perform_action($action, $p1, @p);
                 }
                 case STATE_POST_ACTION {
-                    $state = $class->_post_action($plugin_callbacks);
+                    $state = $class->_post_action();
                 }
                 case STATE_PRE_RENDER {
-                    $state = $class->_pre_render($plugin_callbacks);
+                    $state = $class->_pre_render();
                 }
                 case STATE_RENDER {
                     $state = $class->_process_render();
                 }
                 case STATE_POST_RENDER {
-                    $state = $class->_post_render($plugin_callbacks);
+                    $state = $class->_post_render();
                 }
+		case STATE_FINI {
+		    last LOOP;
+		}
             };
 
         }
@@ -100,24 +108,21 @@ sub handler($$) {
                     $class->scaffold->res->headers->header('location' => $info);
                     $class->scaffold->res->body("");
                 }
-                case TEMPLATE {
+                case RENDER {
                     $class->scaffold->res->status('500');
-                    $class->scaffold->res->body($self->_custom_error($info));
+                    $class->scaffold->res->body($class->_custom_error($info));
                 }
                 case DECLINED {
-                    $class->scaffold->res->status('404');
-                    $class->scaffold->res->body($self->_custom_error(
-                        "Declined - undefined method<br />"
-                        . "<span style='font-size: .8em'>"
-                        . "Method: $action<br />"
-                        . "Location: " . $current_location . "<br />"
-                        . "Module: " . (
-                            $self->locations->{ $current_location }
-                            || 'No module defined for this location' )
-                        . "</span>"
-                        )
+		    my $text = qq(
+			Declined - undefined method<br />
+                        <span style='font-size: .8em'>
+                        Method: $action <br />
+                        Location: $location <br />
+                        Module: $module <br />
+                        </span>
                     );
-
+                    $class->scaffold->res->status('404');
+                    $class->scaffold->res->body($class->_custom_error($text));
                 }
                 else {
                     if ($class->can('exception_handler')) {
@@ -141,7 +146,7 @@ sub handler($$) {
 
         } else {
 
-            $class->scaffold->res->body($self->_custom_error());
+            $class->scaffold->res->body($class->_custom_error($@));
 
         }
 
@@ -234,7 +239,7 @@ sub _perform_action {
 }
 
 sub _post_action($) {
-    my ($self);
+    my ($self) = @_;
 
     my $pstatus;
     my $status = STATE_PRE_RENDER;
@@ -282,11 +287,11 @@ sub _process_render($) {
     my $input = $self->stash->view;
     my $page = $self->stash->view->data;
 
-    if (my $render = $self->scaffold->render)) {
+    if (my $render = $self->scaffold->render) {
 
-        if (! $input->template_diabled) {
+        if (! $input->template_disabled) {
 
-            $page = $render->engine->process($input);
+            $page = $render->process($input);
             $self->stash->output($page);
 
         } else {
@@ -313,7 +318,7 @@ sub _post_render($) {
 
     if (my $plugins = $self->scaffold->plugins) {
 
-        foreach my $plugin (@plugins) {
+        foreach my $plugin (@$plugins) {
 
             $pstatus = $plugin->post_render($self);
             last if ($pstatus != PLUGIN_NEXT);
@@ -347,7 +352,7 @@ sub _custom_error {
     my $request_dump  = Dumper($self);
     my $response_dump = '';
 
-    $request_dump =~ s/(?:^|\n)(\s+)/&trim( $1 )/ge;
+    $request_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
     $request_dump =~ s/</&lt;/g;
 
     my $status = $self->scaffold->res->status || 'Bad Request';

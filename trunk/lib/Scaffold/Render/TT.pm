@@ -9,13 +9,9 @@ use Template;
 
 use Scaffold::Class
   version  => $VERSION,
-  base     => 'Scaffold::Base',
-  accessor => 'engine',
-  messages => {
-      'template' => "unable to initialize Template Toolkit, reason: %s",
-  },
+  base     => 'Scaffold::Render',
   constants => {
-      TEMPLATE => 'scaffold.render.tt',
+      RENDER => 'scaffold.handler.render',
   }
 ;
 
@@ -36,7 +32,7 @@ sub process($$) {
 	    view => $input,
 	},
 	\$page
-    ) or $self->throw_msg(TEMPLATE, 'template', $self->scaffold->render->engine->error);
+    ) or $self->throw_msg(RENDER, 'render', 'TT', $self->scaffold->render->engine->error);
 
     return $page;
 
@@ -51,9 +47,9 @@ sub init {
 
     $self->{config} = $config;
 
-    my @wrappers = split(':', $self->config('-wrappers'));
-    my @defaults = split(':', $self->config('-defaults'));
-    my @include_paths = split(':', $self->config('-include_paths'));
+    my @wrappers = split(':', $self->config('wrappers'));
+    my @defaults = split(':', $self->config('defaults'));
+    my @include_paths = split(':', $self->config('include_paths'));
 
     $self->{engine} = Template->new(
 	WRAPPER      => \@wrappers,

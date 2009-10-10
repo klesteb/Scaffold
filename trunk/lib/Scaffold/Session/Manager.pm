@@ -10,9 +10,9 @@ use HTTP::Session::State::Cookie;
 use Scaffold::Session::Store::Cache;
 
 use Scaffold::Class
-  version  => $VERSION,
-  base     => 'Scaffold::Plugins',
-  constant => 'SESSION_ID :plugins',
+  version   => $VERSION,
+  base      => 'Scaffold::Plugins',
+  constants => 'SESSION_ID :plugins',
 ;
 
 # ----------------------------------------------------------------------
@@ -26,9 +26,9 @@ sub pre_action($$) {
 
     my $session = HTTP::Session->new(
         store => Scaffold::Session::Store::Cache->new(
-            cache     => $sobj->scaffold->cache,
+            cache => $sobj->scaffold->cache,
         ),
-        state => HTTP::Session::State::Cookies->new(
+        state => HTTP::Session::State::Cookie->new(
             cookie_key => SESSION_ID
         ),
         request => $sobj->scaffold->req
@@ -44,7 +44,7 @@ sub pre_action($$) {
     $session->set('create', time()) if (not $create);
     $session->set('access', time()) if (not $access);
 
-    $sobj->scaffold->session = $session;
+    $sobj->scaffold->{session} = $session;
 
     return PLUGIN_NEXT;
 

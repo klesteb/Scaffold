@@ -6,12 +6,14 @@ use warnings;
 our $VERSION = '0.01';
 
 use Scaffold::Stash::View;
+use Scaffold::Stash::Cookies;
 use Scaffold::Stash::Controller;
 
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  accessors => 'view controller cookies output',
+  accessors => 'view controller cookies',
+  mutators  => 'output',
 ;
 
 # ----------------------------------------------------------------------
@@ -27,7 +29,9 @@ sub init {
 
     $self->{config} = $config;
 
+    $self->{output}     = "";
     $self->{view}       = Scaffold::Stash::View->new();
+    $self->{cookies}    = Scaffold::Stash::Cookies->new();
     $self->{controller} = Scaffold::Stash::Controller->new();
 
     return $self;
