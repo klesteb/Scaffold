@@ -59,15 +59,13 @@ sub decr($$) {
 sub init {
     my ($self, $config) = @_;
 
-    $self->{namespace} = "";
-    $self->{config}  = $config;
-    $self->{expires} = $self->config('expires') || '3600';
+    $self->{config}    = $config;
+    $self->{namespace} = $self->config('namespace');
+    $self->{expires}   = $self->config('expires') || '3600';
 
     my $rehash   = $self->config('rehash') || 'no';
     my $servers  = $self->config('servers') || '127.0.0.1:11211';
     my $compress = $self->config('compress_threshold') || '1000';
-
-    $self->{namespace} = $self->config('namespace');
 
     eval {
 
@@ -82,6 +80,8 @@ sub init {
 
     }
     
+    return $self;
+
 }
 
 1;

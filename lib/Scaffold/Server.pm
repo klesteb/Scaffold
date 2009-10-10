@@ -1,72 +1,34 @@
 package Scaffold::Server;
 
 use strict;
-use warning;
+use warnings;
 
 our $VERSION = '0.01';
 
 use HTTP::Engine;
-use Scaffold::Render;
 use HTTP::Engine::Response;
 use Scaffold::Cache::Manager;
+use Scaffold::Render::Default;
 use Scaffold::Cache::FastMmap;
 use Scaffold::Session::Manager;
 
 use Scaffold::Class
-  version   => $VERSION,
-  base      => 'Scaffold::Base',
-  accessors => 'engine cache session render database plugins req res',
+  version    => $VERSION,
+  base       => 'Scaffold::Base',
+  accessors  => 'engine cache session render database plugins req res',
   filesystem => 'File',
   messages => {
       'nomodule'  => "handler not defined for %s",
       'noplugin'  => "plugin %s not initialized, because: %s",
-      'nohandler' => "handler %s for location %s was not loaded, because: %s"
+      'nohandler' => "handler %s for location %s was not loaded, because: %s",
   }
 ;
+
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
-
-sub dispatch($$) {
-    my ($self, $request) = @_;
-
-    $self->{req} = $request;
-    $self->{res} = HTTP::Engine::Response->new();
-
-    my $locations = $self->config('locations');
-
-    my @path = (split( m|/|, $request->uri||'' ));
-
-    while (@path) {
-
-	$self->{config}->{location} = join('/', @path);
-
-	if (defined $locations->{$self->{config}->{location}}) {
-
-	    my $mod = $locations->{$self->{config}->{location}}; 
-
-	    $self->throw_msg('scaffold.server.dispatch', 'nomodule', $self->{config}->{location});
-                unless $mod;
-
-	    my $class = $self->_init_handler($mod, $self->{config}->{location});
-
-	    return $class->handler($self);
-
-	}
-
-	pop(@path);
-
-    } # end while path
-
-    $self->{config}->{location} = '/';
-    my $mod = $locations->{'/'}; 
-
-    my $class = $self->_init_handler($mod, $self->{config}->{location});
-
-    return $class->handler($self);
-
-}
 
 # ----------------------------------------------------------------------
 # Private Methods
@@ -76,9 +38,12 @@ sub init {
     my ($self, $config) = @_;
 
     my $engine;
+    my $configs;
     my $plugins;
 
     $self->{config} = $config;
+
+    $configs = $self->config('configs');
 
     # init caching
 
@@ -87,14 +52,14 @@ sub init {
         $self->{cache} = $cache;
 
     } else {
-
+	
         $self->{cache} = Scaffold::Cache::FastMmap->new(
-	    namespace => $self->config('configs')->{namespace} || 'scaffold';
-	);
+           namespace => $configs->{namespace} || 'scaffold',
+       );
 
     }
 
-    push(@$self->plugins, Scaffold::Cache::Manager->new());
+    push(@{$self->{plugins}}, Scaffold::Cache::Manager->new());
 
     # init rendering
 
@@ -104,7 +69,7 @@ sub init {
 
     } else {
 
-        $self->{render} = Scaffold::Render->new();
+        $self->{render} = Scaffold::Render::Default->new();
 
     }
 
@@ -137,9 +102,54 @@ sub init {
     $self->{engine} = HTTP::Engine->new(
         interface => {
             module => $engine->{module},
-            (defined($engine->{args}) ? args => $engine->{args), {}),
-            handler => sub {
-                $self->dispatch();
+            args => (defined($engine->{args}) ? $engine->{args} : {}),
+            request_handler => sub {
+		my ($request) = @_;
+
+		$self->{req} = $request;
+		$self->{res} = HTTP::Engine::Response->new();
+
+		my $class;
+		my $response;
+		my $locations = $self->config('locations');
+		my @path = (split( m|/|, $request->request_uri||'' ));
+
+		while (@path) {
+
+		    $self->{config}->{location} = join('/', @path);
+
+		    if (defined $locations->{$self->{config}->{location}}) {
+
+			if (my $mod = $locations->{$self->{config}->{location}}) {
+
+			    $class = $self->_init_handler($mod, $self->{config}->{location});
+			    $response = $class->handler($self, $self->{config}->{location}, ref($class));
+			    return $response;
+
+			} else {
+
+			    $self->throw_msg(
+				'scaffold.server.dispatch', 
+				'nomodule', 
+				$self->{config}->{location}
+			    );
+
+			}
+
+		    }
+
+		    pop(@path);
+
+		} # end while path
+
+		$self->{config}->{location} = '/';
+		my $mod = $locations->{'/'}; 
+		$class = $self->_init_handler($mod, $self->{config}->{location});
+		$response = $class->handler($self, $self->{config}->{loction}, ref($class));
+
+warn Dumper($response);
+		return $response;
+
             }
         }
     );
@@ -153,23 +163,36 @@ sub _init_plugin($$) {
 
     eval {
 
-        my $obj = $self->load($plugin)
-        push(@$self->plugins, $obj);
+       my @parts = split("::", $plugin);
+       my $filename = File(@parts);
+       
+       require $filename . '.pm';
+       $plugin->import();
+       my $obj = $plugin->new();
+       
+        push(@{$self->{plugins}}, $obj);
 
     }; if (my $ex = $@) {
 
-        $self->throw_msg('scaffold.server', 'noplug', $plugin, $@);
+        $self->throw_msg('scaffold.server', 'noplugin', $plugin, $@);
 
     }
 
 }
 
-sub _init_handler($$) {
+sub _init_handler($$$) {
     my ($self, $handler, $location) = @_;
+
+    my $obj;
 
     eval {
 
-        my $obj = $self->load($handler)
+       my @parts = split("::", $handler);
+       my $filename = File(@parts);
+       
+       require $filename . '.pm';
+       $handler->import();
+       $obj = $handler->new();
 
     }; if (my $ex = $@) {
 
@@ -177,7 +200,7 @@ sub _init_handler($$) {
 
     }
 
-    return $okj;
+    return $obj;
 
 }
 

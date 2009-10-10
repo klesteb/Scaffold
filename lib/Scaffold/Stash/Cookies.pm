@@ -1,4 +1,4 @@
-package Scaffold::Render;
+package Scaffold::Stash::Cookies;
 
 use strict;
 use warnings;
@@ -8,24 +8,8 @@ our $VERSION = '0.01';
 use Scaffold::Class
   version  => $VERSION,
   base     => 'Scaffold::Base',
-  accessors => 'engine',
-  messages => {
-      'render' => "unable to initialize render %s, reason: %s",
-  },
+  mutators => 'data',
 ;
-
-# ----------------------------------------------------------------------
-# Public Methods
-# ----------------------------------------------------------------------
-
-sub process($$) {
-    my ($self, $input) = @_;
-
-}
-
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
 
 1;
 
@@ -33,7 +17,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Render - The base Renderer.
+Scaffold::Stash::Cookies - 
 
 =head1 SYNOPSIS
 

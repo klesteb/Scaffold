@@ -1,4 +1,4 @@
-package Scaffold::View::Controller;
+package Scaffold::Stash::Controller;
 
 use strict;
 use warnings;

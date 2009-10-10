@@ -34,6 +34,7 @@ sub purge($) {
 }
 
 sub clear($) {
+    my ($self) = @_;
 
     return $self->handle->clear();
 
@@ -50,7 +51,7 @@ sub incr($$) {
 }
 
 sub decr($) {
-    my ($self) = @_;
+    my ($self, $key) = @_;
 
     my $namespace = $self->namespace;
     my $skey = $namespace . ':' . $key;
@@ -66,24 +67,22 @@ sub decr($) {
 sub init {
     my ($self, $config) = @_;
 
-    $self->{namespace} = "";
-    $self->{config}  = $config;
-    $self->{expires} = $self->config('expires') || '1h';
+    $self->{config}    = $config;
+    $self->{namespace} = $self->config('namespace');
+    $self->{expires}   = $self->config('expires') || '1h';
 
     my $num_pages  = $self->config('pages') || '256';
     my $page_size  = $self->config('pagesize') || '256k';
     my $share_file = $self->config('filename') || '/tmp/scaffold.cache';
-
-    $self->{namespace} = $self->config('namespace');
 
     eval {
 
         $self->{handle} = Cache::FastMmap->new(
             num_pages      => $num_pages,
             page_size      => $page_size,
-            expire_time    => $expire_time,
+            expire_time    => $self->expires,
             share_file     => $share_file,
-            compress       => 1
+            compress       => 1,
             unlink_on_exit => 0,
         );
 
@@ -92,6 +91,8 @@ sub init {
         $self->throw_msg('scaffold.cache.fastmmap', 'noload', $@);
 
     }
+
+    return $self;
 
 }
 

@@ -1,4 +1,4 @@
-package Scaffold::Session::Store:Cache;
+package Scaffold::Session::Store::Cache;
 
 use strict;
 use warnings;
