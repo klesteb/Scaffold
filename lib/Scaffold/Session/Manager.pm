@@ -15,6 +15,8 @@ use Scaffold::Class
   constants => 'SESSION_ID :plugins',
 ;
 
+use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
@@ -29,7 +31,7 @@ sub pre_action($$) {
             cache => $sobj->scaffold->cache,
         ),
         state => HTTP::Session::State::Cookie->new(
-            cookie_key => SESSION_ID
+            name => SESSION_ID
         ),
         request => $sobj->scaffold->req
     );
@@ -44,7 +46,7 @@ sub pre_action($$) {
     $session->set('create', time()) if (not $create);
     $session->set('access', time()) if (not $access);
 
-    $sobj->scaffold->{session} = $session;
+    $sobj->scaffold->session($session);
 
     return PLUGIN_NEXT;
 
@@ -53,10 +55,13 @@ sub pre_action($$) {
 sub post_render($$) {
     my ($self, $sobj) = @_;
 
+    my $response = $sobj->scaffold->res;
     my $session = $sobj->scaffold->session;
 
     $session->set('access', time());
-    $session->finalize();
+    $session->response_filter($response);
+
+    $session->finalize();          # must be the last thing done!!
 
     return PLUGIN_NEXT;
 

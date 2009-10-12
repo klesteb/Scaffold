@@ -22,7 +22,7 @@ sub update($$$) {
     my $namespace = $self->namespace;
     my $skey = $namespace . ':' . $key;
 
-    return $self->handle->get_and_set($skey, $value);
+    return $self->handle->get_and_set($skey, sub { return $value});
 
 }
 
@@ -31,6 +31,7 @@ sub purge($) {
 
     return $self->handle->purge();
 
+    
 }
 
 sub clear($) {
@@ -46,7 +47,7 @@ sub incr($$) {
     my $namespace = $self->namespace;
     my $skey = $namespace . ':' . $key;
 
-    $self->handle->get_and_set($skey, 1);
+    $self->handle->get_and_set($skey, sub { return 1});
 
 }
 
@@ -56,7 +57,7 @@ sub decr($) {
     my $namespace = $self->namespace;
     my $skey = $namespace . ':' . $key;
 
-    $self->handle->get_and_set($skey, 0);
+    $self->handle->get_and_set($skey, sub {return 0 });
 
 }
 
