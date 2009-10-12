@@ -51,9 +51,11 @@ sub handler($$) {
     my $p1 = ( shift(@p) || 'main');
 
     my $action = 'do_' . $p1;
-    
+
     $class->scaffold->res->status('200');
-    $class->stash->cookies($class->scaffold->req->cookie);
+    $class->scaffold->res->header('Content-Type' => 'text/html');
+
+    $class->stash->cookies->data($class->scaffold->req->cookie);
 
     eval {
 
@@ -100,12 +102,12 @@ sub handler($$) {
             switch ($type) {
                 case MOVED_PERM {
                     $class->scaffold->res->status('301');
-                    $class->scaffold->res->headers->header('location' => $info);
+                    $class->scaffold->res->header('location' => $info);
                     $class->scaffold->res->body("");
                 }
                 case REDIRECT {
                     $class->scaffold->res->status('302');
-                    $class->scaffold->res->headers->header('location' => $info);
+                    $class->scaffold->res->header('location' => $info);
                     $class->scaffold->res->body("");
                 }
                 case RENDER {
@@ -131,12 +133,16 @@ sub handler($$) {
 
                     } else {
 
-                        warn "Unexpected exception caught:\n";
-                        warn "  type = " . $type. "\n";
-                        warn "  message = " . $info . "\n";
+			my $text = qq(
+			    Unexpected exception caught<br />
+			    <span style='font-size: .8em'>
+			    Type: $type<br />
+                            Info: $info<br />
+			    </span>
+			);
 
                         $class->scaffold->res->status('500');
-                        $class->scaffold->res->body("");
+                        $class->scaffold->res->body($class->_custom_error($text));
 
                     }
 
@@ -151,7 +157,7 @@ sub handler($$) {
         }
 
     }
-
+    
     return $class->scaffold->res;
 
 }
@@ -311,7 +317,7 @@ sub _process_render($) {
 }
 
 sub _post_render($) {
-    my ($self, @actions) = @_;
+    my ($self) = @_;
 
     my $pstatus;
     my $status = STATE_FINI;

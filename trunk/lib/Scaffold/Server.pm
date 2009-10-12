@@ -15,7 +15,8 @@ use Scaffold::Session::Manager;
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Base',
-  accessors  => 'engine cache session render database plugins req res',
+  accessors  => 'engine cache render database plugins req res',
+  mutators   => 'session',
   filesystem => 'File',
   messages => {
       'nomodule'  => "handler not defined for %s",
@@ -52,9 +53,9 @@ sub init {
         $self->{cache} = $cache;
 
     } else {
-	
+
         $self->{cache} = Scaffold::Cache::FastMmap->new(
-           namespace => $configs->{namespace} || 'scaffold',
+           namespace => $configs->{cache_namespace} || 'scaffold',
        );
 
     }
@@ -147,7 +148,6 @@ sub init {
 		$class = $self->_init_handler($mod, $self->{config}->{location});
 		$response = $class->handler($self, $self->{config}->{loction}, ref($class));
 
-warn Dumper($response);
 		return $response;
 
             }
@@ -163,13 +163,13 @@ sub _init_plugin($$) {
 
     eval {
 
-       my @parts = split("::", $plugin);
-       my $filename = File(@parts);
-       
-       require $filename . '.pm';
-       $plugin->import();
-       my $obj = $plugin->new();
-       
+	my @parts = split("::", $plugin);
+	my $filename = File(@parts);
+
+	require $filename . '.pm';
+	$plugin->import();
+	my $obj = $plugin->new();
+
         push(@{$self->{plugins}}, $obj);
 
     }; if (my $ex = $@) {
@@ -210,7 +210,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Server - A base class for Cache Management in Scaffold
+Scaffold::Server - The Scaffold web engine
 
 =head1 SYNOPSIS
 

@@ -57,7 +57,7 @@ sub insert {
 sub update {
     my ($self, $session_id, $data) = @_;
 
-    $self->cache->replace($session_id, $data);
+    $self->cache->update($session_id, $data);
 
 }
 
@@ -80,7 +80,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Session::Store::Cache - Use the internal caching mechanizim 
+Scaffold::Session::Store::Cache - Use Scaffold's internal caching 
 
 =head1 SYNOPSIS
 
