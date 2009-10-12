@@ -44,7 +44,7 @@ sub handler($$) {
 
     my $configs = $class->scaffold->config('configs');
     my $uri = $class->scaffold->req->request_uri || '/';
-    my $root = $configs->{'app_rootp'} || '/';
+    my $root = $configs->{'app_rootp'};
 
     $class->{page_title} = $uri;
 

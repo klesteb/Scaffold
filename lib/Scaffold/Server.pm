@@ -42,9 +42,11 @@ sub init {
     my $configs;
     my $plugins;
 
-    $self->_set_config_defaults($config);
-    $configs = $self->config('configs');
+    $self->{config} = $config;
 
+    $self->_set_config_defaults();
+    $configs = $self->config('configs');
+    
     # init caching
 
     if (my $cache = $self->config('cache')) {
@@ -203,10 +205,8 @@ sub _init_handler($$$) {
 
 }
 
-sub _set_config_defaults($$) {
-    my ($self, $configs);
-
-    $self->{config} = $config;
+sub _set_config_defaults($) {
+    my ($self) = @_;
 
     if (! defined($self->{config}->{configs}->{app_rootp})) {
 
