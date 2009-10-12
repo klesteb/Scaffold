@@ -25,13 +25,13 @@ sub process($$) {
     my $page;
 
     $self->scaffold->render->engine->process(
-	$input->template,
-	{
-	    self => $self,
-	    site => $self,
-	    view => $input,
-	},
-	\$page
+        $input->template,
+        {
+            self => $self,
+            site => $self,
+            view => $input,
+        },
+        \$page
     ) or $self->throw_msg(RENDER, 'render', 'TT', $self->scaffold->render->engine->error);
 
     return $page;
@@ -52,9 +52,9 @@ sub init {
     my @include_paths = split(':', $self->config('include_paths'));
 
     $self->{engine} = Template->new(
-	WRAPPER      => \@wrappers,
-	INCLUDE_PATH => \@include_paths,
-	DEFAULT      => \@defaules
+        WRAPPER      => \@wrappers,
+        INCLUDE_PATH => \@include_paths,
+        DEFAULT      => \@defaules
     ) or $self->throw_msg(TEMPLATE, 'template', $Template::ERROR);
 
     return $self;
