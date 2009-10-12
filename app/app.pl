@@ -1,7 +1,5 @@
 
 use lib 'lib';
-use lib '../App';
-
 use Scaffold::Server;
 
 main: {
