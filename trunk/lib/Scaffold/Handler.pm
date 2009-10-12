@@ -19,12 +19,14 @@ use Scaffold::Class
       'redirect'          => "%s",
       'moved_permanently' => "%s",
       'render'            => "%s",
+      'not_found'         => "%s",
   },
   constant => {
       DECLINED   => 'scaffold.handler.declined',
       REDIRECT   => 'scaffold.handler.redirect',
       MOVED_PERM => 'scaffold.handler.moved_permanently',
       RENDER     => 'scaffold.handler.render',
+      NOTFOUND   => 'scaffold.handler.notfound',
   }
 ;
 
@@ -60,7 +62,7 @@ sub handler($$) {
     eval {
 
         LOOP: 
-	while ($state) {
+        while ($state) {
 
             switch ($state) {
                 case STATE_PRE_ACTION {
@@ -81,14 +83,12 @@ sub handler($$) {
                 case STATE_POST_RENDER {
                     $state = $class->_post_render();
                 }
-		case STATE_FINI {
-		    last LOOP;
-		}
+                case STATE_FINI {
+                    last LOOP;
+                }
             };
 
         }
-
-        $class->scaffold->res->body($class->stash->output);
 
     }; if (my $ex = $@) {
 
@@ -115,12 +115,22 @@ sub handler($$) {
                     $class->scaffold->res->body($class->_custom_error($info));
                 }
                 case DECLINED {
-		    my $text = qq(
-			Declined - undefined method<br />
+                    my $text = qq(
+                        Declined - undefined method<br />
                         <span style='font-size: .8em'>
                         Method: $action <br />
                         Location: $location <br />
                         Module: $module <br />
+                        </span>
+                    );
+                    $class->scaffold->res->status('404');
+                    $class->scaffold->res->body($class->_custom_error($text));
+                }
+                case NOTFOUND {
+                    my $text = qq(
+                        File not found<br />
+                        <span style='font-size: .8em'>
+                        File: $info<br />
                         </span>
                     );
                     $class->scaffold->res->status('404');
@@ -133,13 +143,13 @@ sub handler($$) {
 
                     } else {
 
-			my $text = qq(
-			    Unexpected exception caught<br />
-			    <span style='font-size: .8em'>
-			    Type: $type<br />
+                        my $text = qq(
+                            Unexpected exception caught<br />
+                            <span style='font-size: .8em'>
+                            Type: $type<br />
                             Info: $info<br />
-			    </span>
-			);
+                            </span>
+                        );
 
                         $class->scaffold->res->status('500');
                         $class->scaffold->res->body($class->_custom_error($text));
@@ -157,7 +167,7 @@ sub handler($$) {
         }
 
     }
-    
+
     return $class->scaffold->res;
 
 }
@@ -180,7 +190,14 @@ sub declined($) {
     my ($self) = @_;
 
     $self->throw_msg(DECLINED, 'declined', "");
-    
+
+}
+
+sub not_found($) {
+    my ($self, $file) = @_;
+
+    $self->throw_msg(NOTFOUND, 'not_found', $file);
+
 }
 
 # ----------------------------------------------------------------------
@@ -293,22 +310,28 @@ sub _process_render($) {
     my $input = $self->stash->view;
     my $page = $self->stash->view->data;
 
+    if (my $type = $self->stash->view->content_type) {
+
+        $self->scaffold->res->header('Content-Type' => $type);
+
+    }
+
     if (my $render = $self->scaffold->render) {
 
         if (! $input->template_disabled) {
 
             $page = $render->process($input);
-            $self->stash->output($page);
+            $self->scaffold->res->body($page);
 
         } else {
 
-            $self->stash->output($page);
+            $self->scaffold->res->body($page);
 
         }
 
     } else {
 
-        $self->stash->output($page);
+        $self->scaffold->res->body($page);
 
     }
 

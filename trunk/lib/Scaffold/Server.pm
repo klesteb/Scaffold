@@ -42,8 +42,7 @@ sub init {
     my $configs;
     my $plugins;
 
-    $self->{config} = $config;
-
+    $self->_set_config_defaults($config);
     $configs = $self->config('configs');
 
     # init caching
@@ -55,7 +54,7 @@ sub init {
     } else {
 
         $self->{cache} = Scaffold::Cache::FastMmap->new(
-           namespace => $configs->{cache_namespace} || 'scaffold',
+           namespace => $configs->{cache_namespace},
        );
 
     }
@@ -105,50 +104,50 @@ sub init {
             module => $engine->{module},
             args => (defined($engine->{args}) ? $engine->{args} : {}),
             request_handler => sub {
-		my ($request) = @_;
+                my ($request) = @_;
 
-		$self->{req} = $request;
-		$self->{res} = HTTP::Engine::Response->new();
+                $self->{req} = $request;
+                $self->{res} = HTTP::Engine::Response->new();
 
-		my $class;
-		my $response;
-		my $locations = $self->config('locations');
-		my @path = (split( m|/|, $request->request_uri||'' ));
+                my $class;
+                my $response;
+                my $locations = $self->config('locations');
+                my @path = (split( m|/|, $request->request_uri||'' ));
 
-		while (@path) {
+                while (@path) {
 
-		    $self->{config}->{location} = join('/', @path);
+                    $self->{config}->{location} = join('/', @path);
 
-		    if (defined $locations->{$self->{config}->{location}}) {
+                    if (defined $locations->{$self->{config}->{location}}) {
 
-			if (my $mod = $locations->{$self->{config}->{location}}) {
+                        if (my $mod = $locations->{$self->{config}->{location}}) {
 
-			    $class = $self->_init_handler($mod, $self->{config}->{location});
-			    $response = $class->handler($self, $self->{config}->{location}, ref($class));
-			    return $response;
+                            $class = $self->_init_handler($mod, $self->{config}->{location});
+                            $response = $class->handler($self, $self->{config}->{location}, ref($class));
+                            return $response;
 
-			} else {
+                        } else {
 
-			    $self->throw_msg(
-				'scaffold.server.dispatch', 
-				'nomodule', 
-				$self->{config}->{location}
-			    );
+                            $self->throw_msg(
+                                'scaffold.server.dispatch', 
+                                'nomodule', 
+                                $self->{config}->{location}
+                            );
 
-			}
+                        }
 
-		    }
+                    }
 
-		    pop(@path);
+                    pop(@path);
 
-		} # end while path
+                } # end while path
 
-		$self->{config}->{location} = '/';
-		my $mod = $locations->{'/'}; 
-		$class = $self->_init_handler($mod, $self->{config}->{location});
-		$response = $class->handler($self, $self->{config}->{loction}, ref($class));
+                $self->{config}->{location} = '/';
+                my $mod = $locations->{'/'}; 
+                $class = $self->_init_handler($mod, $self->{config}->{location});
+                $response = $class->handler($self, $self->{config}->{loction}, ref($class));
 
-		return $response;
+                return $response;
 
             }
         }
@@ -163,12 +162,12 @@ sub _init_plugin($$) {
 
     eval {
 
-	my @parts = split("::", $plugin);
-	my $filename = File(@parts);
+        my @parts = split("::", $plugin);
+        my $filename = File(@parts);
 
-	require $filename . '.pm';
-	$plugin->import();
-	my $obj = $plugin->new();
+        require $filename . '.pm';
+        $plugin->import();
+        my $obj = $plugin->new();
 
         push(@{$self->{plugins}}, $obj);
 
@@ -189,7 +188,7 @@ sub _init_handler($$$) {
 
        my @parts = split("::", $handler);
        my $filename = File(@parts);
-       
+
        require $filename . '.pm';
        $handler->import();
        $obj = $handler->new();
@@ -201,6 +200,31 @@ sub _init_handler($$$) {
     }
 
     return $obj;
+
+}
+
+sub _set_config_defaults($$) {
+    my ($self, $configs);
+
+    $self->{config} = $config;
+
+    if (! defined($self->{config}->{configs}->{app_rootp})) {
+
+        $self->{config}->{configs}->{app_rootp} = '/';
+
+    }
+
+    if (! defined($self->{config}->{configs}->{doc_rootp})) {
+
+        $self->{config}->{configs}->{doc_rootp} = 'html';
+
+    }
+
+    if (! defined($self->{config}->{configs}->{cache_namespace})) {
+
+        $self->{config}->{configs}->{cache_namespace} = 'scaffold';
+
+    }
 
 }
 
