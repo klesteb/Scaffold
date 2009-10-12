@@ -1,5 +1,6 @@
 
 use lib 'lib';
+use lib '../lib';
 use Scaffold::Server;
 
 main: {
@@ -13,6 +14,7 @@ main: {
         },
         locations => {
             '/'       => 'App::HelloWorld',
+            '/static' => 'Scaffold::Handler::Static',
         },
     );
 
