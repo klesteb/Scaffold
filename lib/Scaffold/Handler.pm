@@ -50,6 +50,7 @@ sub handler($$) {
 
     my $state = STATE_PRE_ACTION;
     my @p = $class->_cleanroot($uri, $root);
+    my $p = shift(@p);
     my $p1 = ( shift(@p) || 'main');
 
     my $action = 'do_' . $p1;
