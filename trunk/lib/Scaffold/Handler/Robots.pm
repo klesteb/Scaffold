@@ -8,13 +8,14 @@ our $VERSION = '0.01';
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Handler',
+  filesystem => 'File',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub do_main {
+sub do_default {
     my ($self) = @_;
 
     my $doc_rootp = $self->scaffold->config('configs')->{doc_rootp};
