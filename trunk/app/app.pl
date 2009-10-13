@@ -14,6 +14,7 @@ main: {
         },
         locations => {
             '/'            => 'App::HelloWorld',
+            '/test'        => 'App::Cached',
             '/robots.txt'  => 'Scaffold::Handler::Robots',
             '/favicon.ico' => 'Scaffold::Handler::Favicon',
             '/static'      => 'Scaffold::Handler::Static',
