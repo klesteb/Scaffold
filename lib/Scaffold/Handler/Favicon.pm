@@ -17,7 +17,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub do_main {
+sub do_default {
     my ($self, @params) = @_;
 
     my $doc_rootp = $self->scaffold->config('configs')->{doc_rootp};

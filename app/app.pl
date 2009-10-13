@@ -13,8 +13,9 @@ main: {
             }
         },
         locations => {
-            '/'       => 'App::HelloWorld',
-            '/static' => 'Scaffold::Handler::Static',
+            '/'           => 'App::HelloWorld',
+	    '/robots.txt' => 'Scaffold::Handler::Robots',
+            '/static'     => 'Scaffold::Handler::Static',
         },
     );
 
