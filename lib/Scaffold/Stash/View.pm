@@ -9,7 +9,7 @@ use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Base',
   mutators => 'title template data template_disabled template_default 
-               content_type',
+               content_type cache cache_key',
 ;
 
 1;

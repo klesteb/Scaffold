@@ -22,12 +22,21 @@ sub do_default {
 
     my $doc_rootp = $self->scaffold->config('configs')->{doc_rootp};
     my $file = File($doc_rootp, @params);
+    my $cache = $self->scaffold->cache;
 
     if ($file->exists) {
 
+        my $d;
         my ($mediatype, $encoding) = by_suffix($file);
 
-        my $d = $file->read();
+        if (! $d = $cache->get($file)) {
+
+            $d = $file->read();
+
+            $self->stash->view->cache(1);
+            $self->stash->view->cache_key($file);
+
+        }
 
         $self->stash->view->data($d);
         $self->stash->view->template_disabled(1);
