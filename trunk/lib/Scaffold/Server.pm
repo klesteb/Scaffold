@@ -25,11 +25,57 @@ use Scaffold::Class
   }
 ;
 
-use Data::Dumper;
-
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
+
+sub dispatch($$) {
+    my ($self, $request) = @_;
+
+    $self->{req} = $request;
+    $self->{res} = HTTP::Engine::Response->new();
+
+    my $class;
+    my $response;
+    my $locations = $self->config('locations');
+    my @path = (split( m|/|, $request->request_uri||'' ));
+
+    while (@path) {
+
+        $self->{config}->{location} = join('/', @path);
+
+        if (defined $locations->{$self->{config}->{location}}) {
+
+            if (my $mod = $locations->{$self->{config}->{location}}) {
+
+                $class = $self->_init_handler($mod, $self->{config}->{location});
+                $response = $class->handler($self, $self->{config}->{location}, ref($class));
+                return $response;
+
+            } else {
+
+                $self->throw_msg(
+                    'scaffold.server.dispatch', 
+                    'nomodule', 
+                    $self->{config}->{location}
+                );
+
+            }
+
+        }
+
+        pop(@path);
+
+    } # end while path
+
+    $self->{config}->{location} = '/';
+    my $mod = $locations->{'/'}; 
+    $class = $self->_init_handler($mod, $self->{config}->{location});
+    $response = $class->handler($self, $self->{config}->{loction}, ref($class));
+
+    return $response;
+
+}
 
 # ----------------------------------------------------------------------
 # Private Methods
@@ -46,7 +92,7 @@ sub init {
 
     $self->_set_config_defaults();
     $configs = $self->config('configs');
-    
+
     # init caching
 
     if (my $cache = $self->config('cache')) {
@@ -87,6 +133,14 @@ sub init {
 
     }
 
+    # init database handling
+
+    if (my $database = $self->config('database')) {
+
+        $self->{database} = $database;
+
+    }
+
     # load the other plugins
 
     if ($plugins = $self->config('plugins')) {
@@ -107,50 +161,8 @@ sub init {
             args => (defined($engine->{args}) ? $engine->{args} : {}),
             request_handler => sub {
                 my ($request) = @_;
-
-                $self->{req} = $request;
-                $self->{res} = HTTP::Engine::Response->new();
-
-                my $class;
-                my $response;
-                my $locations = $self->config('locations');
-                my @path = (split( m|/|, $request->request_uri||'' ));
-
-                while (@path) {
-
-                    $self->{config}->{location} = join('/', @path);
-
-                    if (defined $locations->{$self->{config}->{location}}) {
-
-                        if (my $mod = $locations->{$self->{config}->{location}}) {
-
-                            $class = $self->_init_handler($mod, $self->{config}->{location});
-                            $response = $class->handler($self, $self->{config}->{location}, ref($class));
-                            return $response;
-
-                        } else {
-
-                            $self->throw_msg(
-                                'scaffold.server.dispatch', 
-                                'nomodule', 
-                                $self->{config}->{location}
-                            );
-
-                        }
-
-                    }
-
-                    pop(@path);
-
-                } # end while path
-
-                $self->{config}->{location} = '/';
-                my $mod = $locations->{'/'}; 
-                $class = $self->_init_handler($mod, $self->{config}->{location});
-                $response = $class->handler($self, $self->{config}->{loction}, ref($class));
-
+                my $response = dispatch($self, $request);
                 return $response;
-
             }
         }
     );
@@ -188,12 +200,23 @@ sub _init_handler($$$) {
 
     eval {
 
-       my @parts = split("::", $handler);
-       my $filename = File(@parts);
+        if (defined($self->{config}->{handlers}->{$location})) {
 
-       require $filename . '.pm';
-       $handler->import();
-       $obj = $handler->new();
+            $obj = $self->{config}->{handlers}->{$location}->{handler};
+
+        } else {
+
+            my @parts = split("::", $handler);
+            my $filename = File(@parts);
+
+            require $filename . '.pm';
+            $handler->import();
+            $obj = $handler->new();
+
+            $self->{config}->{handlers}->{location} = $location;
+            $self->{config}->{handlers}->{$location}->{handler} = $obj;
+
+        }
 
     }; if (my $ex = $@) {
 
@@ -223,6 +246,12 @@ sub _set_config_defaults($) {
     if (! defined($self->{config}->{configs}->{cache_namespace})) {
 
         $self->{config}->{configs}->{cache_namespace} = 'scaffold';
+
+    }
+
+    if (! defined($self->{config}->{configs}->{favicon})) {
+
+        $self->{config}->{configs}->{favicon} = 'favicon.ico';
 
     }
 
