@@ -13,9 +13,10 @@ main: {
             }
         },
         locations => {
-            '/'           => 'App::HelloWorld',
-	    '/robots.txt' => 'Scaffold::Handler::Robots',
-            '/static'     => 'Scaffold::Handler::Static',
+            '/'            => 'App::HelloWorld',
+            '/robots.txt'  => 'Scaffold::Handler::Robots',
+            '/favicon.ico' => 'Scaffold::Handler::Favicon',
+            '/static'      => 'Scaffold::Handler::Static',
         },
     );
 

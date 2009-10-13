@@ -1,4 +1,4 @@
-package Scaffold::Handler::Static;
+package Scaffold::Handler::Favicon;
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ sub do_default {
     my ($self, @params) = @_;
 
     my $doc_rootp = $self->scaffold->config('configs')->{doc_rootp};
-    my $favicon = $self->scaffold->config('config')->{favicon} || 'favicon.ico';
+    my $favicon = $self->scaffold->config('configs')->{favicon};
     my $file = File($doc_rootp, $favicon);
 
     if ($file->exists) {
