@@ -17,14 +17,6 @@ use Scaffold::Class
 sub process($$) {
     my ($self, $input) = @_;
 
-    my $cache = $self->scaffold->cache;
-
-    if ($input->cache) {
-
-        $cache->set($input->cache_key, $input->data);
-
-    }
-
     return $input->data;
 
 }

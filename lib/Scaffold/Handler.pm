@@ -309,12 +309,17 @@ sub _process_render($) {
     my $status = STATE_POST_RENDER;
     my $input = $self->stash->view;
     my $page = $self->stash->view->data;
+    my $cache = $self->scaffold->cache;
+
+    # set the content type
 
     if (my $type = $self->stash->view->content_type) {
 
         $self->scaffold->res->header('Content-Type' => $type);
 
     }
+
+    # render the output
 
     if (my $render = $self->scaffold->render) {
 
@@ -326,6 +331,14 @@ sub _process_render($) {
         } else {
 
             $self->scaffold->res->body($page);
+
+        }
+
+        # cache the output
+
+        if ($input->cache) {
+
+            $cache->set($input->cache_key, $page);
 
         }
 
