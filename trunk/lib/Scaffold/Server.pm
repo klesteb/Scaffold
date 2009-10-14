@@ -15,7 +15,7 @@ use Scaffold::Session::Manager;
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Base',
-  accessors  => 'engine cache render database plugins req res',
+  accessors  => 'authz engine cache render database plugins request response',
   mutators   => 'session',
   filesystem => 'File',
   messages => {
@@ -32,8 +32,8 @@ use Scaffold::Class
 sub dispatch($$) {
     my ($self, $request) = @_;
 
-    $self->{req} = $request;
-    $self->{res} = HTTP::Engine::Response->new();
+    $self->{request} = $request;
+    $self->{response} = HTTP::Engine::Response->new();
 
     my $class;
     my $response;
@@ -241,6 +241,13 @@ sub _set_config_defaults($) {
     if (! defined($self->{config}->{configs}->{doc_rootp})) {
 
         $self->{config}->{configs}->{doc_rootp} = 'html';
+
+    }
+
+    if (! defined($self->{config}->{configs}->{static_search})) {
+
+        my $search_path = "html:html/static:html/templates";
+        $self->{config}->{configs}->{static_search} = $search_path;
 
     }
 
