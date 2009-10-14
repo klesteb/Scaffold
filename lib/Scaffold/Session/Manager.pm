@@ -33,7 +33,7 @@ sub pre_action($$) {
         state => HTTP::Session::State::Cookie->new(
             name => SESSION_ID
         ),
-        request => $sobj->scaffold->req
+        request => $sobj->scaffold->request
     );
 
     $user    = $session->get('user');
@@ -41,8 +41,8 @@ sub pre_action($$) {
     $create  = $session->get('address');
     $access  = $session->get('access');
 
-    $session->set('user', $sobj->scaffold->req->user) if (not $user);
-    $session->set('address', $sobj->scaffold->req->address) if (not $address);
+    $session->set('user', $sobj->scaffold->request->user) if (not $user);
+    $session->set('address', $sobj->scaffold->request->address) if (not $address);
     $session->set('create', time()) if (not $create);
     $session->set('access', time()) if (not $access);
 
@@ -55,7 +55,7 @@ sub pre_action($$) {
 sub post_render($$) {
     my ($self, $sobj) = @_;
 
-    my $response = $sobj->scaffold->res;
+    my $response = $sobj->scaffold->response;
     my $session = $sobj->scaffold->session;
 
     $session->set('access', time());

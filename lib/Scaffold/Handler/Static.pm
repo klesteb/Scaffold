@@ -10,6 +10,7 @@ use MIME::Types 'by_suffix';
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Handler',
+  constants  => 'TRUE FALSE',
   filesystem => 'File'
 ;
 
@@ -20,33 +21,39 @@ use Scaffold::Class
 sub do_default {
     my ($self, @params) = @_;
 
-    my $doc_rootp = $self->scaffold->config('configs')->{doc_rootp};
-    my $file = File($doc_rootp, @params);
+    my $found = FALSE;
     my $cache = $self->scaffold->cache;
+    my $static_search = $self->scaffold->config('configs')->{static_search};
+    my @paths = split(':', $static_search);
 
-    if ($file->exists) {
+    foreach my $path (@paths) {
 
-        my $d;
-        my ($mediatype, $encoding) = by_suffix($file);
+        my $file = File($path, @params);
 
-        if (! ($d = $cache->get($file))) {
+        if ($file->exists) {
 
-            $d = $file->read();
+            my $d;
+            my ($mediatype, $encoding) = by_suffix($file);
+            $found = TRUE;
 
-            $self->stash->view->cache(1);
-            $self->stash->view->cache_key($file);
+            if (! ($d = $cache->get($file))) {
+
+                $d = $file->read();
+
+                $self->stash->view->cache(1);
+                $self->stash->view->cache_key($file);
+
+            }
+
+            $self->stash->view->data($d);
+            $self->stash->view->template_disabled(1);
+            $self->stash->view->content_type(($mediatype || 'text/plain'));
 
         }
 
-        $self->stash->view->data($d);
-        $self->stash->view->template_disabled(1);
-        $self->stash->view->content_type(($mediatype || 'text/plain'));
-
-    } else {
-
-        $self->not_found($file);
-
     }
+
+    $self->not_found(File(@params)) if (! $found);
 
 }
 

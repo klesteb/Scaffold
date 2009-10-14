@@ -43,24 +43,21 @@ sub handler($$) {
     $class->{scaffold} = $sobj;
 
     my $configs = $class->scaffold->config('configs');
-    my $uri = $class->scaffold->req->request_uri || '/';
+    my $uri = $class->scaffold->request->request_uri || '/';
     my $root = $configs->{'app_rootp'};
 
     $class->{page_title} = $uri;
 
     my $state = STATE_PRE_ACTION;
-warn "uri = $uri, location = $location\n";
     my @p = $class->_cleanroot($uri, $location);
-warn Dumper(@p);
-#    my $p = shift(@p);
     my $p1 = ( shift(@p) || 'main');
 
     my $action = 'do_' . $p1;
 
-    $class->scaffold->res->status('200');
-    $class->scaffold->res->header('Content-Type' => 'text/html');
+    $class->scaffold->response->status('200');
+    $class->scaffold->response->header('Content-Type' => 'text/html');
 
-    $class->stash->cookies->data($class->scaffold->req->cookie);
+    $class->stash->cookies->data($class->scaffold->request->cookie);
 
     eval {
 
@@ -104,18 +101,20 @@ warn Dumper(@p);
 
             switch ($type) {
                 case MOVED_PERM {
-                    $class->scaffold->res->status('301');
-                    $class->scaffold->res->header('location' => $info);
-                    $class->scaffold->res->body("");
+                    $class->scaffold->response->status('301');
+                    $class->scaffold->response->header('location' => $info);
+                    $class->scaffold->response->body("");
                 }
                 case REDIRECT {
-                    $class->scaffold->res->status('302');
-                    $class->scaffold->res->header('location' => $info);
-                    $class->scaffold->res->body("");
+                    $class->scaffold->response->status('302');
+                    $class->scaffold->response->header('location' => $info);
+                    $class->scaffold->response->body("");
                 }
                 case RENDER {
-                    $class->scaffold->res->status('500');
-                    $class->scaffold->res->body($class->_custom_error($info));
+                    $class->scaffold->response->status('500');
+                    $class->scaffold->response->body(
+                        $class->_custom_error($info)
+                    );
                 }
                 case DECLINED {
                     my $text = qq(
@@ -126,8 +125,10 @@ warn Dumper(@p);
                         Module: $module <br />
                         </span>
                     );
-                    $class->scaffold->res->status('404');
-                    $class->scaffold->res->body($class->_custom_error($text));
+                    $class->scaffold->response->status('404');
+                    $class->scaffold->response->body(
+                        $class->_custom_error($text)
+                    );
                 }
                 case NOTFOUND {
                     my $text = qq(
@@ -136,8 +137,10 @@ warn Dumper(@p);
                         File: $info<br />
                         </span>
                     );
-                    $class->scaffold->res->status('404');
-                    $class->scaffold->res->body($class->_custom_error($text));
+                    $class->scaffold->response->status('404');
+                    $class->scaffold->response->body(
+                        $class->_custom_error($text)
+                    );
                 }
                 else {
                     if ($class->can('exception_handler')) {
@@ -154,8 +157,10 @@ warn Dumper(@p);
                             </span>
                         );
 
-                        $class->scaffold->res->status('500');
-                        $class->scaffold->res->body($class->_custom_error($text));
+                        $class->scaffold->response->status('500');
+                        $class->scaffold->response->body(
+                            $class->_custom_error($text)
+                        );
 
                     }
 
@@ -165,13 +170,13 @@ warn Dumper(@p);
 
         } else {
 
-            $class->scaffold->res->body($class->_custom_error($@));
+            $class->scaffold->response->body($class->_custom_error($@));
 
         }
 
     }
 
-    return $class->scaffold->res;
+    return $class->scaffold->response;
 
 }
 
@@ -318,7 +323,7 @@ sub _process_render($) {
 
     if (my $type = $self->stash->view->content_type) {
 
-        $self->scaffold->res->header('Content-Type' => $type);
+        $self->scaffold->response->header('Content-Type' => $type);
 
     }
 
@@ -329,11 +334,11 @@ sub _process_render($) {
         if (! $input->template_disabled) {
 
             $page = $render->process($input);
-            $self->scaffold->res->body($page);
+            $self->scaffold->response->body($page);
 
         } else {
 
-            $self->scaffold->res->body($page);
+            $self->scaffold->response->body($page);
 
         }
 
@@ -347,7 +352,7 @@ sub _process_render($) {
 
     } else {
 
-        $self->scaffold->res->body($page);
+        $self->scaffold->response->body($page);
 
     }
 
@@ -389,7 +394,7 @@ sub _custom_error {
     eval "use Data::Dumper";
 
     my $die_msg    = join( "\n", @err );
-    my $param_dump = Dumper($self->scaffold->req->param);
+    my $param_dump = Dumper($self->scaffold->request->param);
 
     $param_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
     $param_dump =~ s/</&lt;/g;
@@ -400,7 +405,7 @@ sub _custom_error {
     $request_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
     $request_dump =~ s/</&lt;/g;
 
-    my $status = $self->scaffold->res->status || 'Bad Request';
+    my $status = $self->scaffold->response->status || 'Bad Request';
     my $page = $self->_error_page();
 
     $page =~ s/##DIE_MESSAGE##/$die_msg/sg;
