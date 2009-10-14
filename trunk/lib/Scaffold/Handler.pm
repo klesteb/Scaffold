@@ -49,8 +49,10 @@ sub handler($$) {
     $class->{page_title} = $uri;
 
     my $state = STATE_PRE_ACTION;
-    my @p = $class->_cleanroot($uri, $root);
-    my $p = shift(@p);
+warn "uri = $uri, location = $location\n";
+    my @p = $class->_cleanroot($uri, $location);
+warn Dumper(@p);
+#    my $p = shift(@p);
     my $p1 = ( shift(@p) || 'main');
 
     my $action = 'do_' . $p1;
@@ -194,7 +196,7 @@ sub declined($) {
 
 }
 
-sub not_found($) {
+sub not_found($$) {
     my ($self, $file) = @_;
 
     $self->throw_msg(NOTFOUND, 'not_found', $file);

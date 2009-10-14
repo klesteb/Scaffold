@@ -37,19 +37,20 @@ sub dispatch($$) {
 
     my $class;
     my $response;
+    my $location;
     my $locations = $self->config('locations');
     my @path = (split( m|/|, $request->request_uri||'' ));
 
     while (@path) {
 
-        $self->{config}->{location} = join('/', @path);
+        $location = join('/', @path);
 
-        if (defined $locations->{$self->{config}->{location}}) {
+        if (defined $locations->{$location}) {
 
-            if (my $mod = $locations->{$self->{config}->{location}}) {
+            if (my $mod = $locations->{$location}) {
 
-                $class = $self->_init_handler($mod, $self->{config}->{location});
-                $response = $class->handler($self, $self->{config}->{location}, ref($class));
+                $class = $self->_init_handler($mod, $location);
+                $response = $class->handler($self, $location, ref($class));
                 return $response;
 
             } else {
@@ -57,7 +58,7 @@ sub dispatch($$) {
                 $self->throw_msg(
                     'scaffold.server.dispatch', 
                     'nomodule', 
-                    $self->{config}->{location}
+                    $location
                 );
 
             }
@@ -68,10 +69,10 @@ sub dispatch($$) {
 
     } # end while path
 
-    $self->{config}->{location} = '/';
-    my $mod = $locations->{'/'}; 
-    $class = $self->_init_handler($mod, $self->{config}->{location});
-    $response = $class->handler($self, $self->{config}->{loction}, ref($class));
+    $location = '/';
+    my $mod = $locations->{$location}; 
+    $class = $self->_init_handler($mod, $location);
+    $response = $class->handler($self, $location, ref($class));
 
     return $response;
 
