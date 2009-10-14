@@ -29,7 +29,7 @@ sub do_default {
         my $d;
         my ($mediatype, $encoding) = by_suffix($file);
 
-        if (! $d = $cache->get($file)) {
+        if (! ($d = $cache->get($file))) {
 
             $d = $file->read();
 
