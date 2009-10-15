@@ -11,11 +11,12 @@ use Scaffold::Cache::Manager;
 use Scaffold::Render::Default;
 use Scaffold::Cache::FastMmap;
 use Scaffold::Session::Manager;
+use Scaffold::Lockmgr::KeyedMutex;
 
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Base',
-  accessors  => 'authz engine cache render database plugins request response',
+  accessors  => 'authz engine cache render database plugins request response lockmgr',
   mutators   => 'session',
   filesystem => 'File',
   messages => {
@@ -131,6 +132,18 @@ sub init {
     } else {
 
         $self->_init_plugin('Scaffold::Session::Manager');
+
+    }
+
+    # init the lockmgr
+
+    if (my $lockmgr = $self->config('lockmgr')) {
+
+        $self->{lockmgr} = $lockmgr;
+
+    } else {
+
+        $self->{lockmgr} = Scaffold::Lockmgr::KeyedMutex->new();
 
     }
 
