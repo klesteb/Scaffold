@@ -10,7 +10,7 @@ use Template;
 use Scaffold::Class
   version  => $VERSION,
   base     => 'Scaffold::Render',
-  constants => {
+  constant => {
       RENDER => 'scaffold.handler.render',
   }
 ;
@@ -19,20 +19,21 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub process($$) {
-    my ($self, $input) = @_;
+sub process($) {
+    my ($self, $sobj) = @_;
 
     my $page;
+    my $template = $sobj->stash->view->template_wrapper;
+    my $vars = {
+	view    => $sobj->stash->view,
+	configs => $sobj->scaffold->config('configs'),
+    };
 
-    $self->scaffold->render->engine->process(
-        $input->template,
-        {
-            self => $self,
-            site => $self,
-            view => $input,
-        },
+    $self->engine->process(
+        $template,
+	$vars,
         \$page
-    ) or $self->throw_msg(RENDER, 'render', 'TT', $self->scaffold->render->engine->error);
+    ) or $self->throw_msg(RENDER, 'template', $template, $self->engine->error);
 
     return $page;
 
@@ -47,15 +48,9 @@ sub init {
 
     $self->{config} = $config;
 
-    my @wrappers = split(':', $self->config('wrappers'));
-    my @defaults = split(':', $self->config('defaults'));
-    my @include_paths = split(':', $self->config('include_paths'));
-
     $self->{engine} = Template->new(
-        WRAPPER      => \@wrappers,
-        INCLUDE_PATH => \@include_paths,
-        DEFAULT      => \@defaules
-    ) or $self->throw_msg(TEMPLATE, 'template', $Template::ERROR);
+        INCLUDE_PATH => $self->config('include_path'),
+    ) or $self->throw_msg(RENDER, 'render', 'TT', $Template::ERROR);
 
     return $self;
 

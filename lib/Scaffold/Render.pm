@@ -11,6 +11,7 @@ use Scaffold::Class
   accessors => 'engine',
   messages => {
       'render' => "unable to initialize render %s, reason: %s",
+      'template' => "unable to render template: %s, reason: %s",
   },
 ;
 
@@ -19,7 +20,7 @@ use Scaffold::Class
 # ----------------------------------------------------------------------
 
 sub process($$) {
-    my ($self, $input) = @_;
+    my ($self, $sobj) = @_;
 
 }
 
