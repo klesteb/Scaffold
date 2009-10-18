@@ -401,11 +401,18 @@ sub _custom_error {
     $param_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
     $param_dump =~ s/</&lt;/g;
 
-    my $request_dump  = Dumper($self);
-    my $response_dump = '';
+    my $request_dump  = Dumper($self->scaffold->request);
+    my $response_dump = Dumper($self->scaffold->response);
+    my $scaffold_dump = Dumper($self->scaffold);
 
     $request_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
     $request_dump =~ s/</&lt;/g;
+
+    $response_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
+    $response_dump =~ s/</&lt;/g;
+
+    $scaffold_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
+    $scaffold_dump =~ s/</&lt;/g;
 
     my $status = $self->scaffold->response->status || 'Bad Request';
     my $page = $self->_error_page();
@@ -414,6 +421,7 @@ sub _custom_error {
     $page =~ s/##PARAM_DUMP##/$param_dump/sg;
     $page =~ s/##REQUEST_DUMP##/$request_dump/sg;
     $page =~ s/##RESPONSE_DUMP##/$response_dump/sg;
+    $page =~ s/##SCAFFOLD_DUMP##/$scaffold_dump/sg;
     $page =~ s/##STATUS##/$status/sg;
     $page =~ s/##PAGE_TITLE##/$self->page_title/sge;
 
@@ -423,9 +431,9 @@ sub _custom_error {
 
 sub _error_page($) {
     my ($self) = @_;
-    
+
     return( qq!
-    <html>
+<html>
     <head>
         <title>##PAGE_TITLE## ##STATUS##</title>
         <style type="text/css">
@@ -478,29 +486,30 @@ sub _error_page($) {
     <body>
         <div class="box">
             <div class="error">##DIE_MESSAGE##</div>
-            <div class="infos"><br/>
-    
-    <div class="head"><u>site.params</u></div>
-    <br />
-    <pre>
+            <div class="infos"><br/>    
+                <div class="head"><u>site.params</u></div>
+                <br />
+                <pre>
 ##PARAM_DUMP##
-    </pre>
-    
-    <div class="head"><u>site</u></div><br/>
-    <pre>
+                </pre>
+                <div class="head"><u>Request Object</u></div><br/>
+                <pre>
 ##REQUEST_DUMP##
-    </pre>
-    <div class="head"><u>Response</u></div><br/>
-    <pre>
+                </pre>
+                <div class="head"><u>Response Object</u></div><br/>
+                <pre>
 ##RESPONSE_DUMP##
-    </pre>
-    
-    </div>
-    
-        <div class="name">Running on Scaffold $Scaffold::Base::VERSION</div>
-    </div>
+                </pre>
+                <div class="head"><u>Scaffold Object</u></div><br/>
+                <pre>
+##SCAFFOLD_DUMP##
+                </pre>    
+            </div>    
+            <div class="name">Running on Scaffold $Scaffold::Base::VERSION</div>
+        </div>
     </body>
-    </html>! );
+</html>! 
+);
     
 }
 
