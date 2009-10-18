@@ -6,11 +6,35 @@ use warnings;
 our $VERSION = '0.01';
 
 use Scaffold::Class
-  version => $VERSION,
-  base    => 'Scaffold::Base',
-  mutators => 'title template data template_disabled template_default 
-               template_wrapper content_type cache cache_key',
+  version   => $VERSION,
+  base      => 'Scaffold::Base',
+  constants => 'FALSE',
+  mutators  => 'title template data template_disabled template_wrapper 
+                template_default content_type cache cache_key',
 ;
+
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
+
+sub reinit($) {
+    my ($self) = @_;
+
+    $self->title('');
+    $self->data('');
+    $self->cache(FALSE);
+    $self->template('');
+    $self->cache_key('');
+    $self->content_type('');
+    $self->template_default('');
+    $self->template_wrapper('');
+    $self->template_disabled(FALSE);
+
+}
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
 
 1;
 

@@ -43,13 +43,13 @@ sub handler($$) {
     $class->{scaffold} = $sobj;
 
     my $configs = $class->scaffold->config('configs');
-    my $uri = $class->scaffold->request->request_uri || '/';
+    my $uri = $class->scaffold->request->uri;
     my $root = $configs->{'app_rootp'};
 
-    $class->{page_title} = $uri;
+    $class->{page_title} = $uri->path;
 
     my $state = STATE_PRE_ACTION;
-    my @p = $class->_cleanroot($uri, $location);
+    my @p = $class->_cleanroot($uri->path, $location);
     my $p1 = ( shift(@p) || 'main');
 
     my $action = 'do_' . $p1;
@@ -249,6 +249,8 @@ sub _perform_action {
 
     my $output;
 
+    $self->stash->view->reinit();
+
     if ($self->can($action)) {
 
         $self->$action(@p);
@@ -333,7 +335,7 @@ sub _process_render($) {
 
         if (! $input->template_disabled) {
 
-            $page = $render->process($input);
+            $page = $render->process($self);
             $self->scaffold->response->body($page);
 
         } else {

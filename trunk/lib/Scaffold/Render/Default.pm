@@ -14,10 +14,10 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub process($$) {
-    my ($self, $input) = @_;
+sub process($) {
+    my ($self, $sobj) = @_;
 
-    return $input->data;
+    return $sobj->scaffold->stash->view->data;
 
 }
 
