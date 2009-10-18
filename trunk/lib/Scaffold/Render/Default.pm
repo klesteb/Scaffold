@@ -17,7 +17,7 @@ use Scaffold::Class
 sub process($) {
     my ($self, $sobj) = @_;
 
-    return $sobj->scaffold->stash->view->data;
+    return $sobj->stash->view->data;
 
 }
 
