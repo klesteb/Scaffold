@@ -19,12 +19,15 @@ use Scaffold::Class
   accessors  => 'authz engine cache render database plugins request response lockmgr',
   mutators   => 'session',
   filesystem => 'File',
+  constants  => 'TRUE FALSE',
   messages => {
       'nomodule'  => "handler not defined for %s",
       'noplugin'  => "plugin %s not initialized, because: %s",
       'nohandler' => "handler %s for location %s was not loaded, because: %s",
   }
 ;
+
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -261,6 +264,12 @@ sub _set_config_defaults($) {
 
         my $search_path = "html:html/static:html/templates";
         $self->{config}->{configs}->{static_search} = $search_path;
+
+    }
+
+    if (! defined($self->{config}->{configs}->{cache_static})) {
+
+        $self->{config}->{configs}->{cache_static} = TRUE;
 
     }
 

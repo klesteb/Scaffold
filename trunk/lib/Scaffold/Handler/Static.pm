@@ -24,6 +24,7 @@ sub do_default {
     my $found = FALSE;
     my $cache = $self->scaffold->cache;
     my $static_search = $self->scaffold->config('configs')->{static_search};
+    my $cache_static = $self->scaffold->config('configs')->{cache_static};
     my @paths = split(':', $static_search);
 
     foreach my $path (@paths) {
@@ -40,8 +41,12 @@ sub do_default {
 
                 $d = $file->read();
 
-                $self->stash->view->cache(1);
-                $self->stash->view->cache_key($file);
+                if ($cache_static) {
+
+                    $self->stash->view->cache(1);
+                    $self->stash->view->cache_key($file);
+
+                }
 
             }
 
