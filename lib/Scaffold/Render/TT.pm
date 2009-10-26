@@ -15,6 +15,8 @@ use Scaffold::Class
   }
 ;
 
+use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
@@ -25,13 +27,13 @@ sub process($) {
     my $page;
     my $template = $sobj->stash->view->template_wrapper;
     my $vars = {
-	view    => $sobj->stash->view,
-	configs => $sobj->scaffold->config('configs'),
+        view    => $sobj->stash->view,
+        configs => $sobj->scaffold->config('configs'),
     };
 
     $self->engine->process(
         $template,
-	$vars,
+        $vars,
         \$page
     ) or $self->throw_msg(RENDER, 'template', $template, $self->engine->error);
 

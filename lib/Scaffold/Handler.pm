@@ -91,7 +91,8 @@ sub handler($$) {
         }
 
     }; if (my $ex = $@) {
-
+warn Dumper($ex);
+        
         my $ref = ref($ex);
 
         if ($ref && $ex->isa('Badger::Exception')) {

@@ -42,8 +42,9 @@ sub dispatch($$) {
     my $class;
     my $response;
     my $location;
+    my $url = $request->uri;
     my $locations = $self->config('locations');
-    my @path = (split( m|/|, $request->request_uri||'' ));
+    my @path = (split( m|/|, $url->path ||'' ));
 
     while (@path) {
 
