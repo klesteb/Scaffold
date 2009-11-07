@@ -24,6 +24,11 @@ use Scaffold::Class
       'nomodule'  => "handler not defined for %s",
       'noplugin'  => "plugin %s not initialized, because: %s",
       'nohandler' => "handler %s for location %s was not loaded, because: %s",
+  },
+  constant => {
+      NOMODULE  => 'scaffold.server.nomodule',
+      NOPLUGIN  => 'scaffold.server.noplugin',
+      NOHANDLER => 'scaffold.server.nohandler',
   }
 ;
 
@@ -60,11 +65,7 @@ sub dispatch($$) {
 
             } else {
 
-                $self->throw_msg(
-                    'scaffold.server.dispatch', 
-                    'nomodule', 
-                    $location
-                );
+                $self->throw_msg(NOMODULE, 'nomodule', $location);
 
             }
 
@@ -205,7 +206,7 @@ sub _init_plugin($$) {
 
     }; if (my $ex = $@) {
 
-        $self->throw_msg('scaffold.server', 'noplugin', $plugin, $@);
+        $self->throw_msg(NOPLUGIN, 'noplugin', $plugin, $@);
 
     }
 
@@ -238,7 +239,7 @@ sub _init_handler($$$) {
 
     }; if (my $ex = $@) {
 
-        $self->throw_msg('scaffold.server', 'nohandler', $handler, $location, $@);
+        $self->throw_msg(NOHANDLER, 'nohandler', $handler, $location, $@);
 
     }
 
