@@ -13,14 +13,14 @@ use Scaffold::Class
   base      => 'Scaffold::Base',
   accessors => 'interface request_handler request_class middlewares',
   messages => {
-      'norequest'   => "request_handler is required",
-      'nomodule'    => "{interface}->{module} is required",
-      'nointerface' => "interace is required",
+      'norequest' => "request_handler is required",
+      'nomodule'  => "{interface}->{module} is required",
+      'noserver'  => "interace is required",
   },
   constant => {
-      NOREQUEST   => 'scaffold.engine.norequest',
-      NOMODULE    => 'scaffold.engine.nomodule',
-      NOINTERFACE => 'scaffold.engine.nointerface',
+      NOREQUEST => 'scaffold.engine.norequest',
+      NOMODULE  => 'scaffold.engine.nomodule',
+      NOSERVER  => 'scaffold.engine.noserver',
   }
 ;
 
@@ -34,12 +34,12 @@ sub run($) {
     my $server_instance;
     my $request_handler;
 
-    $self->throw_msg(NOSERVER, 'nointerface') unless $self->{interface};
-    $self->throw_msg(NOMODULE, 'nomodule') unless $self->{interface}->{module};
+    $self->throw_msg(NOSERVER, 'noserver') unless $self->{server};
+    $self->throw_msg(NOMODULE, 'nomodule') unless $self->{server}->{module};
 
     $server_instance = $self->_build_server_instance(
-        $self->{interface}->{module},
-        $self->{interface}->{args}
+        $self->{server}->{module},
+        $self->{server}->{args}
     );
 
     $request_handler = $self->psgi_handler;
@@ -62,7 +62,7 @@ sub init {
 
     $self->throw_msg(NOREQUEST, 'norequest') unless $config->{request_handler};
 
-    $self->{interface} = $config->{interface};
+    $self->{server} = $config->{server};
     $self->{middlewares} = $config->{middlewares} || [];
     $self->{request_handler} = $config->{request_handler};
     $self->{request_class} = $config->{request_class} || 'Plack::Request'
