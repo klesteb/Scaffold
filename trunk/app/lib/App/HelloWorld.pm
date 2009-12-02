@@ -19,19 +19,9 @@ use Data::Dumper;
 sub do_main {
     my $self = shift;
 
-warn "do_main()\n";
-    
     $self->stash->view->data("<p>Hello World!!</p>");
 
 }
-
-#sub do_default {
-#    my ($self, @params) = @_;
-#    
-#    $self->stash->view->data(Dumper(@params));
-#warn "do_default()\n";
-#    
-#}
 
 # ----------------------------------------------------------------------
 # Private Methods

@@ -169,6 +169,7 @@ Scaffold::Engine - The Scaffold interface to psgi
 
  Scaffold::Base
  Scaffold::Class
+ PlackX::Engine
 
 =head1 AUTHOR
 

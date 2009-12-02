@@ -3,7 +3,7 @@ package Scaffold::Server;
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.01';
 
 use Plack::Response;
 use Scaffold::Engine;
