@@ -45,6 +45,7 @@ sub do_default {
 
                     $self->stash->view->cache(1);
                     $self->stash->view->cache_key($file);
+                    $cache->set($file, $d);
 
                 }
 

@@ -18,22 +18,29 @@ use Scaffold::Class
 sub do_default {
     my ($self) = @_;
 
+    my $d;
+    my $cache = $self->scaffold->cache;
     my $doc_rootp = $self->scaffold->config('configs')->{doc_rootp};
     my $file = File($doc_rootp, 'robots.txt');
 
-    if ($file->exists) {
+    if (! ($d = $cache->get($file))) {
 
-        my $d = $file->read();
+        if ($file->exists) {
 
-        $self->stash->view->data($d);
-        $self->stash->view->template_disabled(1);
-        $self->stash->view->content_type('text/plain');
+            $d = $file->read();
+            $cache->set($file, $d);
 
-    } else {
+        } else {
 
-        $self->not_found($file);
+            $self->not_found($file);
+
+        }
 
     }
+
+    $self->stash->view->data($d);
+    $self->stash->view->template_disabled(1);
+    $self->stash->view->content_type('text/plain');
 
 }
 
@@ -43,7 +50,7 @@ sub do_default {
 
 1;
 
-  __END__
+__END__
 
 =head1 NAME
 
