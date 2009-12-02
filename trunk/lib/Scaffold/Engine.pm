@@ -11,10 +11,10 @@ use Plack::Builder;
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  accessors => 'interface request_handler request_class middlewares',
+  accessors => 'server request_handler request_class middlewares scaffold',
   messages => {
       'norequest' => "request_handler is required",
-      'nomodule'  => "{interface}->{module} is required",
+      'nomodule'  => "{server}->{module} is required",
       'noserver'  => "interace is required",
   },
   constant => {
@@ -23,6 +23,8 @@ use Scaffold::Class
       NOSERVER  => 'scaffold.engine.noserver',
   }
 ;
+
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -51,6 +53,15 @@ sub psgi_handler {
     shift->_build_request_handler;
 }
 
+sub build_request($$) {
+    my ($self, $env) = @_;
+
+    my $response = $self->{request_class}->new($env);
+    
+    return $response;
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
@@ -63,9 +74,12 @@ sub init {
     $self->throw_msg(NOREQUEST, 'norequest') unless $config->{request_handler};
 
     $self->{server} = $config->{server};
+    $self->{scaffold} = $config->{scaffold};
     $self->{middlewares} = $config->{middlewares} || [];
     $self->{request_handler} = $config->{request_handler};
-    $self->{request_class} = $config->{request_class} || 'Plack::Request'
+    $self->{request_class} = $config->{request_class} || 'Plack::Request';
+
+    Scaffold::Engine::Util::load_class($self->{request_class});
 
     return $self;
 
@@ -74,7 +88,7 @@ sub init {
 sub _build_server_instance($$$) {
     my ($class, $server, $args) = @_;
 
-    Plack::Loader->load($server, %args);
+    Plack::Loader->load($server, %$args);
 
 }
 
@@ -92,11 +106,12 @@ sub _build_app($) {
 
     return sub {
         my $env = shift;
+        my $scaffold = $self->scaffold;
         my $req = $self->build_request($env);
-        my $res = $self->{request_handler}->($req);
+        my $res = $self->{request_handler}->($scaffold, $req);
         $res->finalize;
     };
-    
+
 }
 
 sub _wrap_with_middlewares($$) {
@@ -115,13 +130,30 @@ sub _wrap_with_middlewares($$) {
 
 }
 
+package Scaffold::Engine::Util;
+
+sub load_class($$) {
+    my ($class, $prefix) = @_;
+
+    if ( $class !~ s/^\+// && $prefix ) {
+        $class = "$prefix\::$class";
+    }
+
+    my $file = $class;
+    $file =~ s!::!/!g;
+    require "$file.pm";    ## no critic
+
+    return $class;
+
+}
+
 1;
 
 __END__
 
 =head1 NAME
 
-Scaffold::Engine - The Scaffold web engine interface to psgi
+Scaffold::Engine - The Scaffold interface to psgi
 
 =head1 SYNOPSIS
 

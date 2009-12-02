@@ -19,7 +19,7 @@ use Data::Dumper;
 sub do_main {
     my $self = shift;
 
-#warn "do_main()\n";
+warn "do_main()\n";
     
     $self->stash->view->data("<p>Hello World!!</p>");
 
