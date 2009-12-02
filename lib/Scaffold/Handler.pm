@@ -39,8 +39,12 @@ use Data::Dumper;
 sub handler($$) {
     my ($class, $sobj, $location, $module) = @_;
 
+warn "handler()\n";    
+warn ref($class) . " " . ref($sobj) . " " . $location . " " . $module . "\n";;
+    
     $class->{stash} = Scaffold::Stash->new();
     $class->{scaffold} = $sobj;
+warn Dumper($class);
 
     my $configs = $class->scaffold->config('configs');
     my $uri = $class->scaffold->request->uri;
@@ -66,24 +70,31 @@ sub handler($$) {
 
             switch ($state) {
                 case STATE_PRE_ACTION {
+warn "state_pre_action\n";
                     $state = $class->_pre_action();
                 }
                 case STATE_ACTION {
+warn "state_action\n";
                     $state = $class->_perform_action($action, $p1, @p);
                 }
                 case STATE_POST_ACTION {
+warn "state_post_action\n";
                     $state = $class->_post_action();
                 }
                 case STATE_PRE_RENDER {
+warn "start_pre_render\n";
                     $state = $class->_pre_render();
                 }
                 case STATE_RENDER {
+warn "state_render\n";
                     $state = $class->_process_render();
                 }
                 case STATE_POST_RENDER {
+warn "state_post_render\n";
                     $state = $class->_post_render();
                 }
                 case STATE_FINI {
+warn "state_fini\n";
                     last LOOP;
                 }
             };
@@ -91,11 +102,94 @@ sub handler($$) {
         }
 
     }; if (my $ex = $@) {
+warn $@;
+        
+        my $ref = ref($ex);
 
-        $class->_exception_handler($ex);
+        if ($ref && $ex->isa('Badger::Exception')) {
+
+            my $type = $ex->type;
+            my $info = $ex->info;
+            
+            switch ($type) {
+                case MOVED_PERM {
+                    $self->scaffold->response->status('301');
+                    $self->scaffold->response->header('location' => $info);
+                    $self->scaffold->response->body("");
+                }
+                case REDIRECT {
+                    $self->scaffold->response->status('302');
+                    $self->scaffold->response->header('location' => $info);
+                    $self->scaffold->response->body("");
+                }
+                case RENDER {
+                    $self->scaffold->response->status('500');
+                    $self->scaffold->response->body(
+                        $self->_custom_error($info)
+                    );
+                }
+                case DECLINED {
+                    my $text = qq(
+                        Declined - undefined method<br />
+                        <span style='font-size: .8em'>
+                        Method: $action <br />
+                        Location: $location <br />
+                        Module: $module <br />
+                        </span>
+                    );
+                    $self->scaffold->response->status('404');
+                    $self->scaffold->response->body(
+                        $self->_custom_error($text)
+                    );
+                }
+                case NOTFOUND {
+                    my $text = qq(
+                        File not found<br />
+                        <span style='font-size: .8em'>
+                        File: $info<br />
+                        </span>
+                    );
+                    $self->scaffold->response->status('404');
+                    $self->scaffold->response->body(
+                        $self->_custom_error($text)
+                    );
+                }
+                else {
+                    if ($self->can('exception_handler')) {
+
+                        $self->exception_handler($ex);
+
+                    } else {
+
+                        my $text = qq(
+                            Unexpected exception caught<br />
+                            <span style='font-size: .8em'>
+                            Type: $type<br />
+                            Info: $info<br />
+                            </span>
+                        );
+
+                        $self->scaffold->response->status('500');
+                        $self->scaffold->response->body(
+                            $self->_custom_error($text)
+                        );
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            $self->scaffold->response->body($self->_custom_error($@));
+
+        }
 
     }
 
+warn "response = " . $class->scaffold->response . "\n";
+    
     return $class->scaffold->response;
 
 }
@@ -168,25 +262,28 @@ sub _perform_action {
     my ($self, $action , $p1, @p) = @_;
 
     my $output;
-
+warn "_perform_action() - $action\n";
+    
     $self->stash->view->reinit();
-
+warn "after reinit()\n";
+    
     if ($self->can($action)) {
-
+warn "in can\n";
         $self->$action(@p);
 
     } elsif ($self->can('do_default')) {
-
+warn "in default\n";
         $self->do_default($p1, @p);
 
     } else {
-
+warn "in decline\n";
         $self->declined();
 
     }
 
     $self->declined() if ($self->is_declined);
 
+warn "leaving\n";
     return STATE_POST_ACTION;
 
 }
@@ -300,93 +397,6 @@ sub _post_render($) {
     }
 
     return $status;
-
-}
-
-sub _exception_handler($) {
-    my ($self, $ex) = @_;
-    
-    my $ref = ref($ex);
-
-    if ($ref && $ex->isa('Badger::Exception')) {
-
-        my $type = $ex->type;
-        my $info = $ex->info;
-
-        switch ($type) {
-            case MOVED_PERM {
-                $self->scaffold->response->status('301');
-                $self->scaffold->response->header('location' => $info);
-                $self->scaffold->response->body("");
-            }
-            case REDIRECT {
-                $self->scaffold->response->status('302');
-                $self->scaffold->response->header('location' => $info);
-                $self->scaffold->response->body("");
-            }
-            case RENDER {
-                $self->scaffold->response->status('500');
-                $self->scaffold->response->body(
-                    $self->_custom_error($info)
-                );
-            }
-            case DECLINED {
-                my $text = qq(
-                    Declined - undefined method<br />
-                    <span style='font-size: .8em'>
-                    Method: $action <br />
-                    Location: $location <br />
-                    Module: $module <br />
-                    </span>
-                );
-                $self->scaffold->response->status('404');
-                $self->scaffold->response->body(
-                    $self->_custom_error($text)
-                );
-            }
-            case NOTFOUND {
-                my $text = qq(
-                    File not found<br />
-                    <span style='font-size: .8em'>
-                    File: $info<br />
-                    </span>
-                );
-                $self->scaffold->response->status('404');
-                $self->scaffold->response->body(
-                    $self->_custom_error($text)
-                );
-            }
-            else {
-                if ($self->can('exception_handler')) {
-
-                    $self->exception_handler($ex);
-
-                } else {
-
-                    my $text = qq(
-                        Unexpected exception caught<br />
-                        <span style='font-size: .8em'>
-                        Type: $type<br />
-                        Info: $info<br />
-                        </span>
-                    );
-
-                    $self->scaffold->response->status('500');
-                    $self->scaffold->response->body(
-                        $self->_custom_error($text)
-                    );
-
-                }
-
-            }
-
-        };
-
-    } else {
-
-        $self->scaffold->response->body($self->_custom_error($@));
-
-    }
 
 }
 

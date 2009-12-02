@@ -3,10 +3,10 @@ package Scaffold::Server;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Plack::Response;
-use Scaffolfd::Engine;
+use Scaffold::Engine;
 use Scaffold::Cache::Manager;
 use Scaffold::Render::Default;
 use Scaffold::Cache::FastMmap;
@@ -174,16 +174,16 @@ sub init {
 
     $engine = $self->config('engine');
 
-    $self->{engine} = Scaffold::Engine->new({
+    $self->{engine} = Scaffold::Engine->new(
         server => {
             module => $engine->{module},
             args => (defined($engine->{args}) ? $engine->{args} : {}),
         },
-        request_handler => sub {
-            my ($request) = @_;
-            my $response = dispatch($self, $request);
-            return $response;
-        },
+        middlewares => [
+            { module => 'Plack::Middleware::AccessLog::Timed' },
+        ],
+        request_handler => \&dispatch,
+        scaffold => $self,
     );
 
     return $self;
