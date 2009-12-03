@@ -179,9 +179,6 @@ sub init {
             module => $engine->{module},
             args => (defined($engine->{args}) ? $engine->{args} : {}),
         },
-        middlewares => [
-            { module => 'Plack::Middleware::AccessLog::Timed' },
-        ],
         request_handler => \&dispatch,
         scaffold => $self,
     );
