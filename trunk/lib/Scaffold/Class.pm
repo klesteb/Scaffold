@@ -4,6 +4,7 @@ use Badger::Class
   uber     => 'Badger::Class',
   constant => {
       CONSTANTS => 'Scaffold::Constants',
+      UTILS     => 'Scaffold::Utils',
   }
 ;
 

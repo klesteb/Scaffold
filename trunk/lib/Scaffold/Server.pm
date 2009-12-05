@@ -16,7 +16,7 @@ use Scaffold::Lockmgr::KeyedMutex;
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Base',
-  accessors  => 'authz engine cache render database plugins request response lockmgr',
+  accessors  => 'authz authn engine cache render database plugins request response lockmgr',
   mutators   => 'session',
   filesystem => 'File',
   constants  => 'TRUE FALSE',
@@ -48,8 +48,9 @@ sub dispatch($$) {
     my $response;
     my $location;
     my $url = $request->uri;
+    my $uri = lc($url->path);
     my $locations = $self->config('locations');
-    my @path = (split( m|/|, $url->path ||'' ));
+    my @path = (split( m|/|, $uri ||'' ));
 
     while (@path) {
 
@@ -73,7 +74,7 @@ sub dispatch($$) {
 
         pop(@path);
 
-    } # end while path
+    }
 
     $location = '/';
     my $mod = $locations->{$location}; 
