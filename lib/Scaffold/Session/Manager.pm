@@ -38,7 +38,7 @@ sub pre_action($$) {
 
     $user    = $session->get('user');
     $address = $session->get('address');
-    $create  = $session->get('address');
+    $create  = $session->get('create');
     $access  = $session->get('access');
 
     $session->set('user', $sobj->scaffold->request->user) if (not $user);

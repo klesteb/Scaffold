@@ -54,7 +54,7 @@ sub post_render($$) {
 
 =head1 NAME
 
-Scaffold::Plugins - The base class for plugins
+Scaffold::Plugins - The base class for Scaffold plugins
 
 =head1 SYNOPSIS
 

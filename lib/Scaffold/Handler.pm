@@ -13,7 +13,7 @@ use Scaffold::Class
   base      => 'Scaffold::Base',
   accessors => 'stash scaffold page_title',
   mutators  => 'is_declined',
-  constants => ':state :plugins',
+  constants => 'TRUE FALSE :state :plugins',
   messages => {
       'declined'          => '%s',
       'redirect'          => "%s",
@@ -92,83 +92,7 @@ sub handler($$) {
 
     }; if (my $ex = $@) {
 
-        my $ref = ref($ex);
-
-        if ($ref && $ex->isa('Badger::Exception')) {
-
-            my $type = $ex->type;
-            my $info = $ex->info;
-            
-            switch ($type) {
-                case MOVED_PERM {
-                    $class->scaffold->response->status('301');
-                    $class->scaffold->response->header('location' => $info);
-                    $class->scaffold->response->body("");
-                }
-                case REDIRECT {
-                    $class->scaffold->response->status('302');
-                    $class->scaffold->response->header('location' => $info);
-                    $class->scaffold->response->body("");
-                }
-                case RENDER {
-                    $class->scaffold->response->status('500');
-                    $class->scaffold->response->body(
-                        $class->_custom_error($info)
-                    );
-                }
-                case DECLINED {
-                    my $text = qq(
-                        Declined - undefined method<br />
-                        <span style='font-size: .8em'>
-                        Method: $action <br />
-                        Location: $location <br />
-                        Module: $module <br />
-                        </span>
-                    );
-                    $class->scaffold->response->status('404');
-                    $class->scaffold->response->body(
-                        $class->_custom_error($text)
-                    );
-                }
-                case NOTFOUND {
-                    my $text = qq(
-                        File not found<br />
-                        <span style='font-size: .8em'>
-                        File: $info<br />
-                        </span>
-                    );
-                    $class->scaffold->response->status('404');
-                    $class->scaffold->response->body(
-                        $class->_custom_error($text)
-                    );
-                }
-                else {
-                    if ($class->can('exception_handler')) {
-
-                        $class->exception_handler($ex);
-
-                    } else {
-
-                        my $text = qq(
-                            Unexpected exception caught<br />
-                            <span style='font-size: .8em'>
-                            Type: $type<br />
-                            Info: $info<br />
-                            </span>
-                        );
-
-                        $class->scaffold->response->status('500');
-                        $class->scaffold->response->body(
-                            $class->_custom_error($text)
-                        );
-
-                    }
-
-                }
-
-            }
-
-        } else {
+        if ($class->exceptions($ex, $action, $location, $module)) {
 
             $class->scaffold->response->body($class->_custom_error($@));
 
@@ -205,6 +129,98 @@ sub not_found($$) {
     my ($self, $file) = @_;
 
     $self->throw_msg(NOTFOUND, 'not_found', $file);
+
+}
+
+sub exceptions($$$$$) {
+    my ($self, $ex, $action, $location, $module) = @_;
+
+    my $stat = TRUE;
+    my $ref = ref($ex);
+
+    if ($ref && $ex->isa('Badger::Exception')) {
+
+        my $type = $ex->type;
+        my $info = $ex->info;
+
+        switch ($type) {
+            case MOVED_PERM {
+                $stat = FALSE;
+                $self->scaffold->response->status('301');
+                $self->scaffold->response->header('location' => $info);
+                $self->scaffold->response->body("");
+            }
+            case REDIRECT {
+                $stat = FALSE;
+                $self->scaffold->response->status('302');
+                $self->scaffold->response->header('location' => $info);
+                $self->scaffold->response->body("");
+            }
+            case RENDER {
+                $stat = FALSE;
+                $self->scaffold->response->status('500');
+                $self->scaffold->response->body(
+                    $self->_custom_error($info)
+                );
+            }
+            case DECLINED {
+                $stat = FALSE;
+                my $text = qq(
+                    Declined - undefined method<br />
+                    <span style='font-size: .8em'>
+                    Method: $action <br />
+                    Location: $location <br />
+                    Module: $module <br />
+                    </span>
+                );
+                $self->scaffold->response->status('404');
+                $self->scaffold->response->body(
+                    $self->_custom_error($text)
+                );
+            }
+            case NOTFOUND {
+                $stat = FALSE;
+                my $text = qq(
+                    File not found<br />
+                    <span style='font-size: .8em'>
+                    File: $info<br />
+                    </span>
+                );
+                $self->scaffold->response->status('404');
+                $self->scaffold->response->body(
+                    $self->_custom_error($text)
+                );
+            }
+            else {
+                $stat = FALSE;
+                if ($self->can('exception_handler')) {
+
+                    $self->exception_handler($ex);
+
+                } else {
+
+                    my $text = qq(
+                        Unexpected exception caught<br />
+                        <span style='font-size: .8em'>
+                        Type: $type<br />
+                        Info: $info<br />
+                        </span>
+                    );
+
+                    $self->scaffold->response->status('500');
+                    $self->scaffold->response->body(
+                        $self->_custom_error($text)
+                    );
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return $stat;
 
 }
 
