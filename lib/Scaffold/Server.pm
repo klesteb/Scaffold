@@ -16,7 +16,7 @@ use Scaffold::Lockmgr::KeyedMutex;
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Base',
-  accessors  => 'authz authn engine cache render database plugins request response lockmgr',
+  accessors  => 'authz authn engine cache render database plugins request response lockmgr user',
   mutators   => 'session',
   filesystem => 'File',
   constants  => 'TRUE FALSE',
@@ -161,6 +161,24 @@ sub init {
 
     }
 
+    # init authorization handling
+
+    if (my $auth = $self->config('authorization')) {
+
+        if (defined($auth->{authorize})) {
+
+            $self->{authz} = $self->_init_module($auth->{authorize});
+
+        }
+
+        if (defined($auth->{authenticate})) {
+
+            $self->_init_plugin($auth->{authenticate});
+
+        }
+
+    }
+
     # load the other plugins
 
     if ($plugins = $self->config('plugins')) {
@@ -205,6 +223,28 @@ sub _init_plugin($$) {
     }; if (my $ex = $@) {
 
         $self->throw_msg(NOPLUGIN, 'noplugin', $plugin, $@);
+
+    }
+
+}
+
+sub _init_module($$) {
+    my ($self, $module) = @_;
+
+    eval {
+
+        my @parts = split("::", $module);
+        my $filename = File(@parts);
+
+        require $filename . '.pm';
+        $module->import();
+        my $obj = $module->new();
+
+        return $obj;
+
+    }; if (my $ex = $@) {
+
+        $self->throw_msg(NOMODULE, 'nomodule', $module, $@);
 
     }
 

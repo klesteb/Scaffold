@@ -23,7 +23,7 @@ sub lock($$) {
 
     my $stat = FALSE;
 
-    if ($self->lock($key)) {
+    if ($self->engine->lock($key)) {
 
         $stat = TRUE;
 
@@ -36,7 +36,7 @@ sub lock($$) {
 sub unlock($$) {
     my ($self, $key) = @_;
 
-    return $self->release($key);
+    return $self->engine->release($key);
 
 }
 
@@ -45,7 +45,7 @@ sub locked($$) {
 
     my $stat = FALSE;
 
-    if ($self->locked($key)) {
+    if ($self->engine->locked($key)) {
 
         $stat = TRUE;
 

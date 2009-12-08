@@ -249,6 +249,7 @@ sub _pre_action($) {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->pre_action($self);
             last if ($pstatus != PLUGIN_NEXT);
 
@@ -294,6 +295,7 @@ sub _post_action($) {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->post_action($self);
             last if ($pstatus != PLUGIN_NEXT);
 
@@ -315,6 +317,7 @@ sub _pre_render($) {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->pre_render($self);
             last if ($pstatus != PLUGIN_NEXT);
 
@@ -385,6 +388,7 @@ sub _post_render($) {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->post_render($self);
             last if ($pstatus != PLUGIN_NEXT);
 

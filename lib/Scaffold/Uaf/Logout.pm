@@ -8,6 +8,7 @@ our $VERSION = '0.01';
 use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Handler',
+  mixin   => 'Scaffold::Uaf::Authenticate',
 ;
 
 # -----------------------------------------------------------------
@@ -17,16 +18,18 @@ use Scaffold::Class
 sub do_main {
     my ($self) = @_;
 
-    my $title = $self->scaffold->config('configs')->{uaf_title} || 'Logging out';
-    my $wrapper = $self->scaffold->config('configs')->{uaf_wrapper} || 'nowrapper.tt';
-    my $template = $self->scaffolg->config('configs')->{uaf_template} || 'uaf_logout.tt';
+    $self->uaf_init();
+
+    my $title = $self->uaf_logout_title;
+    my $wrapper = $self->uaf_log_wrapper;
+    my $template = $self->uaf_logout_template;
 
     $self->stash->view->title($title);
     $self->stash->view->template_wrapper($wrapper);
     $self->stash->view->template($template);
 
-    $self->scaffold->authn->invalidate();
-    
+    $self->uaf_invalidate();
+
 }
 
 # -----------------------------------------------------------------
