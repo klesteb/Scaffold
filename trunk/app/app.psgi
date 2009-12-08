@@ -15,6 +15,12 @@ main: {
             '/robots.txt'  => 'Scaffold::Handler::Robots',
             '/favicon.ico' => 'Scaffold::Handler::Favicon',
             '/static'      => 'Scaffold::Handler::Static',
+            '/login'       => 'Scaffold::Uaf::Login',
+            '/logout'      => 'Scaffold::Uaf::Logout',
+        },
+        authorization => {
+            authenticate => 'Scaffold::Uaf::Manager',
+            authorize    => 'Scaffold::Uaf::Authorize',
         },
         render => Scaffold::Render::TT->new(
             include_path => 'html:html/resources/templates',

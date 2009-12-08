@@ -17,6 +17,8 @@ sub rules {
 
 __END__
   
+=head1 NAME
+
 Scaffold::Uaf::Authorize - A default authorization module.
 
 =head1 DESCRIPTION

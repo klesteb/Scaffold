@@ -73,7 +73,7 @@ sub decrypt {
 
         } else {
 
-            return join(' ', @decyrpted_values);
+            return join(' ', @decrypted_values);
 
         }
 

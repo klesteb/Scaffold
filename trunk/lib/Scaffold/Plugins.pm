@@ -9,7 +9,7 @@ use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
   constants => ':plugins',
-  accessors => 'scaffold',
+  mutators  => 'scaffold',
 ;
 
 # ----------------------------------------------------------------------

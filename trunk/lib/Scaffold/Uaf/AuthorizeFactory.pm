@@ -124,7 +124,7 @@ which are abstractly known as "users", "actions", and "resources."
 
 =over 4
 
-A user is generally a Gantry::Plugins::Uaf::User object that your 
+A user is generally a Scaffold::Uaf::User object that your 
 applications has identify as the entity operating the application. 
 
 An action can be any data type (i.e. simply a string). It is really up

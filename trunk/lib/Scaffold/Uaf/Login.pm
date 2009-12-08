@@ -14,6 +14,7 @@ use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Handler',
   codecs  => 'JSON',
+  mixin   => 'Scaffold::Uaf::Authenticate',
 ;
 
 # -----------------------------------------------------------------
@@ -23,9 +24,11 @@ use Scaffold::Class
 sub do_main {
     my ($self) = @_;
 
-    my $title = $self->scaffold->config('configs')->{uaf_title} || 'Please Login';
-    my $wrapper = $self->scaffold->config('configs')->{uaf_wrapper} || 'wrapper.tt';
-    my $template = $self->scaffolg->config('configs')->{uaf_template} || 'uaf_login.tt';
+    $self->uaf_init();
+
+    my $title = $self->uaf_login_title;
+    my $wrapper = $self->uaf_login_wrapper;
+    my $template = $self->uaf_login_template;
 
     $self->stash->view->title($title);
     $self->stash->view->template_wrapper($wrapper);
@@ -36,9 +39,11 @@ sub do_main {
 sub do_denied {
     my ($self) = @_;
 
-    my $title = $self->scaffold->config('configs')->{uaf_denied_title} || 'Login Denied';
-    my $wrapper = $self->scaffold->config('configs')->{uaf_denied_wrapper} || 'nowrapper.tt';
-    my $template = $self->scaffolg->config('configs')->{uaf_denied_templae} || 'uaf_denied.tt';
+    $self->uaf_init();
+
+    my $title = $self->uaf_denied_title;
+    my $wrapper = $self->uaf_denied_wrapper;
+    my $template = $self->uaf_denied_template;
 
     $self->stash->view->title($title);
     $self->stash->view->template_wrapper($wrapper);
@@ -49,19 +54,21 @@ sub do_denied {
 sub do_validate {
     my ($self) = @_;
 
+    $self->uaf_init();
+
     my $login_rootp;
     my $denied_rootp;
-    my $limit = $self->scaffold->authn->limit;
+    my $limit = $self->uaf_limit;
     my $params = $self->scaffold->request->param();
     my $count = $self->scaffold->session->get('uaf_login_attempts');
     my $app_rootp = $self->scaffold->config('configs')->{app_rootp};
 
     $count++;
     $self->scaffold->session->set('uaf_login_attempts', $count);
-    $login_rootp = $app_rootp . '/login';
-    $denied_rootp = $app_rootp . '/login/denied';
+    $login_rootp = $self->uaf_login_rootp;
+    $denied_rootp = $self->uaf_denied_rootp;
 
-    $user = $self->scaffold->authn->validate(
+    $user = $self->uaf_validate(
         $params->{username}, 
         $params->{password}
     );
@@ -78,8 +85,8 @@ sub do_validate {
         }
 
         $self->scaffold->session->set('uaf_login_attempts', 0);
-        $self->set_token($user);
-        $self->relocate($app_rootp);
+        $self->uaf_set_token($sobj, $user);
+        $self->redirect($app_rootp);
 
     } else {
 

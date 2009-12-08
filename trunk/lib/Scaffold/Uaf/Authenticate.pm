@@ -4,7 +4,6 @@ use 5.008;
 use strict;
 use warnings;
 
-use Gantry::Utils::Crypt;
 use Scaffold::Uaf::User;
 use Data::Random qw(:all);
 
@@ -13,14 +12,26 @@ our $VERSION = '0.03';
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  accessors => 'filter',
+  utils     => 'encrypt',
+  accessors => 'uaf_filter uaf_limit uaf_timeout uaf_secret uaf_login_rootp 
+                uaf_denied_rootp uaf_expired_rootp uaf_validate_rootp 
+                uaf_login_title uaf_login_wrapper uaf_login_template 
+                uaf_denied_title uaf_denied_wrapper uaf_denied_template
+                uaf_logout_title uaf_logout_template uaf_logout_wrapper',
+  mixins    => 'uaf_filter uaf_limit uaf_timeout uaf_secret uaf_login_rootp 
+                uaf_denied_rootp uaf_expired_rootp uaf_validate_rootp 
+                uaf_login_title uaf_login_wrapper uaf_login_template 
+                uaf_denied_title uaf_denied_wrapper uaf_denied_template
+                uaf_logout_title uaf_logout_template uaf_logout_wrapper
+                uaf_is_valid uaf_validate uaf_invalidate uaf_set_token 
+                uaf_avoid uaf_init',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub is_valid($) {
+sub uaf_is_valid($) {
     my ($self) = @_;
 
     my $ip;
@@ -31,30 +42,31 @@ sub is_valid($) {
     my $token = "";
     my $user = undef;
 
-    $ip = $self->{gantry}->remote_ip;
-    $token = ($self->{gantry}->get_cookies('_token_id_') || '') . '=';
+    $ip = $self->scaffold->request->address;
+    $token = ($self->scaffold->request->cookie('_token_id_') || '') . '=';
+    my $lock = $self->scaffold->session->get('ident');
 
     if (defined($token) and ($token ne '=')) {
 
-        if ($self->{gantry}->session_lock()) {
+        if ($self->scaffold->session->lock($lock)) {
 
-            $old_ip = $self->{gantry}->session_retrieve('uaf_remote_ip') || '';
-            $old_token = $self->{gantry}->session_retrieve('uaf_token') || '';
+            $old_ip = $self->scaffold->session->get('uaf_remote_ip') || '';
+            $old_token = $self->scaffold->session->get('uaf_token') || '';
 
             # This should work for just about everything except a load
             # balancing, natted firewall. And yeah, they do exist.
 
             if (($token eq $old_token) and ($ip eq $old_ip)) {
 
-                $user = $self->{gantry}->session_retrieve('uaf_user');
+                $user = $self->scaffold->session->get('uaf_user');
                 $access = $user->attribute('last_access');
                 $user->attribute('last_access', time());
-                $self->{gantry}->session_update('uaf_user', $user);
-                $user = undef if ($access  <  (time() - $self->{timeout}));
+                $self->scaffold->session->set('uaf_user', $user);
+                $user = undef if ($access  <  (time() - $self->uaf_timeout));
 
             }
 
-            $self->{gantry}->session_unlock();
+            $self->scaffold->lockmgr->unlock($lock);
 
         }
 
@@ -64,7 +76,7 @@ sub is_valid($) {
 
 }
 
-sub validate($$$) {
+sub uaf_validate($$$) {
     my ($self, $username, $password) = @_;
 
     my $ip = "";
@@ -95,7 +107,7 @@ sub validate($$$) {
 }
 
 sub invalidate($) {
-    my $self = shift;
+    my ($self) = @_;
 
     $self->scaffold->session->remove('uaf_user');
     $self->scaffold->session->remove('uaf_token');
@@ -104,58 +116,70 @@ sub invalidate($) {
 
 }
 
-sub set_token($$) {
+sub uaf_set_token($$) {
     my ($self, $user) = @_;
 
     my $salt = $user->attribute('salt');
-    my $path = $self->scaffold->config('configs')->{'uaf_cookie_path'} || '/';
-    my $domain = $self->scaffold->config('configs')->{'uaf_cookie_domain'} || "";
-    my $secure = $self->scaffold->config('configs')->('uaf_cookie_secure');
-
-    my $token = $self->{crypt}->encrypt($user->username, ':', time(), ':', $salt, $$);
+    my $token = encrypt($user->username, ':', time(), ':', $salt, $$);
 
     $self->scaffold->response->cookie->{'_token_id_'} = {
         value => $token,
-        path  => $path
+        path  => $self->uaf_cookie_path
     };
 
     $self->scaffold->session->set('uaf_token', $token);
 
 }
 
-sub avoid {
-    my $self = shift;
+sub uaf_avoid($$) {
+    my ($self) = @_;
 
     return 1;
+
+}
+
+sub uaf_init {
+    my ($self) = @_;
+
+    my $config = $self->scaffold->config('configs');
+    my $app_rootp = $config->{app_rootp};
+
+    $self->{uaf_cookie_path}    = $config->{uaf_cookie_path} || '/';
+    $self->{uaf_cookie_domain}  = $config->{uaf_cookie_domain} || "";
+    $self->{uaf_cookie_secure}  = $config->{uaf_cookie_secure};
+    $self->{uaf_limit}          = $config->{uaf_limit} || 3;
+    $self->{uaf_timeout}        = $config->{uaf_timeout} || 3600;
+    $self->{uaf_secret}         = $config->{uaf_secret} || 'w3s3cR7';
+    $self->{uaf_filter}         = $config->{uaf_filter} || qr/^${app_rootp}\/(login|static).*/;
+
+    $self->{uaf_login_rootp}    = $app_rootp . '/login';
+    $self->{uaf_denied_rootp}   = $self->{uaf_login_rootp} . '/denied';
+    $self->{uaf_expired_rootp}  = $self->{uaf_login_rootp} . '/expired';
+    $self->{uaf_validate_rootp} = $self->{uaf_login_rootp} . '/validate';
+
+    # set default login template values
+
+    $self->{uaf_login_title}    = $config->{uaf_login_title} || 'Please Login';
+    $self->{uaf_login_wrapper}  = $config->{uaf_login_wrapper} || 'nowrapper.tt';
+    $self->{uaf_login_template} = $config->{uaf_login_template} || 'uaf_login.tt';
+
+    # set default denied template values
+
+    $self->{uaf_denied_title}    = $config->{uaf_denied_title} || 'Login Denied';
+    $self->{uaf_denied_wrapper}  = $config->{uaf_denied_wrapper} || 'nowrapper.tt';
+    $self->{uaf_denied_template} = $config->{uaf_denied_template} || 'uaf_denied.tt';
+
+    # set default logout template values
+
+    $self->{uaf_logout_title}    = $config->{uaf_logout_title} || 'Logout';
+    $self->{uaf_logout_wrapper}  = $config->{uaf_logout_wrapper} || 'nowrapper.tt';
+    $self->{uaf_logout_template} = $config->{uaf_logout_template} || 'uaf_logout.tt';
 
 }
 
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub init {
-    my ($self, $config) = @_;
-
-    $self->{config} = $config;
-
-    my $app_rootp = $self->scaffold->config('config')->{app_rootp};
-
-    $self->{limit}         = $config->{limit} || 3;
-    $self->{timeout}       = $config->{timeout} || 3600;
-    $self->{secret}        = $config->{secret} || 'w3s3cR7';
-    $self->{login_rootp}   = $app_rootp . '/login';
-    $self->{denied_rootp}  = $self->{login_rootp} . '/denied';
-    $self->{expired_rootp} = $self->{login_rootp} . '/expired';
-    $self->{filter} = qr/^${app_rootp}\/(login|static).*/;
-
-    $self->{crypt} = Gantry::Utils::Crypt->new({'secret' => $self->{secret}});
-
-    bless($self, $class);
-
-    return $self;
-
-}
 
 1;
 

@@ -6,6 +6,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use HTTP::Session;
+use Data::Random qw(:all);
 use HTTP::Session::State::Cookie;
 use Scaffold::Session::Store::Cache;
 
@@ -24,7 +25,7 @@ use Data::Dumper;
 sub pre_action($$) {
     my ($self, $sobj) = @_;
 
-    my ($user, $address, $create ,$access);
+    my ($user, $address, $create ,$access, $random, $ident);
 
     my $session = HTTP::Session->new(
         store => Scaffold::Session::Store::Cache->new(
@@ -36,15 +37,19 @@ sub pre_action($$) {
         request => $sobj->scaffold->request
     );
 
+    $random = rand_chars(set => 'all', min => 5, max => 10);
+
     $user    = $session->get('user');
     $address = $session->get('address');
     $create  = $session->get('create');
     $access  = $session->get('access');
+    $ident   = $session->get('ident');
 
     $session->set('user', $sobj->scaffold->request->user) if (not $user);
     $session->set('address', $sobj->scaffold->request->address) if (not $address);
     $session->set('create', time()) if (not $create);
     $session->set('access', time()) if (not $access);
+    $session->set('ident', $random) if (not $ident);
 
     $sobj->scaffold->session($session);
 
