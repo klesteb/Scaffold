@@ -16,8 +16,8 @@ use Scaffold::Lockmgr::KeyedMutex;
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Base',
-  accessors  => 'authz authn engine cache render database plugins request response lockmgr user',
-  mutators   => 'session',
+  accessors  => 'authz engine cache render database plugins request response lockmgr',
+  mutators   => 'session user',
   filesystem => 'File',
   constants  => 'TRUE FALSE',
   messages => {

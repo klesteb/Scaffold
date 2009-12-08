@@ -17,15 +17,19 @@ use Scaffold::Class
                 uaf_denied_rootp uaf_expired_rootp uaf_validate_rootp 
                 uaf_login_title uaf_login_wrapper uaf_login_template 
                 uaf_denied_title uaf_denied_wrapper uaf_denied_template
-                uaf_logout_title uaf_logout_template uaf_logout_wrapper',
+                uaf_logout_title uaf_logout_template uaf_logout_wrapper
+                uaf_cookie_path uaf_cookie_domain uaf_cookie_secure',
   mixins    => 'uaf_filter uaf_limit uaf_timeout uaf_secret uaf_login_rootp 
                 uaf_denied_rootp uaf_expired_rootp uaf_validate_rootp 
                 uaf_login_title uaf_login_wrapper uaf_login_template 
                 uaf_denied_title uaf_denied_wrapper uaf_denied_template
                 uaf_logout_title uaf_logout_template uaf_logout_wrapper
+                uaf_cookie_path uaf_cookie_domain uaf_cookie_secure
                 uaf_is_valid uaf_validate uaf_invalidate uaf_set_token 
                 uaf_avoid uaf_init',
 ;
+
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -43,30 +47,25 @@ sub uaf_is_valid($) {
     my $user = undef;
 
     $ip = $self->scaffold->request->address;
-    $token = ($self->scaffold->request->cookie('_token_id_') || '') . '=';
-    my $lock = $self->scaffold->session->get('ident');
+    $token = ($self->scaffold->request->cookies->{'_token_id_'}->value || '');
+
+    my $lock = $self->scaffold->session->session_id;
 
     if (defined($token) and ($token ne '=')) {
 
-        if ($self->scaffold->session->lock($lock)) {
+        $old_ip = $self->scaffold->session->get('uaf_remote_ip') || '';
+        $old_token = $self->scaffold->session->get('uaf_token') || '';
 
-            $old_ip = $self->scaffold->session->get('uaf_remote_ip') || '';
-            $old_token = $self->scaffold->session->get('uaf_token') || '';
+        # This should work for just about everything except a load
+        # balancing, natted firewall. And yeah, they do exist.
 
-            # This should work for just about everything except a load
-            # balancing, natted firewall. And yeah, they do exist.
+        if (($token eq $old_token) and ($ip eq $old_ip)) {
 
-            if (($token eq $old_token) and ($ip eq $old_ip)) {
-
-                $user = $self->scaffold->session->get('uaf_user');
-                $access = $user->attribute('last_access');
-                $user->attribute('last_access', time());
-                $self->scaffold->session->set('uaf_user', $user);
-                $user = undef if ($access  <  (time() - $self->uaf_timeout));
-
-            }
-
-            $self->scaffold->lockmgr->unlock($lock);
+            $user = $self->scaffold->session->get('uaf_user');
+            $access = $user->attribute('last_access');
+            $user->attribute('last_access', time());
+            $self->scaffold->session->set('uaf_user', $user);
+            $user = undef if ($access  <  (time() - $self->uaf_timeout));
 
         }
 
@@ -122,7 +121,7 @@ sub uaf_set_token($$) {
     my $salt = $user->attribute('salt');
     my $token = encrypt($user->username, ':', time(), ':', $salt, $$);
 
-    $self->scaffold->response->cookie->{'_token_id_'} = {
+    $self->scaffold->response->cookies->{'_token_id_'} = {
         value => $token,
         path  => $self->uaf_cookie_path
     };
@@ -143,6 +142,8 @@ sub uaf_init {
 
     my $config = $self->scaffold->config('configs');
     my $app_rootp = $config->{app_rootp};
+    
+    $app_rootp = '' if ($app_rootp eq '/');
 
     $self->{uaf_cookie_path}    = $config->{uaf_cookie_path} || '/';
     $self->{uaf_cookie_domain}  = $config->{uaf_cookie_domain} || "";
@@ -160,19 +161,19 @@ sub uaf_init {
     # set default login template values
 
     $self->{uaf_login_title}    = $config->{uaf_login_title} || 'Please Login';
-    $self->{uaf_login_wrapper}  = $config->{uaf_login_wrapper} || 'nowrapper.tt';
+    $self->{uaf_login_wrapper}  = $config->{uaf_login_wrapper} || 'wrapper.tt';
     $self->{uaf_login_template} = $config->{uaf_login_template} || 'uaf_login.tt';
 
     # set default denied template values
 
     $self->{uaf_denied_title}    = $config->{uaf_denied_title} || 'Login Denied';
-    $self->{uaf_denied_wrapper}  = $config->{uaf_denied_wrapper} || 'nowrapper.tt';
+    $self->{uaf_denied_wrapper}  = $config->{uaf_denied_wrapper} || 'wrapper.tt';
     $self->{uaf_denied_template} = $config->{uaf_denied_template} || 'uaf_denied.tt';
 
     # set default logout template values
 
     $self->{uaf_logout_title}    = $config->{uaf_logout_title} || 'Logout';
-    $self->{uaf_logout_wrapper}  = $config->{uaf_logout_wrapper} || 'nowrapper.tt';
+    $self->{uaf_logout_wrapper}  = $config->{uaf_logout_wrapper} || 'wrapper.tt';
     $self->{uaf_logout_template} = $config->{uaf_logout_template} || 'uaf_logout.tt';
 
 }
