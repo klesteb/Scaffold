@@ -57,8 +57,6 @@ sub handler($$) {
     $class->scaffold->response->status('200');
     $class->scaffold->response->header('Content-Type' => 'text/html');
 
-    $class->stash->cookies->data($class->scaffold->request->cookie);
-
     eval {
 
         LOOP: 
@@ -100,6 +98,8 @@ sub handler($$) {
 
     }
 
+    $class->_pre_exit();
+
     return $class->scaffold->response;
 
 }
@@ -107,14 +107,22 @@ sub handler($$) {
 sub redirect($$) {
     my ($self, $url) = @_;
 
-    $self->throw_msg(REDIRECT, 'redirect', $url);
+    my $uri = $self->scaffold->request->uri;
+    $url = substr($url, 1);
+    $uri->path($url);
+
+    $self->throw_msg(REDIRECT, 'redirect', $uri->canonical);
 
 }
 
 sub moved_permanently($$) {
     my ($self, $url) = @_;
 
-    $self->throw_msg(MOVED_PERM, 'moved_permanently', $url);
+    my $uri = $self->scaffold->request->uri;
+    $url = substr($url, 1);
+    $uri->path($url);
+
+    $self->throw_msg(MOVED_PERM, 'moved_permanently', $uri->canonical);
 
 }
 
@@ -146,15 +154,11 @@ sub exceptions($$$$$) {
         switch ($type) {
             case MOVED_PERM {
                 $stat = FALSE;
-                $self->scaffold->response->status('301');
-                $self->scaffold->response->header('location' => $info);
-                $self->scaffold->response->body("");
+                $self->scaffold->response->redirect($info, '301');
             }
             case REDIRECT {
                 $stat = FALSE;
-                $self->scaffold->response->status('302');
-                $self->scaffold->response->header('location' => $info);
-                $self->scaffold->response->body("");
+                $self->scaffold->response->redirect($info, '302');
             }
             case RENDER {
                 $stat = FALSE;
@@ -397,6 +401,25 @@ sub _post_render($) {
     }
 
     return $status;
+
+}
+
+sub _pre_exit($) {
+    my ($self) = @_;
+
+    my $pstatus;
+
+    if (my $plugins = $self->scaffold->plugins) {
+
+        foreach my $plugin (@$plugins) {
+
+            $plugin->scaffold($self->scaffold);
+            $pstatus = $plugin->pre_exit($self);
+            last if ($pstatus != PLUGIN_NEXT);
+
+        }
+
+    }
 
 }
 

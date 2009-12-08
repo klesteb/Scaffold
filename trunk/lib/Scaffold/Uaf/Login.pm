@@ -8,7 +8,6 @@ our $VERSION = '0.01';
 use DateTime;
 use Digest::MD5;
 use Digest::HMAC;
-use Data::Random ':all';
 
 use Scaffold::Class
   version => $VERSION,
@@ -24,8 +23,10 @@ use Scaffold::Class
 sub do_main {
     my ($self) = @_;
 
-    $self->uaf_init();
+warn "Login/do_main()\n";
 
+    $self->uaf_init();
+    
     my $title = $self->uaf_login_title;
     my $wrapper = $self->uaf_login_wrapper;
     my $template = $self->uaf_login_template;
@@ -54,12 +55,14 @@ sub do_denied {
 sub do_validate {
     my ($self) = @_;
 
+warn "Login/do_validate()\n";
     $self->uaf_init();
 
     my $login_rootp;
     my $denied_rootp;
+    my $user = undef;
     my $limit = $self->uaf_limit;
-    my $params = $self->scaffold->request->param();
+    my $params = $self->scaffold->request->parameters();
     my $count = $self->scaffold->session->get('uaf_login_attempts');
     my $app_rootp = $self->scaffold->config('configs')->{app_rootp};
 
@@ -85,7 +88,7 @@ sub do_validate {
         }
 
         $self->scaffold->session->set('uaf_login_attempts', 0);
-        $self->uaf_set_token($sobj, $user);
+        $self->uaf_set_token($user);
         $self->redirect($app_rootp);
 
     } else {
