@@ -44,7 +44,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Stash - The base class uri method dispatch
+Scaffold::Stash - The base class for the stash within Scaffold
 
 =head1 SYNOPSIS
 
@@ -58,8 +58,41 @@ Scaffold::Stash - The base class uri method dispatch
 
 =head1 SEE ALSO
 
+ Scaffold
  Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
  Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

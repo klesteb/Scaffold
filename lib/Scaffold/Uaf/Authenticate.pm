@@ -35,7 +35,7 @@ use Data::Dumper;
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub uaf_is_valid($) {
+sub uaf_is_valid {
     my ($self) = @_;
 
     my $ip;
@@ -75,7 +75,7 @@ sub uaf_is_valid($) {
 
 }
 
-sub uaf_validate($$$) {
+sub uaf_validate {
     my ($self, $username, $password) = @_;
 
     my $ip = "";
@@ -90,7 +90,7 @@ sub uaf_validate($$$) {
     if ((($username eq 'admin') and ($password eq 'admin')) or 
         (($username eq 'demo')  and ($password eq 'demo'))) {
 
-        $user = Scaffold::Uaf::User->new($username);
+        $user = Scaffold::Uaf::User->new(username => $username);
 
         $user->attribute('login_attempts', 0);
         $user->attribute('last_access', time());
@@ -105,7 +105,7 @@ sub uaf_validate($$$) {
 
 }
 
-sub invalidate($) {
+sub uaf_invalidate {
     my ($self) = @_;
 
     $self->scaffold->session->remove('uaf_user');
@@ -115,7 +115,7 @@ sub invalidate($) {
 
 }
 
-sub uaf_set_token($$) {
+sub uaf_set_token {
     my ($self, $user) = @_;
 
     my $salt = $user->attribute('salt');
@@ -130,7 +130,7 @@ sub uaf_set_token($$) {
 
 }
 
-sub uaf_avoid($$) {
+sub uaf_avoid {
     my ($self) = @_;
 
     return 1;
@@ -188,13 +188,12 @@ __END__
 
 =head1 NAME
 
-Gantry::Plugins::Uaf::Authenticate - An Basic Authentication Framework
+Scaffold::Uaf::Authenticate - An Basic Authentication Framework
 
 =head1 DESCRIPTION
 
-This class is responsible for authenicating, managing the session store
-and creating the User object. This module should be overridden and extended
-as needed by your application.
+This mixin is responsible for authenicating, and creating the User object. 
+This module should be overridden and extended as needed by your application.
 
 This module understands the following config settings:
 
@@ -202,22 +201,28 @@ This module understands the following config settings:
  uaf_cookie_domain   - The cookie domain, not currently used
  uaf_cookie_secure   - Wither the cookie should only be used with SSL
 
- uaf_title           - title for the login page, defaults to 'Please Login"
- uaf_wrapper         - the wrapper for the login page, defaults to "default.tt"
- uaf_template        - the template for the login page, defaults to "login.tt"
+ uaf_limit           - the limit on login attempts, defaults to 3
+ uaf_timeout         - the timeout for the session, defaults to 3600
+ uaf_secret          - the value to use as a "salt" when encrypting
+ uaf_filter          - the url filter to use, defaults to /^{app_rootp}\/(login|static).*/
+
+ uaf_login_title     - title for the login page, defaults to 'Please Login"
+ uaf_login_wrapper   - the wrapper for the login page, defaults to "wrapper.tt"
+ uaf_login_template  - the template for the login page, defaults to "uaf_login.tt"
 
  uaf_denied_title    - title for the denied page, defaults to "Login Denied"
- uaf_denied_wrapper  - the wrapper for the denied page, defaults to "default.tt"
- uaf_denied_template - the template for the denied page, defaults to "login_denied.tt"
+ uaf_denied_wrapper  - the wrapper for the denied page, defaults to "wrapper.tt"
+ uaf_denied_template - the template for the denied page, defaults to "uaf_denied.tt"
+
+ uaf_logout_title    - title for the logout page, default to "Logout"
+ uaf_logout_wrapper  - the wrapper for the logout page, defaults to "wrapper.tt"
+ uaf_logout_template - the template for the logout page, defaults to "uaf_logout.tt"
+
+=head1 METHODS
 
 =over 4
 
-=item new
-
-This initilizes the object, the Gantry object needs to be passed with this
-call.
-
-=item is_valid($) 
+=item uaf_is_valid
 
 This method is used to authenticate the current session. The
 default authentication behaviour is based on security tokens. A token is 
@@ -225,7 +230,7 @@ storeed within the session store and a token is retireved from a cookie. If
 the two match, the session is condsidered autheticate. When the session is 
 authenticated an User object is returned.
 
-=item validate($$) 
+=item uaf_validate
 
 This method handles the validation of the current session. It accepts two 
 parameters. They are a username and password. When the session is validated, 
@@ -234,62 +239,110 @@ knows about "admin" and "demo" users, with default passwords of "admin" and
 "demo". This method should be overridden to refelect your applications Users 
 datastore and validation policy.
 
-=item invalidate($)
+=item uaf_invalidate
 
 This method will invalidate the current session. You may wish to override this
 method. By default it removes the User object form the session store, removes 
 the secuity token from the session store and removes the security cookie.
 
-=item login($$)
-
-This method handles the url "/login" and any actions on that url. By default
-this method display a simple login page which contains a login form. That form 
-is submitted back to the "/login" url, where the username and password are 
-processed. This processing is done by the validate() method. If validation is 
-succesful an User object is created. This object is then stored within the 
-session store so is_valid() can access it when doing session 
-authentication. Also an initial security token is created. 
-
-This method also implements a simple three tries at login attempts. If after 
-three tries, all attempts are redirected to "/login/denied", which displays 
-a simple "denied" page. After a succesful login, a redirect is sent for "/".
-
-=item logout($)
-
-This method handles the url "/logout". It runs the invalidate() method and 
-then redirects back to "/".
-
-=item relocate($$)
-
-Handles relocations, it currently just calls the Gantry relocate() 
-function.
-
-=item set_token($$)
+=item uaf_set_token
 
 This method creates the security token. It is passed the User object. The 
 default action is to create a token using parts of the User object and
 random data. This token is then stored in the session store and sent to the
 browser as a cookie.
 
-=item avoid($)
+=item uaf_avoid
 
 Some application may wish to implement an avoidence scheme for certain
 situations. This is a hook to allow that to happen. The default action is
 to do nothing.
 
-=item filter($)
+=back
 
-This method returns the url filter that is used by uaf_authenticate().
+=head1 ACCESSORS
+
+These accessors return the corresponding config items.
+
+=over 4
+
+=item uaf_filter
+
+=item uaf_cookie_path
+
+=item uaf_cookie_domain
+
+=item uaf_cookie_secure
+
+=item uaf_limit
+
+=item uaf_timeout
+
+=item uaf_secret
+
+=item uaf_filter
+
+=item uaf_login_rootp
+
+=item uaf_denied_rootp
+
+=item uaf_login_title
+
+=item uaf_login_wrapper
+
+=item uaf_login_template
+
+=item uaf_denied_title
+
+=item uaf_denied_wrapper
+
+=item uaf_denied_template
+
+=item uaf_logout_title
+
+=item uaf_logout_wrapper
+
+=item uaf_logout_template
 
 =back
 
 =head1 SEE ALSO
 
- Gantry
- Gantry::Plugins::Uaf 
- Gantry::Plugins::Uaf::Rule
- Gantry::Plugins::Uaf::User
- Gantry::Plugins::Uaf::Authorize
+ Scaffold
+ Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
+ Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

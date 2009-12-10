@@ -23,8 +23,6 @@ use Scaffold::Class
 sub do_main {
     my ($self) = @_;
 
-warn "Login/do_main()\n";
-
     $self->uaf_init();
     
     my $title = $self->uaf_login_title;
@@ -55,7 +53,6 @@ sub do_denied {
 sub do_validate {
     my ($self) = @_;
 
-warn "Login/do_validate()\n";
     $self->uaf_init();
 
     my $login_rootp;
@@ -107,11 +104,22 @@ warn "Login/do_validate()\n";
 
 =head1 NAME
 
-Scaffold::Uaf::Login - A controller in the Monitor application
-
-=head1 SYNOPSIS
+Scaffold::Uaf::Login - A handler for the /login url.
 
 =head1 DESCRIPTION
+
+This handler handles the url "/login" and any actions on that url. By default
+this method display a simple login page which contains a login form. That form 
+is submitted back to the "/login/validate" url, where the username and password are 
+processed. This processing is done by the uaf_validate() method. If validation is 
+succesful an User object is created. This object is then stored within the 
+session store so uaf_is_valid() can access it when doing  
+authentication. Also an initial security token is created. 
+
+This method also implements a simple three tries at login attempts. If after 
+three tries, all attempts are redirected to "/login/denied", which displays 
+a simple "denied" page. After a succesful login, a redirect is sent for root 
+of the application.
 
 =head1 METHODS
 
@@ -119,9 +127,70 @@ Scaffold::Uaf::Login - A controller in the Monitor application
 
 =item do_main
 
+Displays a login page based on the following config items:
+
+ uaf_login_title
+ uaf_login_template
+ uaf_login_wrapper
+
+=item do_denied
+
+Displays a denied page based on the following config items:
+
+ uaf_denied_title
+ uaf_login_template
+ uaf_login_wrapper
+
+=item do_validate
+
+Performs the authentication depending on the username and password
+parameters. If the authentication is valid, it will create a User object that
+is stored in $self->scaffold->user and creates a security token that is passed
+with the session cookies.
+
 =back
 
-=head1 DEPENDENCIES
+=head1 DEPENDENICES
+
+ Scaffold::Uaf::Authenticate
+
+=head1 SEE ALSO
+
+ Scaffold
+ Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
+ Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

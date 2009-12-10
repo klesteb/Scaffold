@@ -10,7 +10,7 @@ use Scaffold::Class
   base     => 'Scaffold::Base',
   accessors => 'engine',
   messages => {
-      'render' => "unable to initialize render %s, reason: %s",
+      'render'   => "unable to initialize renderer %s, reason: %s",
       'template' => "unable to render template: %s, reason: %s",
   },
 ;
@@ -19,7 +19,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub process($$) {
+sub process {
     my ($self, $sobj) = @_;
 
 }
@@ -34,22 +34,73 @@ __END__
 
 =head1 NAME
 
-Scaffold::Render - The base Renderer.
+Scaffold::Render - The base class for rendering.
 
 =head1 SYNOPSIS
 
+    my $server = Scaffold::Server->new(
+        locations => {
+            '/'            => 'App::Main',
+            '/robots.txt'  => 'Scaffold::Handler::Robots',
+            '/favicon.ico' => 'Scaffold::Handler::Favicon',
+            '/static'      => 'Scaffold::Handler::Static',
+        },
+        render => Scaffold::Render::Default->new()
+    );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
+This is the base class for rendering output. If no renderer is specified, 
+Scaffold will use Scaffold::Render::Default. The View object of the Handlers
+stash is used to control the render process. 
+
+=head1 METHODS
 
 =over 4
+
+=item process
+
+This invokes the rendering process.
 
 =back
 
 =head1 SEE ALSO
 
+ Scaffold
  Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
  Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

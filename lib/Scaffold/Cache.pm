@@ -169,8 +169,41 @@ This method will get/set the current namespace for cache operations.
  Cache::FastMmap
  Cache::Memcached
 
+ Scaffold
  Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
  Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

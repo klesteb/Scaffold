@@ -6,41 +6,34 @@ use warnings;
 
 our $VERSION = '0.01';
 
-sub new {
-   my $proto = shift;
+use Scaffold::Class
+  version => $VERSION,
+  base    => 'Scaffold::Base'
+;
 
-   my $class = ref($proto) || $proto;
-   my $self  = { };
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
 
-   bless ($self, $class);
-
-   return $self;
-
-}
-
-sub grants($$$$) {
-
-   my $self = shift;
-   my $user = shift;
-   my $action = shift;
-   my $resource = shift;
+sub grants {
+   my ($self, $user, $action, $resource) = @_;
 
    return 0;
 
 }
 
-sub denies($$$$) {
-
-   my $self = shift;
-   my $user = shift;
-   my $action = shift;
-   my $resource = shift;
+sub denies {
+   my ($self, $user, $action, $resource) @_;
 
    # Abstract rule denies everything. Do not use.
 
    return 1;
 
 }
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
 
 1;
 
@@ -60,14 +53,13 @@ access logic. Rules can choose to grant or deny a request.
  use strict;
  use warnings;
 
- use base qw(Scaffold::Uaf::Rule);
+ use Scaffold::Class
+     version => '0.01',
+     base    => 'Scaffold::Uaf::Rule
+ ;
 
- sub grants($$$$) {
-
-     my $self = shift;
-     my $user = shift;
-     my $action = shift;
-     my $resource = shift;
+ sub grants {
+     my ($self, $user, $action, $resource) @_;
 
      if ($action eq "edit" && $resource->isa("sample::Record")) {
 
@@ -79,7 +71,8 @@ access logic. Rules can choose to grant or deny a request.
 
  }
 
- sub denies($$$$) {
+ sub denies {
+     my ($self, $user, $action, $resource) @_;
 
      return 0;
  
@@ -98,10 +91,41 @@ request.
 
 =head1 SEE ALSO
 
+ Scaffold
+ Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
+ Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
  Scaffold::Uaf::Rule
  Scaffold::Uaf::User
- Scaffolf::Uaf::Authenticate
- Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Utils
 
 =head1 AUTHOR
 
