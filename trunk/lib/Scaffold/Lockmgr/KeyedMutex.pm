@@ -18,7 +18,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub lock($$) {
+sub lock {
     my ($self, $key) = @_;
 
     my $stat = FALSE;
@@ -33,21 +33,21 @@ sub lock($$) {
 
 }
 
-sub unlock($$) {
+sub unlock {
     my ($self, $key) = @_;
 
     return $self->engine->release($key);
 
 }
 
-sub locked($$) {
+sub tyr_lock {
     my ($self, $key) = @_;
 
-    my $stat = FALSE;
+    my $stat = TRUE;
 
     if ($self->engine->locked($key)) {
 
-        $stat = TRUE;
+        $stat = FALSE;
 
     }
 
@@ -88,26 +88,56 @@ sub init {
 
 1;
 
-  __END__
+__END__
 
 =head1 NAME
 
 Scaffold::Lockmgr::KeyedMutex - Use KeyedMutex as the backend.
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This implenments general purpose locking using KeyedMutex. KeyedMutex is a 
+distributed locking daemon with a perl interface module. 
 
 =head1 SEE ALSO
 
+ KeyedMutex
+
+ Scaffold
  Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
  Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

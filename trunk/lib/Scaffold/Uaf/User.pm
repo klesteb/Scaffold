@@ -6,33 +6,28 @@ use warnings;
 
 our $VERSION = '0.01';
 
-sub new {
-    my ($proto, $username) = @_;
+use Scaffold::Class
+  version   => $VERSION,
+  base      => 'Scaffold::Base',
+  accessors => 'username',
+  mutators  => 'attribute',
+;
 
-    my $class = ref($proto) || $proto;
-    my $self = {
-        username => $username, 
-        attributes => {}
-    };
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
 
-    bless($self, $class);
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
+sub init {
+    my ($self, $config) = @_;
+
+    $self->{config} = $config;
+    $self->{username} = $config->{username};
 
     return $self;
-
-}
-
-sub username {
-    my ($self) = shift;
-
-    return $self->{username};
-
-}
-
-sub attribute {
-    my ($self, $name, $p) = @_;
-
-    $self->{attributes}->{$name} = $p if (defined($p));
-    return $self->{attributes}->{$name};
 
 }
 
@@ -51,7 +46,7 @@ Scaffold::Uaf::User - A module that defines a basic user object.
  use Scaffold::Uaf::User;
 
  my $username = 'joe blow';
- my $user = Scaffold::Uaf::User->new($username);
+ my $user = Scaffold::Uaf::User->new(username => $username);
  $user->attribute('birthday', '01-Jan-2008');
  
 =back
@@ -75,7 +70,7 @@ Example:
 =over 4
 
  my $username = 'joeblow';
- my $user = Scaffold::Uaf::User->new($username);
+ my $user = Scaffold::Uaf::User->new(username => $username);
 
 =back
 
@@ -101,6 +96,42 @@ Example:
 =back
 
 =head1 SEE ALSO
+
+ Scaffold
+ Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
+ Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

@@ -14,7 +14,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub process($) {
+sub process {
     my ($self, $sobj) = @_;
 
     return $sobj->stash->view->data;
@@ -31,22 +31,61 @@ __END__
 
 =head1 NAME
 
-Scaffold::Render::Default - Default render..
+Scaffold::Render::Default - The default renderer for Scaffold.
 
 =head1 SYNOPSIS
 
+    my $server = Scaffold::Server->new(
+        locations => {
+            '/'            => 'App::Main',
+            '/robots.txt'  => 'Scaffold::Handler::Robots',
+            '/favicon.ico' => 'Scaffold::Handler::Favicon',
+            '/static'      => 'Scaffold::Handler::Static',
+        },
+        render => Scaffold::Render::Default->new(),
+    );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This is the default renderer. It does nothing more the pass the data back.
 
 =head1 SEE ALSO
 
+ Scaffold
  Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
  Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

@@ -21,7 +21,7 @@ use Data::Dumper;
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub process($) {
+sub process {
     my ($self, $sobj) = @_;
 
     my $page;
@@ -68,18 +68,64 @@ Scaffold::Render::TT - Use the Template Toolkit to render pages.
 
 =head1 SYNOPSIS
 
+    my $server = Scaffold::Server->new(
+        locations => {
+            '/'            => 'App::Main',
+            '/robots.txt'  => 'Scaffold::Handler::Robots',
+            '/favicon.ico' => 'Scaffold::Handler::Favicon',
+            '/static'      => 'Scaffold::Handler::Static',
+        },
+        render => Scaffold::Render::TT->new(
+            include_path => 'html:html/resources/templates',
+        ),
+    );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This module loads the Template Toolkit as the renderer. It takes only on config
+parameter and that is "include_path". Which is a colon seperated list of 
+directories that will be searched for templates. The first matching template
+that is found is the one that will be used.
 
 =head1 SEE ALSO
 
+ Template
+
+ Scaffold
  Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
  Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 
