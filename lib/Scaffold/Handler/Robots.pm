@@ -54,17 +54,30 @@ __END__
 
 =head1 NAME
 
-Scaffold::Handler::Static - A handler to handle static files
+Scaffold::Handler::Robots - A handler to handle "robots.txt" files
 
 =head1 SYNOPSIS
 
+ use Scaffold::Server;
+
+ my $server = Scaffold::Server->new(
+    configs => {
+        doc_rootp => 'html',
+    },
+    locations => {
+        '/'            => 'App::Main',
+        '/robots.txt'  => 'Scaffold::Handler::Robots',
+        '/favicon.ico' => 'Scaffold::Handler::Favicon',
+        '/static'      => 'Scaffold::Handler::Static',
+    },
+ );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This handler will return a "robots.txt" file back to the browser. Where it is 
+located is controlled by the configs option "doc_rootp". Once a "robots.txt"
+file has been requested, subsequent requests will load the image from cache 
+instead of disk.
 
 =head1 SEE ALSO
 

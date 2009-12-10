@@ -19,17 +19,20 @@ use constant {
     PLUGIN_NEXT       => 1,
     PLUGIN_ABORT      => 2,
     #
-    SESSION_ID        => '__session_id__'      
+    SESSION_ID        => '__session_id__',
+    TOKEN_ID          => '__token_id__',
 };
 
 our $EXPORT_ALL = 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
                    STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-                   STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID'
+                   STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID
+                   TOKEN_ID'
 ;
 
 our $EXPORT_ANY = 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
                    STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-                   STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID'
+                   STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID
+                   TOKEN_ID'
 ;
 
 our $EXPORT_TAGS = {
@@ -45,21 +48,51 @@ __END__
 
 =head1 NAME
 
-Scaffold::Constants - Define useful constants for Scaffold
+Scaffold::Constants - Define useful constants for the Scaffold environment
 
 =head1 SYNOPSIS
 
  use Scaffolc::Class
    version => '0.01',
    base    => 'Scaffold::Base',
-   constants => 'LOCK'
+   constants => 'SESSION_ID'
  ;
 
 =head1 DESCRIPTION
 
+The module is defines constants for the Scaffold environment.
+
 =head1 EXPORTS
 
+These constants are used by the handler's state engine.
+
+ STATE_PRE_ACTION
+ STATE_ACTION
+ STATE_POST_ACTION
+ STATE_PRE_RENDER
+ STATE_RENDER
+ STATE_POST_RENDER
+ STATE_FINI
+
+They can be loaded using the tag ":state".
+
+These constants are used by plugins.
+
+ PLUGIN_NEXT
+ PLUGIN_ABORT
+
+They can be loaded using the tag ":plugins".
+
+These constants are used by the Session manager and the Uaf authentication
+and authorization modules.
+
+ SESSION_ID
+ TOKEN_ID
+
 =head1 SEE ALSO
+
+ Scaffold::Base
+ Scaffold::Class
 
 =head1 AUTHOR
 

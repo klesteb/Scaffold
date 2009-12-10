@@ -16,7 +16,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub update($$$) {
+sub update {
     my ($self, $key, $value) = @_;
 
     my $namespace = $self->namespace;
@@ -26,7 +26,7 @@ sub update($$$) {
 
 }
 
-sub purge($) {
+sub purge {
     my ($self) = @_;
 
     return $self->handle->purge();
@@ -34,14 +34,14 @@ sub purge($) {
     
 }
 
-sub clear($) {
+sub clear {
     my ($self) = @_;
 
     return $self->handle->clear();
 
 }
 
-sub incr($$) {
+sub incr {
     my ($self, $key) = @_;
 
     my $namespace = $self->namespace;
@@ -51,7 +51,7 @@ sub incr($$) {
 
 }
 
-sub decr($) {
+sub decr {
     my ($self, $key) = @_;
 
     my $namespace = $self->namespace;
@@ -107,15 +107,25 @@ Scaffold::Cache::FastMmap - Caching is based on fastmmap.
 
 =head1 SYNOPSIS
 
+ my $server = Scaffold::Server->new(
+     cache => Scaffold::Cache::FastMmap->new(
+        namespace => 'scaffold',
+        expires   => '1h',
+        pages     => 256,
+        pagesize  => 256k,
+        filename  => '/tmp/scaffold.cache'
+    ),
+ );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This module initializes the Cache::FastMmap module and uses it for the caching
+subsystem within Scaffold. The synopsis shows the defaults that are used in 
+initialization.
 
 =head1 SEE ALSO
+
+ Cache::FastMmap
 
  Scaffold::Base
  Scaffold::Class

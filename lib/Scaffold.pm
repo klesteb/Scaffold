@@ -3,6 +3,12 @@ package Scaffold;
 use warnings;
 use strict;
 
+our $VERSION = '0.01';
+
+1; 
+
+__END__
+  
 =head1 NAME
 
 Scaffold - The great new Scaffold!
@@ -10,11 +16,6 @@ Scaffold - The great new Scaffold!
 =head1 VERSION
 
 Version 0.01
-
-=cut
-
-our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -32,22 +33,6 @@ Perhaps a little code snippet.
 A list of functions that can be exported.  You can delete this section
 if you don't export anything, such as for a purely object-oriented module.
 
-=head1 FUNCTIONS
-
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
-
 =head1 AUTHOR
 
 Kevin L. Esteb, C<< <kesteb(at)wsipc.org> >>
@@ -57,9 +42,6 @@ Kevin L. Esteb, C<< <kesteb(at)wsipc.org> >>
 Please report any bugs or feature requests to C<bug-scaffold at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Scaffold>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
@@ -103,5 +85,3 @@ under the same terms as Perl itself.
 
 
 =cut
-
-1; # End of Scaffold
