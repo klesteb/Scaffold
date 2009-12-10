@@ -45,7 +45,6 @@ sub do_default {
 
                     $self->stash->view->cache(1);
                     $self->stash->view->cache_key($file);
-                    $cache->set($file, $d);
 
                 }
 
@@ -73,17 +72,34 @@ sub do_default {
 
 =head1 NAME
 
-Scaffold::Handler::Static - A handler to handle static files
+Scaffold::Handler::Static - A handler for static files
 
 =head1 SYNOPSIS
 
+ use Scaffold::Server;
+
+ my $server = Scaffold::Server->new(
+    configs => {
+         static_search => 'html:html/static',
+         cache_static  => FALSE,
+    },
+    locations => {
+        '/'            => 'App::Main',
+        '/robots.txt'  => 'Scaffold::Handler::Robots',
+        '/favicon.ico' => 'Scaffold::Handler::Favicon',
+        '/static'      => 'Scaffold::Handler::Static',
+    },
+ );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This handler will return "static" files back to the browser. Where they are 
+located is controlled by the configs option "static_search". This is a colon 
+seperated search list of directories to search. Think of the PATH 
+environment variable. The first matching file is sent. By default 
+"static" files will be cached. This can be turned off with
+the configs options "cache_static", which has a TRUE/FALSE value. This is a
+global setting.
 
 =head1 SEE ALSO
 

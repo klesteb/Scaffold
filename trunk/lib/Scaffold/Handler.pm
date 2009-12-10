@@ -36,7 +36,7 @@ use Data::Dumper;
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub handler($$) {
+sub handler {
     my ($class, $sobj, $location, $module) = @_;
 
     $class->{stash} = Scaffold::Stash->new();
@@ -104,7 +104,7 @@ sub handler($$) {
 
 }
 
-sub redirect($$) {
+sub redirect {
     my ($self, $url) = @_;
 
     my $uri = $self->scaffold->request->uri;
@@ -115,7 +115,7 @@ sub redirect($$) {
 
 }
 
-sub moved_permanently($$) {
+sub moved_permanently {
     my ($self, $url) = @_;
 
     my $uri = $self->scaffold->request->uri;
@@ -126,21 +126,21 @@ sub moved_permanently($$) {
 
 }
 
-sub declined($) {
+sub declined {
     my ($self) = @_;
 
     $self->throw_msg(DECLINED, 'declined', "");
 
 }
 
-sub not_found($$) {
+sub not_found {
     my ($self, $file) = @_;
 
     $self->throw_msg(NOTFOUND, 'not_found', $file);
 
 }
 
-sub exceptions($$$$$) {
+sub exceptions {
     my ($self, $ex, $action, $location, $module) = @_;
 
     my $stat = TRUE;
@@ -243,7 +243,7 @@ sub _cleanroot {
 
 }
 
-sub _pre_action($) {
+sub _pre_action {
     my ($self) = @_;
 
     my $pstatus;
@@ -269,16 +269,19 @@ sub _perform_action {
     my ($self, $action , $p1, @p) = @_;
 
     my $output;
-    
+
     $self->stash->view->reinit();
-    
+
     if ($self->can($action)) {
+
         $self->$action(@p);
 
     } elsif ($self->can('do_default')) {
+
         $self->do_default($p1, @p);
 
     } else {
+
         $self->declined();
 
     }
@@ -289,7 +292,7 @@ sub _perform_action {
 
 }
 
-sub _post_action($) {
+sub _post_action {
     my ($self) = @_;
 
     my $pstatus;
@@ -311,7 +314,7 @@ sub _post_action($) {
 
 }
 
-sub _pre_render($) {
+sub _pre_render {
     my ($self) = @_;
 
     my $pstatus;
@@ -333,7 +336,7 @@ sub _pre_render($) {
 
 }
 
-sub _process_render($) {
+sub _process_render {
     my ($self) = @_;
 
     my $status = STATE_POST_RENDER;
@@ -382,7 +385,7 @@ sub _process_render($) {
 
 }
 
-sub _post_render($) {
+sub _post_render {
     my ($self) = @_;
 
     my $pstatus;
@@ -404,7 +407,7 @@ sub _post_render($) {
 
 }
 
-sub _pre_exit($) {
+sub _pre_exit {
     my ($self) = @_;
 
     my $pstatus;
@@ -430,10 +433,15 @@ sub _trim {
     return( "\n$new_sp" );
 }
 
+sub _dumper_hook {
+    $_[0] = bless {
+        %{ $_[0] },
+        result_source => undef,
+    }, ref($_[0]);
+}
+
 sub _custom_error {
     my ($self, @err) = @_;
-
-    eval "use Data::Dumper";
 
     my $die_msg    = join( "\n", @err );
     my $param_dump = Dumper($self->scaffold->request->param);
@@ -443,6 +451,8 @@ sub _custom_error {
 
     my $request_dump  = Dumper($self->scaffold->request);
     my $response_dump = Dumper($self->scaffold->response);
+
+    local $Data::Dumper::Freezer = '_dumper_hook';
     my $scaffold_dump = Dumper($self->scaffold);
 
     $request_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
@@ -469,7 +479,7 @@ sub _custom_error {
 
 }
 
-sub _error_page($) {
+sub _error_page {
     my ($self) = @_;
 
     return( qq!
@@ -555,19 +565,161 @@ sub _error_page($) {
 
 1;
 
-  __END__
+__END__
 
 =head1 NAME
 
-Scaffold::Handler - The base class uri method dispatch
+Scaffold::Handler - The base class for Scaffold URL handlers
 
 =head1 SYNOPSIS
 
+ use Scaffold::Server;
+
+ my $server = Scaffold::Server->new(
+    locations => {
+        '/'            => 'App::Main',
+        '/robots.txt'  => 'Scaffold::Handler::Robots',
+        '/favicon.ico' => 'Scaffold::Handler::Favicon',
+        '/static'      => 'Scaffold::Handler::Static',
+    },
+ );
+
+ ...
+
+ package App::Main;
+
+ use Scaffold::Class
+   version => '0.01',
+   base    => 'Scaffold::Handler',
+   filesystem => 'File',
+ ;
+
+ sub do_main
+     my ($self) = @_;
+
+    $self-view->template_disable(1);
+    $self->view->data('<p>Hello World</p>');
+
+ }
+
+ 1;
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
+There are many ways to dispatch and handle requests for a particular URL. 
+Scaffold does a simple direct mapping of URL to handler. When the dispatch()
+method in Scaffold::Server is invoked it is passed a Plack::Request object. 
+The object contains the URL of the request. dispatch() will then parse that 
+URL and looks in "locations" for a corresponding handler. If a handler is 
+found, that handlers, handler() method is evoked, which further parses the URL 
+to determine which methods are called within the handler.
+
+So, for example a request to "/" is made. This would evoke the App::Main 
+handler. The handler for App::Main would determine that it should call 
+do_main(). do_main() is always called for the root of a URL. If do_main() 
+doesn't exist then a call to do_default() will be tried. If neither of these
+methods exist a "declined" exception is thrown. 
+
+So, now a request to "/photos' is made. This would also evoke App::Main. Which 
+would determine that it should call the do_photos() method. Since there is 
+none, it would try to evoke do_default() passing "photos" as the first 
+parameter. Since do_default() also doesnt' exist, it will throw a 
+"declined" exception.
+
+Now we add a do_photos() method:
+
+ sub do_photos {
+     my ($self, $dir, $wanted) = @_;
+
+     my $photo;
+     my $file = File($dir, $wanted . '.png');
+
+     if ($file->exists) {
+
+         $photo = $file->read;
+
+         $self->view->data($photo);
+         $self->view->template_disable(1);
+         $self->view->content_type('image/png');
+
+     } else {
+
+         $self->not_found($file);
+
+     }
+
+ }
+
+The method, do_photos() wants two parameters passed to it. They will be
+parsed out of the URL. So a request to "/photos/family/25" is made. The 
+App::Main handler is called. The do_photos() method is invoked passing 
+"family" and "25" as the two parameters. If the do_photos() method didn't 
+exist and a do_default method did, it would be passed three parameters; 
+"photos", "family" and "25".
+
+Handlers also run plugins. Plugins are envoked at specific times during the
+request's life cycle. They may be used as filters or to perform specific 
+actions.
+
+=head1 METHODS
 
 =over 4
+
+=item handler 
+
+The main entry point. This method contains the state machine that handles the
+life cycle of a request. It runs the plugins sends the output thru a renderer
+for format and returns the response back to the dispatcher.
+
+=item redirect
+
+The method performs a 302 redirect with the specified URL. A fully qualified 
+URL is returned in the response header.
+
+ $self->redirect('/login');
+
+Redirects are considered exceptions. When one is generated normal processing
+stops and the redirect happens. Since 3xx level http codes are handled directly
+by the browser, this method is a prime candiate to override in a single page
+JavaScript application. In that case it may return a data structure that has
+meaning to the JavaScript application.
+
+=item moved_permanently
+
+The method performs a 301 redirect with the specified URL. A fully qualified 
+URL is returned in the response header.
+
+ $self->moved_permanently('/login');
+
+This is considered an exception and normal processing stops.
+
+=item declined
+
+This method performs a 404 response, along with an error page. The error page
+shows the location and the handler that was supposed to run along with a dump
+of various objects within Scaffold.
+
+ $self->declined();
+
+This is considered an exception and normal processing stops.
+
+=item not_found
+
+This method performs a 404 response, along with an error page. The error page
+shows the name of the file that was not found along with a dump of various
+objects within Scaffold.
+
+ $self->not_found($file);
+
+This is considered an exception and normal processing stops.
+
+=item exceptions
+
+The method performs exception handling. The methods redirect(), 
+moved_permanently(), declined() and not_found() throw exceptions. They are 
+handled here. If some other exception is thrown this method will try to pass
+it to a local exception_handler() method. If this is not found an error page
+is displayed with a dump of various objects within Scaffold.
 
 =back
 

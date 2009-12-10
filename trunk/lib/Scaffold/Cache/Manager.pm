@@ -15,10 +15,10 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub pre_action($$) {
+sub pre_action {
     my ($self, $sobj) = @_;
 
-    $sobj->scaffold->cache->purge();
+    $self->scaffold->cache->purge();
 
     return PLUGIN_NEXT;
 
@@ -34,17 +34,14 @@ sub pre_action($$) {
 
 =head1 NAME
 
-Scaffold::Cache::Manager - Maintain the cache subsystem
-
-=head1 SYNOPSIS
+Scaffold::Cache::Manager - Maintains the cache subsystem for Scaffold
 
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+Scaffold::Cache::Manager is a plugin that maintains the cache system. It 
+purges expired items from the cache. It runs in the pre_action phase of 
+plugin execution. This plugin is automatically loaded when Scaffold::Server 
+initializes. Thus it is the first plugin that is executed.
 
 =head1 SEE ALSO
 

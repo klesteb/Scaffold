@@ -16,7 +16,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub update($$$) {
+sub update {
     my ($self, $key, $value) = @_;
 
     my $namespace = $self->namespace;
@@ -26,13 +26,13 @@ sub update($$$) {
 
 }
 
-sub clear($) {
+sub clear {
 
     return $self->handle->flush_all();
 
 }
 
-sub incr($$) {
+sub incr {
     my ($self, $key) = @_;
 
     my $namespace = $self->namespace;
@@ -42,7 +42,7 @@ sub incr($$) {
 
 }
 
-sub decr($$) {
+sub decr {
     my ($self, $key) = @_;
 
     my $namespace = $self->namespace;
@@ -94,15 +94,25 @@ Scaffold::Cache::Memcached - Caching is based on memcached.
 
 =head1 SYNOPSIS
 
+ my $server = Scaffold::Server->new(
+     cache => Scaffold::Cache::Memcached->new(
+        namespace => 'scaffold',
+        expires   => '1h',
+        rehash    => 'no',
+        servers   => '127.0.0.1:11211',
+        compress_threshold => '1000',
+    ),
+ );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This module initializes the Cache::Memcached module and uses it for the caching
+subsystem within Scaffold. The synopsis shows the defaults that are used in 
+initialization. The "servers" configuration item can be a comma seperated list.
 
 =head1 SEE ALSO
+
+ Cache::Memcached
 
  Scaffold::Base
  Scaffold::Class

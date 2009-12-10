@@ -30,7 +30,7 @@ use Data::Dumper;
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub run($) {
+sub run {
     my ($self) = @_;
 
     my $server_instance;
@@ -51,15 +51,6 @@ sub run($) {
 
 sub psgi_handler {
     shift->_build_request_handler;
-}
-
-sub build_request($$) {
-    my ($self, $env) = @_;
-
-    my $response = $self->{request_class}->new($env);
-    
-    return $response;
-
 }
 
 # ----------------------------------------------------------------------
@@ -101,13 +92,22 @@ sub _build_request_handler($) {
 
 }
 
+sub _build_request {
+    my ($self, $env) = @_;
+
+    my $response = $self->{request_class}->new($env);
+    
+    return $response;
+
+}
+
 sub _build_app($) {
     my ($self) = @_;
 
     return sub {
         my $env = shift;
         my $scaffold = $self->scaffold;
-        my $req = $self->build_request($env);
+        my $req = $self->_build_request($env);
         my $res = $self->{request_handler}->($scaffold, $req);
         $res->finalize;
     };
@@ -132,7 +132,7 @@ sub _wrap_with_middlewares($$) {
 
 package Scaffold::Engine::Util;
 
-sub load_class($$) {
+sub load_class {
     my ($class, $prefix) = @_;
 
     if ( $class !~ s/^\+// && $prefix ) {
@@ -153,23 +153,102 @@ __END__
 
 =head1 NAME
 
-Scaffold::Engine - The Scaffold interface to psgi
+Scaffold::Engine - The Scaffold interface to Plack/psgi
 
 =head1 SYNOPSIS
 
+  use Scaffold::Server;
+  use Scaffold::Render::TT;
+
+  my $psgi_handler;
+  my $server = Scaffold::Server->new(
+     locations => {
+         '/'            => 'App::HelloWorld',
+         '/test'        => 'App::Cached',
+         '/robots.txt'  => 'Scaffold::Handler::Robots',
+         '/favicon.ico' => 'Scaffold::Handler::Favicon',
+         '/static'      => 'Scaffold::Handler::Static',
+         '/login'       => 'Scaffold::Uaf::Login',
+         '/logout'      => 'Scaffold::Uaf::Logout',
+     },
+     authorization => {
+         authenticate => 'Scaffold::Uaf::Manager',
+         authorize    => 'Scaffold::Uaf::Authorize',
+     },
+     render => Scaffold::Render::TT->new(
+         include_path => 'html:html/resources/templates',
+     ),
+ );
+
+ $psgi_hander = $server->engine->psgi_handler();
+
+... or
+
+  use Scaffold::Server;
+  use Scaffold::Render::TT;
+
+  my $server = Scaffold::Server->new(
+     engine => {
+         module => 'ServerSimple',
+         args => {
+             port => 8080,
+         }
+     },
+     locations => {
+         '/'            => 'App::HelloWorld',
+         '/test'        => 'App::Cached',
+         '/robots.txt'  => 'Scaffold::Handler::Robots',
+         '/favicon.ico' => 'Scaffold::Handler::Favicon',
+         '/static'      => 'Scaffold::Handler::Static',
+         '/login'       => 'Scaffold::Uaf::Login',
+         '/logout'      => 'Scaffold::Uaf::Logout',
+     },
+     authorization => {
+         authenticate => 'Scaffold::Uaf::Manager',
+         authorize    => 'Scaffold::Uaf::Authorize',
+     },
+     render => Scaffold::Render::TT->new(
+         include_path => 'html:html/resources/templates',
+     ),
+ );
+
+ $server->engine->run();
+
 =head1 DESCRIPTION
+
+This module is used internally by Scaffold::Server to initialize and return 
+the code reference that is needed by the Plack/psgi runtime environment. The
+first example in the Synopsis can be ran with the following command:
+
+ # plackup -app app.psgi -port 8080
+
+The second example can be ran with this command:
+
+ # perl app.pl
+
+The first example is more versatile, as the code can be used in any environment
+that the Plack runtime supports.
 
 =head1 ACCESSORS
 
 =over 4
 
+=item psgi_handler
+
+Returns a code reference to the dispacth handler.
+
+=item run
+
+Runs Scaffold::Server as a standalone application.
+
 =back
 
 =head1 SEE ALSO
 
+ PlackX::Engine
+
  Scaffold::Base
  Scaffold::Class
- PlackX::Engine
 
 =head1 AUTHOR
 

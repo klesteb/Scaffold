@@ -59,17 +59,31 @@ __END__
 
 =head1 NAME
 
-Scaffold::Handler::Static - A handler to handle static files
+Scaffold::Handler::Favicon - A handler to handle "favicon.ico" files
 
 =head1 SYNOPSIS
 
+ use Scaffold::Server;
+
+ my $server = Scaffold::Server->new(
+    configs => {
+        favicon   => 'image.jpeg',
+        doc_rootp => 'html'
+    },
+    locations => {
+        '/'            => 'App::Main',
+        '/robots.txt'  => 'Scaffold::Handler::Robots',
+        '/favicon.ico' => 'Scaffold::Handler::Favicon',
+        '/static'      => 'Scaffold::Handler::Static',
+    },
+ );
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+This handler will return a "favicon.ico"  back to the browser. What the 
+"favicon" is and where it is located is controlled by the two config options 
+"favicon" and "doc_rootp". Once a "favicon" has been requested, subsequent 
+requests will load the image from cache instead of disk.
 
 =head1 SEE ALSO
 

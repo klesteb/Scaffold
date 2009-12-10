@@ -31,6 +31,7 @@ and utiltiy functions that are needed by the Scaffold environment.
 
 =head1 SEE ALSO
 
+ Badger::Base
  Badger::Class
 
  Scaffold::Base

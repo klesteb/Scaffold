@@ -20,7 +20,7 @@ sub config {
     my ($self, $p) = @_;
 
     return $self->{config}->{$p};
-    
+
 }
 
 1;
@@ -29,11 +29,19 @@ __END__
 
 =head1 NAME
 
-Scaffold::Base - Base environment for Scaffold
+Scaffold::Base - The Base environment for Scaffold
 
 =head1 SYNOPSIS
 
+ use Scaffold::Class
+   version => '0.01',
+   base    => 'Scaffold::Base'
+ ;
+
 =head1 DESCRIPTION
+
+This is the base class for Scaffold. It defines some useful exception messages
+and a method to access the config cache.
 
 =head1 ACCESSORS
 
