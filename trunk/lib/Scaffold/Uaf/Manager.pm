@@ -47,7 +47,7 @@ sub pre_action($$) {
                     # from xhr requests. While a standard page loads work 
                     # quite nicely.
                     #
-                    # --> $self->set_token($user);
+                    # --> $self->uaf_set_token($user);
                     #
 
                     $sobj->scaffold->user($user);

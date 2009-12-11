@@ -39,27 +39,26 @@ sub uaf_is_valid {
     my ($self) = @_;
 
     my $ip;
-    my $old_ip;
+    my $token;
     my $access;
     my $needed;
+    my $old_ip;
     my $old_token;
-    my $token = "";
+    my $new_token;
     my $user = undef;
 
     $ip = $self->scaffold->request->address;
-    $token = ($self->scaffold->request->cookies->{'_token_id_'}->value || '');
 
-    my $lock = $self->scaffold->session->session_id;
+    if ($token = $self->scaffold->request->cookies->{'__token_id__'}) {
 
-    if (defined($token) and ($token ne '=')) {
-
+        $new_token = $token->value;
         $old_ip = $self->scaffold->session->get('uaf_remote_ip') || '';
         $old_token = $self->scaffold->session->get('uaf_token') || '';
 
         # This should work for just about everything except a load
         # balancing, natted firewall. And yeah, they do exist.
 
-        if (($token eq $old_token) and ($ip eq $old_ip)) {
+        if (($new_token eq $old_token) and ($ip eq $old_ip)) {
 
             $user = $self->scaffold->session->get('uaf_user');
             $access = $user->attribute('last_access');
@@ -81,11 +80,13 @@ sub uaf_validate {
     my $ip = "";
     my $salt = "";
     my $user = undef;
+    my @junk;
 
     $username = lc($username);
     $password = lc($password);
     $ip = $self->scaffold->request->address;
-    $salt = rand_chars(set => 'all', min => 5, max => 10);
+    @junk = rand_chars(set => 'all', min => 5, max => 10);
+    $salt = join('', @junk);
 
     if ((($username eq 'admin') and ($password eq 'admin')) or 
         (($username eq 'demo')  and ($password eq 'demo'))) {
@@ -111,6 +112,7 @@ sub uaf_invalidate {
     $self->scaffold->session->remove('uaf_user');
     $self->scaffold->session->remove('uaf_token');
     $self->scaffold->session->remove('uaf_remote_ip');
+
     $self->scaffold->session->expire();
 
 }
@@ -121,7 +123,7 @@ sub uaf_set_token {
     my $salt = $user->attribute('salt');
     my $token = encrypt($user->username, ':', time(), ':', $salt, $$);
 
-    $self->scaffold->response->cookies->{'_token_id_'} = {
+    $self->scaffold->response->cookies->{'__token_id__'} = {
         value => $token,
         path  => $self->uaf_cookie_path
     };
@@ -151,7 +153,8 @@ sub uaf_init {
     $self->{uaf_limit}          = $config->{uaf_limit} || 3;
     $self->{uaf_timeout}        = $config->{uaf_timeout} || 3600;
     $self->{uaf_secret}         = $config->{uaf_secret} || 'w3s3cR7';
-    $self->{uaf_filter}         = $config->{uaf_filter} || qr/^${app_rootp}\/(login|static).*/;
+    $self->{uaf_filter}         = $config->{uaf_filter} || 
+      qr/^${app_rootp}\/(login|static|favicon.ico|robots.txt).*/;
 
     $self->{uaf_login_rootp}    = $app_rootp . '/login';
     $self->{uaf_denied_rootp}   = $self->{uaf_login_rootp} . '/denied';

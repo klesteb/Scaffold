@@ -23,7 +23,7 @@ sub grants {
 }
 
 sub denies {
-   my ($self, $user, $action, $resource) @_;
+   my ($self, $user, $action, $resource) = @_;
 
    # Abstract rule denies everything. Do not use.
 

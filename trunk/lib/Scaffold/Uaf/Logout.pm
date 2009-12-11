@@ -21,7 +21,7 @@ sub do_main {
     $self->uaf_init();
 
     my $title = $self->uaf_logout_title;
-    my $wrapper = $self->uaf_log_wrapper;
+    my $wrapper = $self->uaf_logout_wrapper;
     my $template = $self->uaf_logout_template;
 
     $self->stash->view->title($title);

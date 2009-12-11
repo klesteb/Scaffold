@@ -20,7 +20,7 @@ main: {
         },
         authorization => {
             authenticate => 'Scaffold::Uaf::Manager',
-            authorize    => 'Scaffold::Uaf::Authorize',
+            authorize    => 'Scaffold::Uaf::AuthorizeFactory',
         },
         render => Scaffold::Render::TT->new(
             include_path => 'html:html/resources/templates',
