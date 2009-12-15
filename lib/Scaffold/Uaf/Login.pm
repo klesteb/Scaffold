@@ -23,11 +23,27 @@ use Scaffold::Class
 sub do_main {
     my ($self) = @_;
 
+    my $title;
+    my $wrapper;
+    my $template;
+
     $self->uaf_init();
-    
-    my $title = $self->uaf_login_title;
-    my $wrapper = $self->uaf_login_wrapper;
-    my $template = $self->uaf_login_template;
+
+    my $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
+
+    if ($attempts < $self->uaf_limit) {
+
+        $title = $self->uaf_login_title;
+        $wrapper = $self->uaf_login_wrapper;
+        $template = $self->uaf_login_template;
+
+    } else {
+
+        $title = $self->uaf_denied_title;
+        $wrapper = $self->uaf_denied_wrapper;
+        $template = $self->uaf_denied_template;
+
+    }
 
     $self->stash->view->title($title);
     $self->stash->view->template_wrapper($wrapper);
