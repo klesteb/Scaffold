@@ -17,48 +17,56 @@ use Scaffold::Class
 # ----------------------------------------------------------------------
 
 sub pre_action($$) {
-    my ($self, $sobj) = @_;
+    my ($self, $hobj) = @_;
 
-    
     $self->uaf_init();
 
     my $user;
+    my $attempts;
     my $regex = $self->uaf_filter;
-    my $uri = $sobj->scaffold->request->uri;
+    my $uri = $self->scaffold->request->uri;
     my $login_rootp = $self->uaf_login_rootp;
-    my $lock = $sobj->scaffold->session->session_id;
+    my $denied_rootp = $self->uaf_denied_rootp;
+    my $lock = $self->scaffold->session->session_id;
 
     # authenticate the session, this happens with each access
 
     if ($uri->path !~ /^$regex/) {
 
-        if ($self->uaf_avoid()) {
+        if ($self->scaffold->lockmgr->lock($lock)) {
 
-            if ($sobj->scaffold->lockmgr->lock($lock)) {
-
+            $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
+            
+            if ($attempts < $self->uaf_limit) {
+                
                 if ($user = $self->uaf_is_valid()) {
-
+                        
                     #
                     # Uncomment this line of code and you will get an 
                     # everchanging security token. Some internet pundits 
                     # consider this a "good thing". But in an xhr async 
-                    # environment you will get a rather nasty race condition. 
-                    # i.e. The browsers don't consistently update the cookies 
-                    # from xhr requests. While a standard page loads work 
-                    # quite nicely.
+                    # environment you will get a rather nasty race 
+                    # condition. i.e. The browsers don't consistently 
+                    # update the cookies from xhr requests. While a 
+                    # standard page loads work quite nicely.
                     #
                     # --> $self->uaf_set_token($user);
                     #
 
-                    $sobj->scaffold->user($user);
-                    $sobj->scaffold->lockmgr->unlock($lock);
+                    $self->scaffold->user($user);
+                    $self->scaffold->lockmgr->unlock($lock);
 
                 } else { 
 
-                    $sobj->scaffold->lockmgr->unlock($lock);
-                    $sobj->redirect($login_rootp); 
+                    $self->scaffold->lockmgr->unlock($lock);
+                    $hobj->redirect($login_rootp); 
 
                 }
+
+            } else {
+
+                $self->scaffold->lockmgr->unlock($lock);
+                $hobj->redirect($denied_rootp); 
 
             }
 

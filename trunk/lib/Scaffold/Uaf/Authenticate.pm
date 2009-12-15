@@ -11,8 +11,8 @@ our $VERSION = '0.03';
 
 use Scaffold::Class
   version   => $VERSION,
-  base      => 'Scaffold::Base',
   utils     => 'encrypt',
+  constants => 'TRUE FALSE',
   accessors => 'uaf_filter uaf_limit uaf_timeout uaf_secret uaf_login_rootp 
                 uaf_denied_rootp uaf_expired_rootp uaf_validate_rootp 
                 uaf_login_title uaf_login_wrapper uaf_login_template 
@@ -26,10 +26,8 @@ use Scaffold::Class
                 uaf_logout_title uaf_logout_template uaf_logout_wrapper
                 uaf_cookie_path uaf_cookie_domain uaf_cookie_secure
                 uaf_is_valid uaf_validate uaf_invalidate uaf_set_token 
-                uaf_avoid uaf_init',
+                uaf_avoid uaf_init uaf_check_credentials',
 ;
-
-use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -46,6 +44,8 @@ sub uaf_is_valid {
     my $old_token;
     my $new_token;
     my $user = undef;
+
+warn "entering uaf_is_valid()\n";    
 
     $ip = $self->scaffold->request->address;
 
@@ -77,23 +77,21 @@ sub uaf_is_valid {
 sub uaf_validate {
     my ($self, $username, $password) = @_;
 
+    my $attempts;
     my $ip = "";
     my $salt = "";
     my $user = undef;
     my @junk;
 
-    $username = lc($username);
-    $password = lc($password);
     $ip = $self->scaffold->request->address;
     @junk = rand_chars(set => 'all', min => 5, max => 10);
     $salt = join('', @junk);
 
-    if ((($username eq 'admin') and ($password eq 'admin')) or 
-        (($username eq 'demo')  and ($password eq 'demo'))) {
+    if ($self->uaf_check_credentials($username, $password)) {
 
         $user = Scaffold::Uaf::User->new(username => $username);
 
-        $user->attribute('login_attempts', 0);
+        $user->attribute('login_attempts', $attempts);
         $user->attribute('last_access', time());
         $user->attribute('salt', $salt);
 
@@ -108,10 +106,6 @@ sub uaf_validate {
 
 sub uaf_invalidate {
     my ($self) = @_;
-
-    $self->scaffold->session->remove('uaf_user');
-    $self->scaffold->session->remove('uaf_token');
-    $self->scaffold->session->remove('uaf_remote_ip');
 
     $self->scaffold->session->expire();
 
@@ -136,6 +130,14 @@ sub uaf_avoid {
     my ($self) = @_;
 
     return 1;
+
+}
+
+sub uaf_check_credentials {
+    my ($self, $username, $password) = @_;
+
+    return TRUE if ((($username eq 'admin') and ($password eq 'admin')) or 
+                    (($username eq 'demo')  and ($password eq 'demo')));
 
 }
 
@@ -260,6 +262,10 @@ browser as a cookie.
 Some application may wish to implement an avoidence scheme for certain
 situations. This is a hook to allow that to happen. The default action is
 to do nothing.
+
+=item uaf_check_credentials
+
+Check the username and password for validity.
 
 =back
 
