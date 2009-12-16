@@ -23,12 +23,23 @@ sub do_main {
     my $title = $self->uaf_logout_title;
     my $wrapper = $self->uaf_logout_wrapper;
     my $template = $self->uaf_logout_template;
+    my $logout_rootp = $self->uaf_logout_rootp;
+    my $lock = $self->scaffold->session->session_id;
 
     $self->stash->view->title($title);
-    $self->stash->view->template_wrapper($wrapper);
     $self->stash->view->template($template);
+    $self->stash->view->template_wrapper($wrapper);
 
-    $self->uaf_invalidate();
+    if ($self->scaffold->lockmgr->lock($lock)) {
+
+	$self->uaf_invalidate();
+	$self->scaffold->lockmgr->unlock($lock);
+
+    } else {
+
+	$self->redirect($logout_rootp);
+
+    }
 
 }
 
