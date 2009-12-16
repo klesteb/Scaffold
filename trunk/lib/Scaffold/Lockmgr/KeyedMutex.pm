@@ -99,7 +99,7 @@ sub init {
 
     $self->{config}  = $config;
     $self->{limit}   = $config->{limit} || 10;
-    $self->{timeout} = $config->{timeout} || 1000;
+    $self->{timeout} = $config->{timeout} || 10;
 
     $self->{engine} = KeyedMutex->new(
         {

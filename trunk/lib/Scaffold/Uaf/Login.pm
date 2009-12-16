@@ -34,7 +34,7 @@ sub do_main {
     $title = $self->uaf_login_title;
     $wrapper = $self->uaf_login_wrapper;
     $template = $self->uaf_login_template;
-
+    
     if ($self->scaffold->lockmgr->lock($lock)) {
 
         $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
@@ -101,11 +101,10 @@ sub do_validate {
 
             $self->scaffold->session->set('uaf_user', $user);
 
-            if ($count < $self->limit) {
+            if ($count < $self->uaf_limit) {
 
                 $self->scaffold->session->set('uaf_login_attempts', 0);
                 $self->uaf_set_token($user);
-                $self->redirect($app_rootp);
                 $url = $app_rootp;
 
             } else {
@@ -120,7 +119,7 @@ sub do_validate {
 
         }
 
-        $self->scaffold->session->unlock($lock);
+        $self->scaffold->lockmgr->unlock($lock);
 
     }
 
