@@ -6,25 +6,26 @@ use warnings;
 our $VERSION = '0.01';
 
 use Scaffold::Class
-  version => $VERSION,
-  base    => 'Scaffold::Base',
+  version   => $VERSION,
+  base      => 'Scaffold::Base',
+  accessors => 'engine timeout limit',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub lock($$) {
+sub lock {
     my ($self, $key) = @_;
 
 }
 
-sub unlock($$) {
+sub unlock {
     my ($self, $key) = @_;
 
 }
 
-sub try_lock($$) {
+sub try_lock {
     my ($self, $key) = @_;
 
 }

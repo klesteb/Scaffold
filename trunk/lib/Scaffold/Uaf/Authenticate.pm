@@ -45,8 +45,6 @@ sub uaf_is_valid {
     my $new_token;
     my $user = undef;
 
-warn "entering uaf_is_valid()\n";    
-
     $ip = $self->scaffold->request->address;
 
     if ($token = $self->scaffold->request->cookies->{'__token_id__'}) {
