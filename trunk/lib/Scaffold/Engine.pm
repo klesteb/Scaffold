@@ -76,14 +76,14 @@ sub init {
 
 }
 
-sub _build_server_instance($$$) {
+sub _build_server_instance {
     my ($class, $server, $args) = @_;
 
     Plack::Loader->load($server, %$args);
 
 }
 
-sub _build_request_handler($) {
+sub _build_request_handler {
     my ($self) = @_;
 
     my $app = $self->_build_app;
@@ -101,7 +101,7 @@ sub _build_request {
 
 }
 
-sub _build_app($) {
+sub _build_app {
     my ($self) = @_;
 
     return sub {
@@ -114,7 +114,7 @@ sub _build_app($) {
 
 }
 
-sub _wrap_with_middlewares($$) {
+sub _wrap_with_middlewares {
     my ($self, $request_handler) = @_;
 
     my $builder = Plack::Builder->new;

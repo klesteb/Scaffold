@@ -38,7 +38,7 @@ use Data::Dumper;
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub dispatch($$) {
+sub dispatch {
     my ($self, $request) = @_;
 
     $self->{request} = $request;
@@ -206,7 +206,7 @@ sub init {
 
 }
 
-sub _init_plugin($$) {
+sub _init_plugin {
     my ($self, $plugin) = @_;
 
     eval {
@@ -228,7 +228,7 @@ sub _init_plugin($$) {
 
 }
 
-sub _init_module($$) {
+sub _init_module {
     my ($self, $module) = @_;
 
     eval {
@@ -250,7 +250,7 @@ sub _init_module($$) {
 
 }
 
-sub _init_handler($$$) {
+sub _init_handler {
     my ($self, $handler, $location) = @_;
 
     my $obj;
@@ -285,7 +285,7 @@ sub _init_handler($$$) {
 
 }
 
-sub _set_config_defaults($) {
+sub _set_config_defaults {
     my ($self) = @_;
 
     if (! defined($self->{config}->{configs}->{app_rootp})) {
