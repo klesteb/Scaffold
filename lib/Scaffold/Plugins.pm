@@ -16,36 +16,36 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub pre_action($$) {
-    my ($self, $sobj) = @_;
+sub pre_action {
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
-sub post_action($$) {
-    my ($self, $sobj) = @_;
+sub post_action {
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
-sub pre_render($$) {
-    my ($self, $sobj) = @_;
+sub pre_render {
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
-sub post_render($$) {
-    my ($self, $sobj) = @_;
+sub post_render {
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
-sub pre_exit($$) {
-    my ($self, $sobj) = @_;
+sub pre_exit {
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 

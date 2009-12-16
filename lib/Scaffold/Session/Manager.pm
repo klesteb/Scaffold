@@ -21,7 +21,7 @@ use Data::Dumper;
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub pre_action($$) {
+sub pre_action {
     my ($self, $sobj) = @_;
 
     my $user;
@@ -58,7 +58,7 @@ sub pre_action($$) {
 
 }
 
-sub pre_exit($$) {
+sub pre_exit {
     my ($self, $sobj) = @_;
 
     my $response = $sobj->scaffold->response;

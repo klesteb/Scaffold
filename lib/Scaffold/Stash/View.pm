@@ -17,7 +17,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub reinit($) {
+sub reinit {
     my ($self) = @_;
 
     $self->title('');

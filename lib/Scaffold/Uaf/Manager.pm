@@ -16,7 +16,7 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub pre_action($$) {
+sub pre_action {
     my ($self, $hobj) = @_;
 
     $self->uaf_init();
@@ -36,11 +36,11 @@ sub pre_action($$) {
         if ($self->scaffold->lockmgr->lock($lock)) {
 
             $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
-            
+
             if ($attempts < $self->uaf_limit) {
-                
+
                 if ($user = $self->uaf_is_valid()) {
-                        
+
                     #
                     # Uncomment this line of code and you will get an 
                     # everchanging security token. Some internet pundits 
