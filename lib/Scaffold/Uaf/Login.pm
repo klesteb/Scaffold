@@ -26,22 +26,28 @@ sub do_main {
     my $title;
     my $wrapper;
     my $template;
+    my $attempts;
+    my $lock = $self->scaffold->session->session_id;
 
     $self->uaf_init();
 
-    my $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
+    $title = $self->uaf_login_title;
+    $wrapper = $self->uaf_login_wrapper;
+    $template = $self->uaf_login_template;
 
-    if ($attempts < $self->uaf_limit) {
+    if ($self->scaffold->lockmgr->lock($lock)) {
 
-        $title = $self->uaf_login_title;
-        $wrapper = $self->uaf_login_wrapper;
-        $template = $self->uaf_login_template;
+        $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
 
-    } else {
+        if ($attempts > $self->uaf_limit) {
 
-        $title = $self->uaf_denied_title;
-        $wrapper = $self->uaf_denied_wrapper;
-        $template = $self->uaf_denied_template;
+            $title = $self->uaf_denied_title;
+            $wrapper = $self->uaf_denied_wrapper;
+            $template = $self->uaf_denied_template;
+
+        }
+
+        $self->scaffold->lockmgr->unlock($lock);
 
     }
 
@@ -71,44 +77,54 @@ sub do_validate {
 
     $self->uaf_init();
 
-    my $login_rootp;
-    my $denied_rootp;
+    my $url;
+    my $count;
     my $user = undef;
-    my $limit = $self->uaf_limit;
+    my $login_rootp = $self->uaf_login_rootp;
+    my $denied_rootp = $self->uaf_denied_rootp;
+    my $lock = $self->scaffold->session->session_id;
     my $params = $self->scaffold->request->parameters();
-    my $count = $self->scaffold->session->get('uaf_login_attempts');
     my $app_rootp = $self->scaffold->config('configs')->{app_rootp};
 
-    $count++;
-    $self->scaffold->session->set('uaf_login_attempts', $count);
-    $login_rootp = $self->uaf_login_rootp;
-    $denied_rootp = $self->uaf_denied_rootp;
+    $url = $login_rootp;
 
-    $user = $self->uaf_validate(
-        $params->{username}, 
-        $params->{password}
-    );
+    if ($self->scaffold->lockmgr->lock($lock)) {
 
-    if (defined($user)) {
+        $count = $self->scaffold->session->get('uaf_login_attempts');
+        $count++;
 
-        $self->scaffold->session->set('uaf_user', $user);
+        $self->scaffold->session->set('uaf_login_attempts', $count);
 
-        if ($count > $limit) {
+        $user = $self->uaf_validate($params->{username}, $params->{password});
 
-            $self->redirect($denied_rootp);
-            return;
+        if (defined($user)) {
+
+            $self->scaffold->session->set('uaf_user', $user);
+
+            if ($count < $self->limit) {
+
+                $self->scaffold->session->set('uaf_login_attempts', 0);
+                $self->uaf_set_token($user);
+                $self->redirect($app_rootp);
+                $url = $app_rootp;
+
+            } else {
+
+                $url = $denied_rootp;
+
+            }
+
+        } else {
+
+            $url = $login_rootp; 
 
         }
 
-        $self->scaffold->session->set('uaf_login_attempts', 0);
-        $self->uaf_set_token($user);
-        $self->redirect($app_rootp);
-
-    } else {
-
-        $self->redirect($login_rootp); 
+        $self->scaffold->session->unlock($lock);
 
     }
+
+    $self->redirect($url);
 
 }
 

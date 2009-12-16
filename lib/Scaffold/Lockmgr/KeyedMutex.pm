@@ -11,7 +11,6 @@ use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Lockmgr',
   constants => 'TRUE FALSE',
-  accessors => 'engine',
 ;
 
 # ----------------------------------------------------------------------
@@ -21,11 +20,23 @@ use Scaffold::Class
 sub lock {
     my ($self, $key) = @_;
 
-    my $stat = FALSE;
+    my $stat = TRUE;
+    my $count = 0;
 
-    if ($self->engine->lock($key)) {
+    while (! $self->engine->lock($key)) {
 
-        $stat = TRUE;
+        $count++;
+
+        if ($count < $self->limit) {
+
+            sleep $self->timeout;
+
+        } else {
+
+            $stat = FALSE;
+            last;
+
+        }
 
     }
 
@@ -40,14 +51,26 @@ sub unlock {
 
 }
 
-sub tyr_lock {
+sub try_lock {
     my ($self, $key) = @_;
 
     my $stat = TRUE;
+    my $count = 0;
 
-    if ($self->engine->locked($key)) {
+    while ($self->engine->locked($key)) {
 
-        $stat = FALSE;
+        $count++;
+
+        if ($count < $self->limit) {
+
+            sleep $self->timeout;
+
+        } else {
+
+            $stat = FALSE;
+            last;
+
+        }
 
     }
 
@@ -74,7 +97,9 @@ sub init {
 
     }
 
-    $self->{config} = $config;
+    $self->{config}  = $config;
+    $self->{limit}   = $config->{limit} || 10;
+    $self->{timeout} = $config->{timeout} || 1000;
 
     $self->{engine} = KeyedMutex->new(
         {
