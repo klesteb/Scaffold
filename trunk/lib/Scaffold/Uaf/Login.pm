@@ -12,7 +12,6 @@ use Digest::HMAC;
 use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Handler',
-  codecs  => 'JSON',
   mixin   => 'Scaffold::Uaf::Authenticate',
 ;
 
@@ -52,8 +51,8 @@ sub do_main {
     }
 
     $self->stash->view->title($title);
-    $self->stash->view->template_wrapper($wrapper);
     $self->stash->view->template($template);
+    $self->stash->view->template_wrapper($wrapper);
 
 }
 
@@ -67,8 +66,8 @@ sub do_denied {
     my $template = $self->uaf_denied_template;
 
     $self->stash->view->title($title);
-    $self->stash->view->template_wrapper($wrapper);
     $self->stash->view->template($template);
+    $self->stash->view->template_wrapper($wrapper);
 
 }
 

@@ -19,6 +19,7 @@ use Scaffold::Class
   accessors  => 'authz engine cache render database plugins request response lockmgr',
   mutators   => 'session user',
   filesystem => 'File',
+  utils      => 'init_module',
   constants  => 'TRUE FALSE',
   messages => {
       'nomodule'  => "handler not defined for %s",
@@ -211,13 +212,7 @@ sub _init_plugin {
 
     eval {
 
-        my @parts = split("::", $plugin);
-        my $filename = File(@parts);
-
-        require $filename . '.pm';
-        $plugin->import();
-        my $obj = $plugin->new();
-
+        my $obj = init_module($plugin);
         push(@{$self->{plugins}}, $obj);
 
     }; if (my $ex = $@) {
@@ -233,13 +228,7 @@ sub _init_module {
 
     eval {
 
-        my @parts = split("::", $module);
-        my $filename = File(@parts);
-
-        require $filename . '.pm';
-        $module->import();
-        my $obj = $module->new();
-
+        my $obj = init_module($module);
         return $obj;
 
     }; if (my $ex = $@) {
@@ -263,12 +252,7 @@ sub _init_handler {
 
         } else {
 
-            my @parts = split("::", $handler);
-            my $filename = File(@parts);
-
-            require $filename . '.pm';
-            $handler->import();
-            $obj = $handler->new();
+            $obj = init_module($handler);
 
             $self->{config}->{handlers}->{location} = $location;
             $self->{config}->{handlers}->{$location}->{handler} = $obj;

@@ -11,6 +11,7 @@ our $VERSION = '0.03';
 
 use Scaffold::Class
   version   => $VERSION,
+  base      => 'Badger::Mixin',
   utils     => 'encrypt',
   constants => 'TRUE FALSE',
   accessors => 'uaf_filter uaf_limit uaf_timeout uaf_secret uaf_login_rootp 
@@ -89,13 +90,14 @@ sub uaf_validate {
     if ($self->uaf_check_credentials($username, $password)) {
 
         $user = Scaffold::Uaf::User->new(username => $username);
+        $attempts = $self->scaffold->session->get('uaf_login_attempts');
 
-        $user->attribute('login_attempts', $attempts);
-        $user->attribute('last_access', time());
         $user->attribute('salt', $salt);
+        $user->attribute('last_access', time());
+        $user->attribute('login_attempts', $attempts);
 
-        $self->scaffold->session->set('uaf_remote_ip', $ip);
         $self->scaffold->session->set('uaf_user', $user);
+        $self->scaffold->session->set('uaf_remote_ip', $ip);
 
     }
 
@@ -145,7 +147,7 @@ sub uaf_init {
 
     my $config = $self->scaffold->config('configs');
     my $app_rootp = $config->{app_rootp};
-    
+
     $app_rootp = '' if ($app_rootp eq '/');
 
     $self->{uaf_cookie_path}    = $config->{uaf_cookie_path} || '/';
