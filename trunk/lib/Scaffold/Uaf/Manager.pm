@@ -41,18 +41,6 @@ sub pre_action {
 
                 if ($user = $self->uaf_is_valid()) {
 
-                    #
-                    # Uncomment this line of code and you will get an 
-                    # everchanging security token. Some internet pundits 
-                    # consider this a "good thing". But in an xhr async 
-                    # environment you will get a rather nasty race 
-                    # condition. i.e. The browsers don't consistently 
-                    # update the cookies from xhr requests. While a 
-                    # standard page loads work quite nicely.
-                    #
-                    # --> $self->uaf_set_token($user);
-                    #
-
                     $self->scaffold->user($user);
                     $self->scaffold->lockmgr->unlock($lock);
 
