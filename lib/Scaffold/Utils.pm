@@ -6,22 +6,17 @@ use warnings;
 our $VERSION = '0.01';
 
 use Crypt::CBC;
+use Badger::Exception;
 use Digest::MD5 'md5_hex';
 
 use Scaffold::Class
-  version => $VERSION,
-  base    => 'Badger::Utils',
-  codec   => 'Base64',
+  version    => $VERSION,
+  base       => 'Badger::Utils',
+  codec      => 'Base64',
+  filesystem => 'File',
   exports => {
-      any => 'encrypt decrypt',
+      any => 'encrypt decrypt init_module',
   },
-  messages => {
-      'badcrypt' => "error building CBC object: %s",
-      'nocrypt'  => 'bad encryption',
-  },
-  constant => {
-      Exception => __PACKAGE__,
-  }
 ;
 
 # ----------------------------------------------------------------------
@@ -36,7 +31,6 @@ sub decrypt {
     my $omd5;
     my $p_text;
     my @decrypted_values;
-    my $msg = 'scaffold.utils.decrypt';
 
     $encrypted ||= '';
 
@@ -52,9 +46,14 @@ sub decrypt {
             } 
         );
 
-    }; if (my $ex = $@) {
+    }; if (my $x = $@) {
 
-        Exception->throw_msg($msg, 'badcyrpt', $ex);
+        my $ex = Badger::Exception->new(
+            type => 'scaffold.utils.decrypt',
+            info => sprintf("error building CBC object: %s", $x),
+        );
+
+        $ex->throw;
 
     }
 
@@ -79,10 +78,15 @@ sub decrypt {
 
     } else {
 
-        Exception->throw_msg($msg, 'nocrypt');
+        my $ex = Badger::Exception->new(
+            type => 'scaffold.utils.decrypt',
+            info => "bad encryption",
+        );
+
+        $ex->throw;
 
     }
-    
+
 }
 
 sub encrypt {
@@ -107,9 +111,14 @@ sub encrypt {
             } 
         );
 
-    }; if (my $ex = $@) {
+    }; if (my $x = $@) {
 
-        Exception->throw_msg($msg, 'badcrypt', $ex);
+        my $ex = Badger::Exception->new(
+            type => 'scaffold.utils.encrypt',
+            info => sprintf("error building CBC object: %s", $x),
+        );
+
+        $ex->throw;
 
     }
 
@@ -123,6 +132,20 @@ sub encrypt {
     $c->finish();
 
     return $c_text;
+
+}
+
+sub init_module {
+    my ($module) = @_;
+
+    my @parts = split("::", $module);
+    my $filename = File(@parts);
+
+    require $filename . '.pm';
+    $module->import();
+    my $obj = $module->new();
+
+    return $obj;
 
 }
 
@@ -155,6 +178,10 @@ encrypts and returns the encrypted string
 =item decrypt( 'string' )
 
 decrypts and returns the values
+
+=item init_module( 'module' )
+
+load and initializes a module
 
 =back
 

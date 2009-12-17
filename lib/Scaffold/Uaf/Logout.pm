@@ -32,12 +32,12 @@ sub do_main {
 
     if ($self->scaffold->lockmgr->lock($lock)) {
 
-	$self->uaf_invalidate();
-	$self->scaffold->lockmgr->unlock($lock);
+        $self->uaf_invalidate();
+        $self->scaffold->lockmgr->unlock($lock);
 
     } else {
 
-	$self->redirect($logout_rootp);
+        $self->redirect($logout_rootp);
 
     }
 
