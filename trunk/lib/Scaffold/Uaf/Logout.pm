@@ -37,7 +37,7 @@ sub do_main {
 
     } else {
 
-        $self->redirect($logout_rootp);
+        $self->uaf_relocate($logout_rootp);
 
     }
 

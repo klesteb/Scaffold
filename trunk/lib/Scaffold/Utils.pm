@@ -7,7 +7,6 @@ our $VERSION = '0.01';
 
 use Crypt::CBC;
 use Badger::Exception;
-use Digest::MD5 'md5_hex';
 
 use Scaffold::Class
   version    => $VERSION,
@@ -25,12 +24,10 @@ use Scaffold::Class
 
 sub decrypt {
     my ($secret, $encrypted) = @_;
-
+    
     my $c;
-    my $md5;
-    my $omd5;
+    my $base64;
     my $p_text;
-    my @decrypted_values;
 
     $encrypted ||= '';
 
@@ -38,54 +35,27 @@ sub decrypt {
 
     eval {
 
-        $c = new Crypt::CBC ( 
-            {
-                'key'     => $secret,
-                'cipher'  => 'Blowfish',
-                'padding' => 'null',
-            } 
+        $c = Crypt::CBC->new( 
+            -key    => $secret,
+            -cipher => 'Crypt::OpenSSL::AES',
         );
+
+        $base64 = decode($encrypted);
+        $p_text = $c->decrypt($base64);
+        $c->finish();
 
     }; if (my $x = $@) {
 
         my $ex = Badger::Exception->new(
             type => 'scaffold.utils.decrypt',
-            info => sprintf("error building CBC object: %s", $x),
+            info => $x,
         );
 
         $ex->throw;
 
     }
 
-    $p_text = $c->decrypt(decode($encrypted));
-    $c->finish();
-
-    @decrypted_values = split(':;:', $p_text);
-    $md5 = pop(@decrypted_values);
-    $omd5 = md5_hex(join('', @decrypted_values)) || '';
-
-    if ($omd5 eq $md5) {
-
-        if (wantarray) {
-
-            return @decrypted_values;
-
-        } else {
-
-            return join(' ', @decrypted_values);
-
-        }
-
-    } else {
-
-        my $ex = Badger::Exception->new(
-            type => 'scaffold.utils.decrypt',
-            info => "bad encryption",
-        );
-
-        $ex->throw;
-
-    }
+    return $p_text;
 
 }
 
@@ -93,43 +63,35 @@ sub encrypt {
     my ($secret, @to_encrypt) = @_;
 
     my $c;
-    my $md5;
     my $str;
     my $encd;
     my $c_text;
-    my $msg = 'scaffold.utils.encrypt';
 
     local $^W = 0;
 
     eval {
 
-        $c = new Crypt::CBC( 
-            {
-                'key'     => $secret,
-                'cipher'  => 'Blowfish',
-                'padding' => 'null',
-            } 
+        $c = Crypt::CBC->new( 
+            -key   => $secret,
+            -cipher => 'Crypt::OpenSSL::AES',
         );
+
+        $str    = join('', @to_encrypt);
+        $encd   = $c->encrypt($str);
+        $c_text = encode($encd);
+
+        $c->finish();
 
     }; if (my $x = $@) {
 
         my $ex = Badger::Exception->new(
             type => 'scaffold.utils.encrypt',
-            info => sprintf("error building CBC object: %s", $x),
+            info => $x,
         );
 
         $ex->throw;
 
     }
-
-    $md5 = md5_hex(join('', @to_encrypt));
-    push(@to_encrypt, $md5);
-
-    $str    = join(':;:', @to_encrypt);
-    $encd   = $c->encrypt($str);
-    $c_text = encode($encd, '');
-
-    $c->finish();
 
     return $c_text;
 
@@ -171,13 +133,15 @@ This module provides some basic utility functions for Scaffold.
 
 =over 4
 
-=item encrypt( 'value' [, ... ] )
+=item encrypt( secret [, ... ] )
 
-encrypts and returns the encrypted string
+Encrypts and returns the encrypted string using Crypt::CBC along with 
+Crypt::OpenSSL::AES. 
 
-=item decrypt( 'string' )
+=item decrypt( secret, 'string' )
 
-decrypts and returns the values
+Decrypts and returns the encrypted string using Crypt::CBC along with 
+Crypt::OpenSSL::AES. 
 
 =item init_module( 'module' )
 
@@ -187,7 +151,9 @@ load and initializes a module
 
 =head1 SEE ALSO
 
+ Crypt::CBC
  Badger::Utils
+ Crypt::OpenSSL::AES
 
  Scaffold
  Scaffold::Base
