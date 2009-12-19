@@ -5,7 +5,6 @@ use strict;
 use warnings;
 
 use Scaffold::Uaf::User;
-use Data::Random qw(:all);
 
 our $VERSION = '0.03';
 
@@ -28,7 +27,7 @@ use Scaffold::Class
                 uaf_denied_template uaf_logout_title uaf_logout_template 
                 uaf_logout_wrapper uaf_cookie_path uaf_cookie_domain 
                 uaf_cookie_secure uaf_is_valid uaf_validate uaf_invalidate 
-                uaf_set_token uaf_avoid uaf_init uaf_check_credentials',
+                uaf_set_token uaf_avoid uaf_init uaf_check_credentials'
 ;
 
 # ----------------------------------------------------------------------
@@ -79,20 +78,15 @@ sub uaf_validate {
 
     my $attempts;
     my $ip = "";
-    my $salt = "";
     my $user = undef;
-    my @junk;
 
     $ip = $self->scaffold->request->address;
-    @junk = rand_chars(set => 'all', min => 5, max => 10);
-    $salt = join('', @junk);
 
     if ($self->uaf_check_credentials($username, $password)) {
 
         $user = Scaffold::Uaf::User->new(username => $username);
         $attempts = $self->scaffold->session->get('uaf_login_attempts');
 
-        $user->attribute('salt', $salt);
         $user->attribute('last_access', time());
         $user->attribute('login_attempts', $attempts);
 

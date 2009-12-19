@@ -92,7 +92,7 @@ sub handler {
 
         if ($class->exceptions($ex, $action, $location, $module)) {
 
-            $class->scaffold->response->body($class->_custom_error($@));
+            $class->scaffold->response->body($class->_custom_error($ex));
 
         }
 
@@ -150,6 +150,7 @@ sub exceptions {
 
         my $type = $ex->type;
         my $info = $ex->info;
+        $stat = FALSE;
 
         switch ($type) {
             case MOVED_PERM {
@@ -163,9 +164,7 @@ sub exceptions {
             case RENDER {
                 $stat = FALSE;
                 $self->scaffold->response->status('500');
-                $self->scaffold->response->body(
-                    $self->_custom_error($info)
-                );
+                $self->scaffold->response->body($self->_custom_error($info));
             }
             case DECLINED {
                 $stat = FALSE;
@@ -178,9 +177,7 @@ sub exceptions {
                     </span>
                 );
                 $self->scaffold->response->status('404');
-                $self->scaffold->response->body(
-                    $self->_custom_error($text)
-                );
+                $self->scaffold->response->body($self->_custom_error($text));
             }
             case NOTFOUND {
                 $stat = FALSE;
@@ -191,33 +188,10 @@ sub exceptions {
                     </span>
                 );
                 $self->scaffold->response->status('404');
-                $self->scaffold->response->body(
-                    $self->_custom_error($text)
-                );
+                $self->scaffold->response->body($self->_custom_error($text));
             }
             else {
-                $stat = FALSE;
-                if ($self->can('exception_handler')) {
-
-                    $self->exception_handler($ex);
-
-                } else {
-
-                    my $text = qq(
-                        Unexpected exception caught<br />
-                        <span style='font-size: .8em'>
-                        Type: $type<br />
-                        Info: $info<br />
-                        </span>
-                    );
-
-                    $self->scaffold->response->status('500');
-                    $self->scaffold->response->body(
-                        $self->_custom_error($text)
-                    );
-
-                }
-
+                $self->_unexpected_exception($type, $infp);
             }
 
         }
@@ -231,7 +205,7 @@ sub exceptions {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
+    
 sub _cleanroot {
     my ($self, $uri, $root) = @_;
 
@@ -423,6 +397,22 @@ sub _pre_exit {
         }
 
     }
+
+}
+
+sub _unexpected_exception {
+    my ($self, $type, $info) = @_;
+
+    my $text = qq(
+        Unexpected exception caught<br />
+        <span style='font-size: .8em'>
+        Type: $type<br />
+        Info: $info<br />
+        </span>
+    );
+
+    $self->scaffold->response->status('500');
+    $self->scaffold->response->body($self->_custom_error($text));
 
 }
 
