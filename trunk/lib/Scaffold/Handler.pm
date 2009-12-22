@@ -190,9 +190,6 @@ sub exceptions {
                 $self->scaffold->response->status('404');
                 $self->scaffold->response->body($self->_custom_error($text));
             }
-            else {
-                $self->_unexpected_exception($type, $infp);
-            }
 
         }
 
@@ -707,9 +704,8 @@ This is considered an exception and normal processing stops.
 
 The method performs exception handling. The methods redirect(), 
 moved_permanently(), declined() and not_found() throw exceptions. They are 
-handled here. If some other exception is thrown this method will try to pass
-it to a local exception_handler() method. If this is not found an error page
-is displayed with a dump of various objects within Scaffold.
+handled here. If other exception types need to be handled, this method 
+can be overridden.
 
 =back
 

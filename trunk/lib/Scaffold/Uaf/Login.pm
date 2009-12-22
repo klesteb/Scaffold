@@ -114,7 +114,7 @@ sub do_validate {
 
         } else {
 
-            $url = $login_rootp; 
+            $url = ($count < $self->uaf_limit) ? $login_rootp : $denied_rootp;
 
         }
 
