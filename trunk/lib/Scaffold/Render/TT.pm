@@ -82,7 +82,7 @@ Scaffold::Render::TT - Use the Template Toolkit to render pages.
 
 =head1 DESCRIPTION
 
-This module loads the Template Toolkit as the renderer. It takes only on config
+This module loads the Template Toolkit as the renderer. It takes only one config
 parameter and that is "include_path". Which is a colon seperated list of 
 directories that will be searched for templates. The first matching template
 that is found is the one that will be used.

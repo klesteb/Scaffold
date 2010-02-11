@@ -87,7 +87,16 @@ Scaffold::SessionManager - The class for Sessions in Scaffold
 
 =head1 SYNOPSIS
 
+The module initializes a "session". It automatically stores the username 
+from the browser, the browsers address, the time the session was initially 
+created and the last access time.
+
 =head1 DESCRIPTION
+
+All access to a Scaffold application has an associated session. The session 
+uses the default caching mechanism to store the session context. There is no
+default locking to control access to this session context. This must done using
+the Scaffold LockManager. Session meta data is stored in a temporary cookie. 
 
 =head1 ACCESSORS
 

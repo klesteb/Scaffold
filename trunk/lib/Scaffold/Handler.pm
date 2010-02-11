@@ -702,7 +702,7 @@ This is considered an exception and normal processing stops.
 
 =item exceptions
 
-The method performs exception handling. The methods redirect(), 
+This method performs exception handling. The methods redirect(), 
 moved_permanently(), declined() and not_found() throw exceptions. They are 
 handled here. If other exception types need to be handled, this method 
 can be overridden.
