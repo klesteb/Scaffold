@@ -81,15 +81,10 @@ __END__
 
 Scaffold::Session::Store::Cache - Use Scaffold's internal caching 
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
-
-=over 4
-
-=back
+The module provides an interface from HTTP::Session to Scaffolds internal 
+caching system.
 
 =head1 SEE ALSO
 

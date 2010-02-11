@@ -321,11 +321,63 @@ Scaffold::Server - The Scaffold web engine
 
 =head1 SYNOPSIS
 
+ app.psgi
+ --------
+
+ use lib 'lib';
+ use lib '../lib';
+ use Scaffold::Server;
+ use Scaffold::Render::TT;
+
+ my $psgi_handler;
+
+ main: {
+
+    my $server = Scaffold::Server->new(
+        locations => {
+            '/'            => 'App::Main',
+            '/robots.txt'  => 'Scaffold::Handler::Robots',
+            '/favicon.ico' => 'Scaffold::Handler::Favicon',
+            '/static'      => 'Scaffold::Handler::Static',
+            '/login'       => 'Scaffold::Uaf::Login',
+            '/logout'      => 'Scaffold::Uaf::Logout',
+        },
+        authorization => {
+            authenticate => 'Scaffold::Uaf::Manager',
+            authorize    => 'Scaffold::Uaf::AuthorizeFactory',
+        },
+        render => Scaffold::Render::TT->new(
+            include_path => 'html:html/resources/templates',
+        ),
+    );
+
+    $psgi_hander = $server->engine->psgi_handler();
+
+ }
+
+Initializes and returns a handle for the psgi engine. Suitable for this command:
+
+ # plackup -app app.psgi -s Standalone::Prefork
+
+Which is a great way to develop and test your web application. By the way, 
+the above configuration would run a complete static page site that needs 
+authentication for access. 
+
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
+This module is the main entry point for an application built with Scaffold. 
+It parses the configuration, loads the various components, makes the various 
+connections for the CacheManager, the LockManager, initializes the 
+SessionManager and will connect to the database of your choice.
+
+=head1 METHODS
 
 =over 4
+
+=item dispatch
+
+This method parses the URL and dispatches to the appropiate handler for request
+handling. 
 
 =back
 
