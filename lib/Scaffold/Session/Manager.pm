@@ -28,9 +28,6 @@ sub pre_action {
     my $address;
     my $create;
     my $access;
-    my @chars;
-    my $random;
-    my $ident;
 
     my $session = HTTP::Session->new(
         store => Scaffold::Session::Store::Cache->new(

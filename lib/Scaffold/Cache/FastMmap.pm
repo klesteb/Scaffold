@@ -87,8 +87,11 @@ sub init {
             unlink_on_exit => 0,
         );
 
-    }; if (my $ex = $@) {
+	1;
 
+    } or do {
+
+	my $ex = $@;
         $self->throw_msg('scaffold.cache.fastmmap', 'noload', $@);
 
     }

@@ -78,20 +78,20 @@ sub do_api {
 sub do_router {
     my ($self) = @_;
 
-    my $data;
+    my $datum;
     my @results;
     my $type = 'JSON';
     my $params = $self->scaffold->request->params;
 
     if ($params->{POSTDATA}) {
 
-        $data = decode(params->{POSTDATA});
-        $data = [ $data ] if (ref($data) ne ARRAY);
+        $datum = decode(params->{POSTDATA});
+        $datum = [ $datum ] if (ref($datum) ne ARRAY);
 
     } else {
 
         $type = 'FORM';
-        $data = [
+        $datum = [
             {
                 action => delete($params->{extAction}),
                 method => delete($params->{extMethod}),
@@ -104,7 +104,7 @@ sub do_router {
 
     }
 
-    foreach my $request (@$data) {
+    foreach my $request (@$datum) {
 
         my $action = $request->{action};
         my $method = $request->{method};
@@ -122,24 +122,22 @@ sub do_router {
             eval {
 
                 $status->{result} = $self->$method(ref($data) eq ARRAY ? @$data : ());
+		1;
 
-            }; if (my $ex = $@) {
-
+            } or do {
+		
+		my $ex = $@;
                 my $ref = ref($ex);
 
                 $status->{type} = 'exception';
 
                 if ($ref && $ex->isa('Badger::Exception')) {
 
-                    my $type = $ex->type;
-                    my $info = $ex->info;
-
-                    $status->{message} = $info;
-                    $status->{where}   = $type;
+                    $status->{message} = $ex->info;
+                    $status->{where}   = $ex->type;
 
                 } else {
 
-                    $status->{type}    => 'exception';
                     $status->{message} => sprintf("%s", $ex);
                     $status->{where}   => "Action: $action";
 

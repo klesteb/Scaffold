@@ -74,7 +74,11 @@ sub init {
         $self->{handle}->enable_compres(1);
         $self->{handle}->set_norehash() if ($rehash =~ m/no/i);
 
-    }; if (my $ex = $@) {
+        1;
+
+    } or do {
+
+        my $ex = $@;
 
         $self->throw_msg('scaffold.cache.memcached', 'noload', $@);
 

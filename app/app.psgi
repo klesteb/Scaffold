@@ -4,6 +4,9 @@ use lib '../lib';
 use Scaffold::Server;
 use Scaffold::Render::TT;
 
+use strict;
+use warnings;
+
 my $psgi_handler;
 
 main: {
@@ -27,7 +30,7 @@ main: {
         ),
     );
 
-    $psgi_hander = $server->engine->psgi_handler();
+    $psgi_handler = $server->engine->psgi_handler();
 
 }
 

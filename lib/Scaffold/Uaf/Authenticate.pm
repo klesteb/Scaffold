@@ -40,7 +40,6 @@ sub uaf_is_valid {
     my $ip;
     my $token;
     my $access;
-    my $needed;
     my $old_ip;
     my $old_token;
     my $new_token;
