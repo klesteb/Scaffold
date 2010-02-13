@@ -27,10 +27,9 @@ sub add_rule {
 sub can {
     my ($self, $user, $action, $resource) = @_;
 
-    my $rule;
     my ($granted, $denied) = (0,0);
 
-    for $rule (@{$self->{rules}}) {
+    forech my $rule (@{$self->{rules}}) {
 
         $granted = 1 if ($rule->grants($user, $action, $resource));
         $denied = 1  if ($rule->denies($user, $action, $resource));
