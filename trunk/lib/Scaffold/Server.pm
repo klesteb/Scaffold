@@ -22,9 +22,9 @@ use Scaffold::Class
   utils      => 'init_module',
   constants  => 'TRUE FALSE',
   messages => {
-      'nomodule'  => "handler not defined for %s",
-      'noplugin'  => "plugin %s not initialized, because: %s",
-      'nohandler' => "handler %s for location %s was not loaded, because: %s",
+      'nomodule'  => "module: %s not loaded, because: %s",
+      'noplugin'  => "plugin: %s not initialized, because: %s",
+      'nohandler' => "handler: %s for location %s was not loaded, because: %s",
   },
   constant => {
       NOMODULE  => 'scaffold.server.nomodule',
@@ -214,28 +214,38 @@ sub _init_plugin {
 
         my $obj = init_module($plugin);
         push(@{$self->{plugins}}, $obj);
+        
+        1;
 
-    }; if (my $ex = $@) {
+    } or do {
+        
+        my $ex = $@;
 
         $self->throw_msg(NOPLUGIN, 'noplugin', $plugin, $@);
 
-    }
+    };
 
 }
 
 sub _init_module {
     my ($self, $module) = @_;
 
+    my $obj;
+
     eval {
 
-        my $obj = init_module($module);
-        return $obj;
+        $obj = init_module($module);
+        1;
 
-    }; if (my $ex = $@) {
+    } or do {
+
+        my $ex = $@;
 
         $self->throw_msg(NOMODULE, 'nomodule', $module, $@);
 
-    }
+    };
+
+    return $obj;
 
 }
 
@@ -259,11 +269,15 @@ sub _init_handler {
 
         }
 
-    }; if (my $ex = $@) {
+        1;
+
+    } or do {
+
+        my $ex = $@;
 
         $self->throw_msg(NOHANDLER, 'nohandler', $handler, $location, $@);
 
-    }
+    };
 
     return $obj;
 

@@ -44,11 +44,11 @@ sub decrypt {
         $p_text = $c->decrypt($base64);
         $c->finish();
 
-	1;
+        1;
 
     } or do {
 
-	my $x = $@;
+        my $x = $@;
         my $ex = Badger::Exception->new(
             type => 'scaffold.utils.decrypt',
             info => $x,
@@ -56,7 +56,7 @@ sub decrypt {
 
         $ex->throw;
 
-    }
+    };
 
     return $p_text;
 
@@ -85,11 +85,11 @@ sub encrypt {
 
         $c->finish();
 
-	1;
+        1;
 
     } or do {
-	
-	my $x = $@;
+        
+        my $x = $@;
         my $ex = Badger::Exception->new(
             type => 'scaffold.utils.encrypt',
             info => $x,
@@ -97,7 +97,7 @@ sub encrypt {
 
         $ex->throw;
 
-    }
+    };
 
     return $c_text;
 

@@ -82,7 +82,7 @@ sub init {
 
         $self->throw_msg('scaffold.cache.memcached', 'noload', $@);
 
-    }
+    };
     
     return $self;
 

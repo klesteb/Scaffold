@@ -88,7 +88,11 @@ sub handler {
 
         }
 
-    }; if (my $ex = $@) {
+        1;
+
+    } or do {
+
+        my $ex = $@;
 
         if ($class->exceptions($ex, $action, $location, $module)) {
 
@@ -96,7 +100,7 @@ sub handler {
 
         }
 
-    }
+    };
 
     $class->_pre_exit();
 

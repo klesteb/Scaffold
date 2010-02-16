@@ -122,11 +122,11 @@ sub do_router {
             eval {
 
                 $status->{result} = $self->$method(ref($data) eq ARRAY ? @$data : ());
-		1;
+                1;
 
             } or do {
 		
-		my $ex = $@;
+                my $ex = $@;
                 my $ref = ref($ex);
 
                 $status->{type} = 'exception';
@@ -143,7 +143,7 @@ sub do_router {
 
                 }
 
-            }
+            };
 
         } else {
 
@@ -183,7 +183,7 @@ sub do_router {
 sub introspect {
     my ($self) = @_;
 
-    # Note on convetions
+    # Note on conventions
     #
     # Keys are currently case sensitive
     #    "Action" is passed in from Ext.Direct call
