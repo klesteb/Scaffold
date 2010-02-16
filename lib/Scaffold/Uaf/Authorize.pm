@@ -29,7 +29,7 @@ sub can {
 
     my ($granted, $denied) = (0,0);
 
-    forech my $rule (@{$self->{rules}}) {
+    foreach my $rule (@{$self->{rules}}) {
 
         $granted = 1 if ($rule->grants($user, $action, $resource));
         $denied = 1  if ($rule->denies($user, $action, $resource));
@@ -54,7 +54,7 @@ sub init {
     my ($self, $config) = @_;
 
     $self->{config} = $config;
-    
+
     $self->{rules} = [];
     $self->rules();
 
