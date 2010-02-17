@@ -96,7 +96,7 @@ sub _build_request {
     my ($self, $env) = @_;
 
     my $response = $self->{request_class}->new($env);
-    
+
     return $response;
 
 }

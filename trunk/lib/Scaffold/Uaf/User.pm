@@ -81,8 +81,6 @@ Example:
 
 =back
 
-=back
-
 =head1 MUTATORS
 
 =over 4
@@ -93,12 +91,8 @@ Set/Returns a user object attribute.
 
 Example:
 
-=over 4
-
- $birthday = $user->attribute('birthday');
+ my $birthday = $user->attribute('birthday');
  $user->attribute('birthday', $birthday);
-
-=back
 
 =back
 

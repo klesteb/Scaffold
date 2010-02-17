@@ -76,152 +76,73 @@ __END__
 
 =head1 NAME
 
-Gantry::Plugins::Uaf - A User Authentication and Authorization Framework
-
-=head1 SYNOPSIS
-
-In the Apache Perl startup or app.cgi or app.server:
-
-    <Perl>
-        # ...
-        use MyApp qw{ -Engine=CGI -TemplateEngine=TT Cache Session Uaf};
-    </Perl>
-    
-Inside MyApp.pm:
-
-    use Gantry::Plugins::Uaf;
+Scaffold::Uaf::Manager - A plugin to do authentication within the Scaffold framework
 
 =head1 DESCRIPTION
 
-This plugin mixes in a method that will provide session authentication and 
-user authorization. Session authentication is based on a valid username and 
-password. While user authorization is based on application defined rules 
-which grant access to resources. The goal of this module is to be 
-simple and flexiable.
+This plugin is automatically loaded when authentication is desired. It 
+checks the current session to see if it is authenticatied. If not it will 
+redirect back to a "login" url to force authentication or it will redirect to
+a "denied" url when login attempts are exceeded.
 
-To met this goal four objects are defined. They are Authenticate, 
-Authorize, User and Rule. This package provides basic implementations of 
-those objects. 
+This plugin understands the following config settings:
 
-The Rule object either grants or denies access to a resource. The access is 
-anything you want to use. A resource can be anything you define.
-
-The User object consists of username and attributes. You can define as many 
-and whatever attributes you want. The User object is not tied to any one 
-datastore.
-
-The base Authenticate object has two users hardcoded within. Those users are
-"admin" and "demo", with corresponding passwords. This object handles the
-authentication along with basic login and logout functionality.
-
-The base Authorization object has only one rule defined: AllowAll.
-
-Using the default, provided, Authentication and Authorization modules should
-allow you get your application up and running in minimal time. Once that is
-done, then you can define your User datastore, what your application rules 
-are and then create your objects. Once you do that, then you can load
-your own modules with the following config variables.
-
- uaf_authn_factory - The module name for your Authentication object
- uaf_authz_factory - The module name for your Authorization object
-
-The defaults for those are:
-
- Gantry::Plugins::Uaf::Authorize
- Gantry::Plugins::Uaf::Authenticate
-
-These modules must be on the Perl include path and are loaded during
-Gantry's startup processing. This plugin also requires the Session plugin. 
+ uaf_limit        - The number of login attempts
+ uaf_filter       - A reqex of non authenticated urls
+ uaf_login_rootp  - The url to redirect to for login processing
+ uaf_denied_rootp - The url to redirect to for login denial
 
 =head1 METHODS
 
 =over 4
 
-=item uaf_authenticate
+=item pre_action
 
-The method that is called for every url. It controls the authentication 
-process, loads the User object and sets the scurity token.
-
-=back
-
-=head1 ACCESSORS
-
-=over 4
-
-=item uaf_authn
-
-Returns the handle for the Authentication object.
-
-=item uaf_authz
-
-Returns the handle for the Authorization object.
-
-Example:
-
-=over 4
-
- $manager = $gobj->uaf_authz;
- if ($manager->can($user, "read", "data")) {
-
- }
+Checks to see if the current session is authenticated, redirects as needed.
 
 =back
 
-=item uaf_user
+=head1 DEPENDENICES
 
-Set/Returns the handle for the User object.
-
-Example:
-
-=over 4
-
- $user = $gobj->uaf_user;
- $gobj->uaf_user($user);
-
-=back
-
-=back
-
-=head1 PRIVATE METHODS
-
-=over 4
-
-=item get_callbacks
-
-For use by Gantry. Registers the callbacks needed by Uaf
-during the PerlHandler Apache phase or its moral equivalent.
-
-=item initialize
-
-This method is called by Gantry it will load and initialize your Authentication
-and Authorization modules.
-
-=item do_login
-
-Exposes the url "/login", and calls the login() method of your Authenticaton 
-module.
-
-=item do_logout
-
-Exposes the url "/logout", and calls the logout() method of your Authentication
-module.
-
-=back
+ Scaffold::Uaf::Authenticate
 
 =head1 SEE ALSO
 
- Gantry
- Gantry::Plugins::Session
- Gantry::Plugins::Uaf::Rule
- Gantry::Plugins::Uaf::User
- Gantry::Plugins::Uaf::Authorize
- Gantry::Plugins::Uaf::Authenticate
- Gantry::Plugins::Uaf::AuthorizeFactory
-
-=head1 ACKNOWLEGEMENT
-
-This module was heavily influenced by Apache2::SiteControl 
-written by Tony Kay, E<lt>tkay@uoregon.eduE<gt>.
+ Scaffold
+ Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
+ Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 

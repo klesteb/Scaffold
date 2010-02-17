@@ -6,7 +6,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use Crypt::CBC;
-use Badger::Exception;
+use Badger::Exception trace => 1;
 
 use Scaffold::Class
   version    => $VERSION,
@@ -24,7 +24,7 @@ use Scaffold::Class
 
 sub decrypt {
     my ($secret, $encrypted) = @_;
-    
+
     my $c;
     my $base64;
     my $p_text;
@@ -88,7 +88,7 @@ sub encrypt {
         1;
 
     } or do {
-        
+
         my $x = $@;
         my $ex = Badger::Exception->new(
             type => 'scaffold.utils.encrypt',
