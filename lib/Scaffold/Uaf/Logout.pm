@@ -51,11 +51,13 @@ sub do_main {
 
 =head1 NAME
 
-Events::Uaf::Logout - A handler for logout actions
-
-=head1 SYNOPSIS
+Events::Uaf::Logout - A handler for /logout url
 
 =head1 DESCRIPTION
+
+This handler handles the url "/logout" and any actions on that url. By default
+this method display a simple logout page which contains a logout form. This 
+form can be used to verify that "logging out" is what they want to do. 
 
 =head1 METHODS
 
