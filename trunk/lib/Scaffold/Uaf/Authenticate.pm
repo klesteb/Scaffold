@@ -30,6 +30,8 @@ use Scaffold::Class
                 uaf_set_token uaf_avoid uaf_init uaf_check_credentials'
 ;
 
+use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
@@ -47,8 +49,8 @@ sub uaf_is_valid {
 
     $ip = $self->scaffold->request->address;
 
-    if ($token = $self->scaffold->request->cookies->{'__token_id__'}) {
-
+    if ($token = $self->stash->cookies->cookie('__token_id__')) {
+        
         $new_token = $token->value;
         $old_ip = $self->scaffold->session->get('uaf_remote_ip') || '';
         $old_token = $self->scaffold->session->get('uaf_token') || '';

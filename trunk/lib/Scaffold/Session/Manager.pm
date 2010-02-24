@@ -22,7 +22,7 @@ use Data::Dumper;
 # ----------------------------------------------------------------------
 
 sub pre_action {
-    my ($self, $sobj) = @_;
+    my ($self, $hobj) = @_;
 
     my $user;
     my $address;
@@ -31,12 +31,12 @@ sub pre_action {
 
     my $session = HTTP::Session->new(
         store => Scaffold::Session::Store::Cache->new(
-            cache => $sobj->scaffold->cache,
+            cache => $self->scaffold->cache,
         ),
         state => HTTP::Session::State::Cookie->new(
             name => SESSION_ID
         ),
-        request => $sobj->scaffold->request
+        request => $self->scaffold->request
     );
 
     $user    = $session->get('user');
@@ -44,8 +44,8 @@ sub pre_action {
     $create  = $session->get('create');
     $access  = $session->get('access');
 
-    $session->set('user', $sobj->scaffold->request->user) if (not $user);
-    $session->set('address', $sobj->scaffold->request->address) if (not $address);
+    $session->set('user', $self->scaffold->request->user) if (not $user);
+    $session->set('address', $self->scaffold->request->address) if (not $address);
     $session->set('create', time()) if (not $create);
     $session->set('access', time()) if (not $access);
 
@@ -56,10 +56,10 @@ sub pre_action {
 }
 
 sub pre_exit {
-    my ($self, $sobj) = @_;
+    my ($self, $hobj) = @_;
 
-    my $response = $sobj->scaffold->response;
-    my $session = $sobj->scaffold->session;
+    my $response = $self->scaffold->response;
+    my $session = $self->scaffold->session;
 
     $session->set('access', time());
     $session->response_filter($response);

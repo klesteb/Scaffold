@@ -16,7 +16,7 @@ use Scaffold::Class
 # ----------------------------------------------------------------------
 
 sub pre_action {
-    my ($self, $sobj) = @_;
+    my ($self, $hobj) = @_;
 
     $self->scaffold->cache->purge();
 
