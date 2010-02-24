@@ -9,7 +9,7 @@ use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
   constants => ':plugins',
-  mutators  => 'scaffold',
+  mutators  => 'scaffold stash',
 ;
 
 # ----------------------------------------------------------------------
@@ -17,35 +17,35 @@ use Scaffold::Class
 # ----------------------------------------------------------------------
 
 sub pre_action {
-    my ($self, $hobj) = @_;
+    my ($self) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub post_action {
-    my ($self, $hobj) = @_;
+    my ($self) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub pre_render {
-    my ($self, $hobj) = @_;
+    my ($self) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub post_render {
-    my ($self, $hobj) = @_;
+    my ($self) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub pre_exit {
-    my ($self, $hobj) = @_;
+    my ($self) = @_;
 
     return PLUGIN_NEXT;
 

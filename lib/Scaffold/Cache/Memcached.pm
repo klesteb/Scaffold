@@ -27,6 +27,7 @@ sub update {
 }
 
 sub clear {
+    my ($self) = @_;
 
     return $self->handle->flush_all();
 
@@ -71,7 +72,7 @@ sub init {
 
         $self->{handle} = Cache::Memcached->new({servers => [$servers]});
         $self->{handle}->set_compress_threshold($compress);
-        $self->{handle}->enable_compres(1);
+        $self->{handle}->enable_compress(1);
         $self->{handle}->set_norehash() if ($rehash =~ m/no/i);
 
         1;

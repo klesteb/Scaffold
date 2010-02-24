@@ -13,7 +13,6 @@ use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
   accessors => 'view controller cookies',
-  mutators  => 'output',
 ;
 
 # ----------------------------------------------------------------------
@@ -29,10 +28,11 @@ sub init {
 
     $self->{config} = $config;
 
-    $self->{output}     = "";
     $self->{view}       = Scaffold::Stash::View->new();
-    $self->{cookies}    = Scaffold::Stash::Cookies->new();
     $self->{controller} = Scaffold::Stash::Controller->new();
+    $self->{cookies}    = Scaffold::Stash::Cookies->new(
+        cookies => $config->{cookies}
+    );
 
     return $self;
 

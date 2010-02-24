@@ -39,8 +39,10 @@ use Data::Dumper;
 sub handler {
     my ($class, $sobj, $location, $module) = @_;
 
-    $class->{stash} = Scaffold::Stash->new();
     $class->{scaffold} = $sobj;
+    $class->{stash} = Scaffold::Stash->new(
+        cookies => $class->scaffold->request->cookies
+    );
 
     my $configs = $class->scaffold->config('configs');
     my $uri = $class->scaffold->request->uri;
@@ -228,6 +230,7 @@ sub _pre_action {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->stash($self->stash);
             $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->pre_action($self);
             last if ($pstatus != PLUGIN_NEXT);
@@ -277,6 +280,7 @@ sub _post_action {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->stash($self->stash);
             $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->post_action($self);
             last if ($pstatus != PLUGIN_NEXT);
@@ -299,6 +303,7 @@ sub _pre_render {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->stash($self->stash);
             $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->pre_render($self);
             last if ($pstatus != PLUGIN_NEXT);
@@ -370,6 +375,7 @@ sub _post_render {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->stash($self->stash);
             $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->post_render($self);
             last if ($pstatus != PLUGIN_NEXT);
@@ -391,6 +397,7 @@ sub _pre_exit {
 
         foreach my $plugin (@$plugins) {
 
+            $plugin->stash($self->stash);
             $plugin->scaffold($self->scaffold);
             $pstatus = $plugin->pre_exit($self);
             last if ($pstatus != PLUGIN_NEXT);
