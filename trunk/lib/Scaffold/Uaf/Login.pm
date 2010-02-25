@@ -15,6 +15,8 @@ use Scaffold::Class
   mixin   => 'Scaffold::Uaf::Authenticate',
 ;
 
+use Data::Dumper;
+
 # -----------------------------------------------------------------
 # Public Methods
 # -----------------------------------------------------------------
@@ -82,9 +84,9 @@ sub do_validate {
     my $login_rootp = $self->uaf_login_rootp;
     my $denied_rootp = $self->uaf_denied_rootp;
     my $lock = $self->scaffold->session->session_id;
-    my $params = $self->scaffold->request->parameters();
+    my $params = $self->scaffold->request->parameters->as_hashref();
     my $app_rootp = $self->scaffold->config('configs')->{app_rootp};
-
+    
     $url = $login_rootp;
 
     if ($self->scaffold->lockmgr->lock($lock)) {
