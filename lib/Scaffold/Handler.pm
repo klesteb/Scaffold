@@ -41,7 +41,7 @@ sub handler {
 
     $class->{scaffold} = $sobj;
     $class->{stash} = Scaffold::Stash->new(
-        cookies => $class->scaffold->request->cookies
+        request => $class->scaffold->request
     );
 
     my $configs = $class->scaffold->config('configs');

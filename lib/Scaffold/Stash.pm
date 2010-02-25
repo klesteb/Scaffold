@@ -31,7 +31,7 @@ sub init {
     $self->{view}       = Scaffold::Stash::View->new();
     $self->{controller} = Scaffold::Stash::Controller->new();
     $self->{cookies}    = Scaffold::Stash::Cookies->new(
-        cookies => $config->{cookies}
+        request => $config->{request}
     );
 
     return $self;

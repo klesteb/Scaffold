@@ -8,6 +8,7 @@ our $VERSION = '0.01';
 use Plack::Response;
 use Scaffold::Engine;
 use Scaffold::Cache::Manager;
+use Scaffold::Stash::Manager;
 use Scaffold::Render::Default;
 use Scaffold::Cache::FastMmap;
 use Scaffold::Session::Manager;
@@ -117,6 +118,7 @@ sub init {
     }
 
     push(@{$self->{plugins}}, Scaffold::Cache::Manager->new());
+    push(@{$self->{plugins}}, Scaffold::Stash::Manager->new());
 
     # init rendering
 

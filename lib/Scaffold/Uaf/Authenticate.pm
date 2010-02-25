@@ -12,7 +12,7 @@ use Scaffold::Class
   version   => $VERSION,
   base      => 'Badger::Mixin',
   utils     => 'encrypt',
-  constants => 'TRUE FALSE',
+  constants => 'TRUE FALSE TOKEN_ID SESSION_ID',
   accessors => 'uaf_filter uaf_limit uaf_timeout uaf_secret uaf_login_rootp 
                 uaf_denied_rootp uaf_expired_rootp uaf_validate_rootp 
                 uaf_logout_rootp uaf_login_title uaf_login_wrapper 
@@ -49,7 +49,7 @@ sub uaf_is_valid {
 
     $ip = $self->scaffold->request->address;
 
-    if ($token = $self->stash->cookies->cookie('__token_id__')) {
+    if ($token = $self->stash->cookies->get(TOKEN_ID)) {
         
         $new_token = $token->value;
         $old_ip = $self->scaffold->session->get('uaf_remote_ip') || '';
@@ -104,6 +104,7 @@ sub uaf_invalidate {
     my ($self) = @_;
 
     $self->scaffold->session->expire();
+    $self->stash->cookies->delete(TOKEN_ID);
 
 }
 
@@ -113,10 +114,11 @@ sub uaf_set_token {
     my $salt = $user->attribute('salt');
     my $token = encrypt($user->username, ':', time(), ':', $salt, $$);
 
-    $self->scaffold->response->cookies->{'__token_id__'} = {
+    $self->stash->cookies->set(
+        name  => TOKEN_ID,
         value => $token,
         path  => $self->uaf_cookie_path
-    };
+    );
 
     $self->scaffold->session->set('uaf_token', $token);
 
