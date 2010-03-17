@@ -98,6 +98,7 @@ sub handler {
 
         if ($class->exceptions($ex, $action, $location, $module)) {
 
+            $class->scaffold->response->status('500');
             $class->scaffold->response->body($class->_custom_error($ex));
 
         }
