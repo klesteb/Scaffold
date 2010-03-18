@@ -6,6 +6,7 @@ use strict;
 our $VERSION = '0.01';
 
 use Switch;
+use Try::Tiny;
 use Scaffold::Stash;
 
 use Scaffold::Class
@@ -59,7 +60,7 @@ sub handler {
     $class->scaffold->response->status('200');
     $class->scaffold->response->header('Content-Type' => 'text/html');
 
-    eval {
+    try {
 
         LOOP: 
         while ($state) {
@@ -90,18 +91,11 @@ sub handler {
 
         }
 
-        1;
+    } catch {
 
-    } or do {
+        my $ex = $_;
 
-        my $ex = $@;
-
-        if ($class->exceptions($ex, $action, $location, $module)) {
-
-            $class->scaffold->response->status('500');
-            $class->scaffold->response->body($class->_custom_error($ex));
-
-        }
+        $class->exceptions($ex, $action, $location, $module);
 
     };
 
@@ -150,31 +144,31 @@ sub not_found {
 sub exceptions {
     my ($self, $ex, $action, $location, $module) = @_;
 
-    my $stat = TRUE;
+    my $page;
     my $ref = ref($ex);
 
     if ($ref && $ex->isa('Badger::Exception')) {
 
         my $type = $ex->type;
         my $info = $ex->info;
-        $stat = FALSE;
 
         switch ($type) {
             case MOVED_PERM {
-                $stat = FALSE;
                 $self->scaffold->response->redirect($info, '301');
             }
             case REDIRECT {
-                $stat = FALSE;
                 $self->scaffold->response->redirect($info, '302');
             }
             case RENDER {
-                $stat = FALSE;
+                $page = $self->custom_error(
+                    $self->scaffold,
+                    $self->page_title,
+                    $info,
+                );
                 $self->scaffold->response->status('500');
-                $self->scaffold->response->body($self->_custom_error($info));
+                $self->scaffold->response->body($page);
             }
             case DECLINED {
-                $stat = FALSE;
                 my $text = qq(
                     Declined - undefined method<br />
                     <span style='font-size: .8em'>
@@ -183,26 +177,33 @@ sub exceptions {
                     Module: $module <br />
                     </span>
                 );
+                $page = $self->custom_error(
+                    $self->scaffold,
+                    $self->page_title,
+                    $text,
+                );
                 $self->scaffold->response->status('404');
-                $self->scaffold->response->body($self->_custom_error($text));
+                $self->scaffold->response->body($page);
             }
             case NOTFOUND {
-                $stat = FALSE;
                 my $text = qq(
                     File not found<br />
                     <span style='font-size: .8em'>
                     File: $info<br />
                     </span>
                 );
+                $page = $self->custom_error(
+                    $self->scaffold,
+                    $self->page_title,
+                    $text,
+                );
                 $self->scaffold->response->status('404');
-                $self->scaffold->response->body($self->_custom_error($text));
+                $self->scaffold->response->body($page);
             }
 
         }
 
     }
-
-    return $stat;
 
 }
 
@@ -407,159 +408,6 @@ sub _pre_exit {
 
     }
 
-}
-
-sub _unexpected_exception {
-    my ($self, $type, $info) = @_;
-
-    my $text = qq(
-        Unexpected exception caught<br />
-        <span style='font-size: .8em'>
-        Type: $type<br />
-        Info: $info<br />
-        </span>
-    );
-
-    $self->scaffold->response->status('500');
-    $self->scaffold->response->body($self->_custom_error($text));
-
-}
-
-sub _trim {
-    my $spaces = $1;
-
-    my $new_sp = " " x int( length($spaces) / 4 );
-    return( "\n$new_sp" );
-}
-
-sub _dumper_hook {
-    $_[0] = bless {
-        %{ $_[0] },
-        result_source => undef,
-    }, ref($_[0]);
-}
-
-sub _custom_error {
-    my ($self, @err) = @_;
-
-    my $die_msg    = join( "\n", @err );
-    my $param_dump = Dumper($self->scaffold->request->param);
-
-    $param_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
-    $param_dump =~ s/</&lt;/g;
-
-    my $request_dump  = Dumper($self->scaffold->request);
-    my $response_dump = Dumper($self->scaffold->response);
-
-    local $Data::Dumper::Freezer = '_dumper_hook';
-    my $scaffold_dump = Dumper($self->scaffold);
-
-    $request_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
-    $request_dump =~ s/</&lt;/g;
-
-    $response_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
-    $response_dump =~ s/</&lt;/g;
-
-    $scaffold_dump =~ s/(?:^|\n)(\s+)/&_trim( $1 )/ge;
-    $scaffold_dump =~ s/</&lt;/g;
-
-    my $status = $self->scaffold->response->status || 'Bad Request';
-    my $page = $self->_error_page();
-
-    $page =~ s/##DIE_MESSAGE##/$die_msg/sg;
-    $page =~ s/##PARAM_DUMP##/$param_dump/sg;
-    $page =~ s/##REQUEST_DUMP##/$request_dump/sg;
-    $page =~ s/##RESPONSE_DUMP##/$response_dump/sg;
-    $page =~ s/##SCAFFOLD_DUMP##/$scaffold_dump/sg;
-    $page =~ s/##STATUS##/$status/sg;
-    $page =~ s/##PAGE_TITLE##/$self->page_title/sge;
-
-    return $page;
-
-}
-
-sub _error_page {
-    my ($self) = @_;
-
-    return( qq!
-<html>
-    <head>
-        <title>##PAGE_TITLE## ##STATUS##</title>
-        <style type="text/css">
-            body {
-                font-family: "Bitstream Vera Sans", "Trebuchet MS", Verdana,
-                            Tahoma, Arial, helvetica, sans-serif;
-                color: #ddd;
-                background-color: #eee;
-                margin: 0px;
-                padding: 0px;
-            }
-            div.box {
-                background-color: #ccc;
-                border: 1px solid #aaa;
-                padding: 4px;
-                margin: 10px;
-                -moz-border-radius: 10px;
-            }
-            div.error {
-                font: 20px Tahoma;
-                background-color: #88003A;
-                border: 1px solid #755;
-                padding: 8px;
-                margin: 4px;
-                margin-bottom: 10px;
-                -moz-border-radius: 10px;
-            }
-            div.infos {
-                font: 9px Tahoma;
-                background-color: #779;
-                border: 1px solid #575;
-                padding: 8px;
-                margin: 4px;
-                margin-bottom: 10px;
-                -moz-border-radius: 10px;
-            }
-            .head {
-                font: 12px Tahoma;
-            }
-            div.name {
-                font: 12px Tahoma;
-                background-color: #66B;
-                border: 1px solid #557;
-                padding: 8px;
-                margin: 4px;
-                -moz-border-radius: 10px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="box">
-            <div class="error">##DIE_MESSAGE##</div>
-            <div class="infos"><br/>    
-                <div class="head"><u>site.params</u></div>
-                <br />
-                <pre>
-##PARAM_DUMP##
-                </pre>
-                <div class="head"><u>Request Object</u></div><br/>
-                <pre>
-##REQUEST_DUMP##
-                </pre>
-                <div class="head"><u>Response Object</u></div><br/>
-                <pre>
-##RESPONSE_DUMP##
-                </pre>
-                <div class="head"><u>Scaffold Object</u></div><br/>
-                <pre>
-##SCAFFOLD_DUMP##
-                </pre>    
-            </div>    
-            <div class="name">Running on Scaffold $Scaffold::Base::VERSION</div>
-        </div>
-    </body>
-</html>! 
-);
-    
 }
 
 1;

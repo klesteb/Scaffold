@@ -119,14 +119,13 @@ sub do_router {
 
         if ($self->can($method)) {
 
-            eval {
+            try {
 
                 $status->{result} = $self->$method(ref($data) eq ARRAY ? @$data : ());
-                1;
 
-            } or do {
+            } catch {
 		
-                my $ex = $@;
+                my $ex = $_;
                 my $ref = ref($ex);
 
                 $status->{type} = 'exception';

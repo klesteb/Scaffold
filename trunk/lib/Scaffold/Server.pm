@@ -5,6 +5,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
+use Try::Tiny;
 use Plack::Response;
 use Scaffold::Engine;
 use Scaffold::Cache::Manager;
@@ -24,10 +25,12 @@ use Scaffold::Class
   constants  => 'TRUE FALSE',
   messages => {
       'nomodule'  => "module: %s not loaded, because: %s",
+      'nodefine'  => "a module for \"%s\" was not defined", 
       'noplugin'  => "plugin: %s not initialized, because: %s",
       'nohandler' => "handler: %s for location %s was not loaded, because: %s",
   },
   constant => {
+      NODEFINE  => 'scaffold.server.nodefine',
       NOMODULE  => 'scaffold.server.nomodule',
       NOPLUGIN  => 'scaffold.server.noplugin',
       NOHANDLER => 'scaffold.server.nohandler',
@@ -49,39 +52,48 @@ sub dispatch {
     my $class;
     my $response;
     my $location;
-    my $url = $request->uri;
-    my $uri = lc($url->path);
+    my $url = $request->path_info;
+    my $uri = lc($url);
+    my @path = split('/', $uri);
     my $locations = $self->config('locations');
-    my @path = (split( m|/|, $uri ||'' ));
 
-    while (@path) {
+    $path[0] = '/' if ($uri eq '/');
 
-        $location = join('/', @path);
+    try {
 
-        if (defined $locations->{$location}) {
+        while (@path) {
 
-            if (my $mod = $locations->{$location}) {
+            $location = join('/', @path);
+warn "location = $location\n";
+            
+            if (defined($locations->{$location})) {
 
-                $class = $self->_init_handler($mod, $location);
-                $response = $class->handler($self, $location, ref($class));
-                return $response;
+                if (my $mod = $locations->{$location}) {
 
-            } else {
+                    $class = $self->_init_handler($mod, $location);
+                    $response = $class->handler($self, $location, ref($class));
+                    last;
 
-                $self->throw_msg(NOMODULE, 'nomodule', $location);
+                } else {
+
+                    $self->throw_msg(NODEFINE, 'nodefine', $location);
+
+                }
 
             }
 
+            pop(@path);
+
         }
 
-        pop(@path);
+    } catch {
 
-    }
+        my $ex = $_;
 
-    $location = '/';
-    my $mod = $locations->{$location}; 
-    $class = $self->_init_handler($mod, $location);
-    $response = $class->handler($self, $location, ref($class));
+        $self->_unexpected_exception($ex);
+        $response = $self->response;
+
+    };
 
     return $response;
 
@@ -212,18 +224,16 @@ sub init {
 sub _init_plugin {
     my ($self, $plugin) = @_;
 
-    eval {
+    try {
 
         my $obj = init_module($plugin);
         push(@{$self->{plugins}}, $obj);
-        
-        1;
 
-    } or do {
+    } catch {
         
-        my $ex = $@;
+        my $ex = $_;
 
-        $self->throw_msg(NOPLUGIN, 'noplugin', $plugin, $@);
+        $self->throw_msg(NOPLUGIN, 'noplugin', $plugin, $ex);
 
     };
 
@@ -234,16 +244,15 @@ sub _init_module {
 
     my $obj;
 
-    eval {
+    try {
 
         $obj = init_module($module);
-        1;
 
-    } or do {
+    } catch {
 
-        my $ex = $@;
+        my $ex = $_;
 
-        $self->throw_msg(NOMODULE, 'nomodule', $module, $@);
+        $self->throw_msg(NOMODULE, 'nomodule', $module, $ex);
 
     };
 
@@ -256,7 +265,7 @@ sub _init_handler {
 
     my $obj;
 
-    eval {
+    try {
 
         if (defined($self->{config}->{handlers}->{$location})) {
 
@@ -271,13 +280,11 @@ sub _init_handler {
 
         }
 
-        1;
+    } catch {
 
-    } or do {
+        my $ex = $_;
 
-        my $ex = $@;
-
-        $self->throw_msg(NOHANDLER, 'nohandler', $handler, $location, $@);
+        $self->throw_msg(NOHANDLER, 'nohandler', $handler, $location, $ex->info);
 
     };
 
@@ -324,6 +331,24 @@ sub _set_config_defaults {
         $self->{config}->{configs}->{favicon} = 'favicon.ico';
 
     }
+
+}
+
+sub _unexpected_exception {
+    my ($self, $ex) = @_;
+
+    my $text = qq(
+        Unexpected exception caught<br />
+        <span style='font-size: .8em'>
+        Type: $ex->type<br />
+        Info: $ex->info<br />
+        </span>
+    );
+
+    my $page = $self->custom_error($self, 'Unexcpected Exception', $text);
+
+    $self->response->status('500');
+    $self->response->body($page);
 
 }
 

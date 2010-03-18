@@ -1,3 +1,4 @@
+
 package Scaffold::Utils;
 
 use strict;
@@ -5,6 +6,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
+use Try::Tiny;
 use Crypt::CBC;
 use Badger::Exception trace => 1;
 
@@ -33,7 +35,7 @@ sub decrypt {
 
     local $^W = 0;
 
-    eval {
+    try {
 
         $c = Crypt::CBC->new( 
             -key    => $secret,
@@ -44,11 +46,9 @@ sub decrypt {
         $p_text = $c->decrypt($base64);
         $c->finish();
 
-        1;
+    } catch {
 
-    } or do {
-
-        my $x = $@;
+        my $x = $_;
         my $ex = Badger::Exception->new(
             type => 'scaffold.utils.decrypt',
             info => $x,
@@ -72,7 +72,7 @@ sub encrypt {
 
     local $^W = 0;
 
-    eval {
+    try {
 
         $c = Crypt::CBC->new( 
             -key   => $secret,
@@ -85,11 +85,9 @@ sub encrypt {
 
         $c->finish();
 
-        1;
+    } catch {
 
-    } or do {
-
-        my $x = $@;
+        my $x = $_;
         my $ex = Badger::Exception->new(
             type => 'scaffold.utils.encrypt',
             info => $x,
@@ -106,12 +104,42 @@ sub encrypt {
 sub init_module {
     my ($module) = @_;
 
-    my @parts = split("::", $module);
-    my $filename = File(@parts);
+    my $obj;
+    my @parts;
+    my $filename;
 
-    require $filename . '.pm';
-    $module->import();
-    my $obj = $module->new();
+    if ($module) {
+
+        @parts = split("::", $module);
+        $filename = File(@parts);
+
+        try {
+
+            require $filename . '.pm';
+            $module->import();
+            $obj = $module->new();
+
+        } catch {
+
+            my $ex = Badger::Exception->new(
+                type => 'scaffold.utils.init_module',
+                info => "unable to load module: $module"
+            );
+
+            $ex->throw;
+
+        };
+
+    } else {
+
+        my $ex = Badger::Exception->new(
+            type => 'scaffold.utils.init_module',
+            info => 'no module was defined'
+        );
+
+        $ex->throw;
+
+    }
 
     return $obj;
 
