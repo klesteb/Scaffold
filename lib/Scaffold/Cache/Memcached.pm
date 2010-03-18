@@ -5,6 +5,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
+use Try::Tiny;
 use Cache::Memcached;
 
 use Scaffold::Class
@@ -68,20 +69,18 @@ sub init {
     my $servers  = $self->config('servers') || '127.0.0.1:11211';
     my $compress = $self->config('compress_threshold') || '1000';
 
-    eval {
+    try {
 
         $self->{handle} = Cache::Memcached->new({servers => [$servers]});
         $self->{handle}->set_compress_threshold($compress);
         $self->{handle}->enable_compress(1);
         $self->{handle}->set_norehash() if ($rehash =~ m/no/i);
 
-        1;
+    } catch {
 
-    } or do {
+        my $ex = $_;
 
-        my $ex = $@;
-
-        $self->throw_msg('scaffold.cache.memcached', 'noload', $@);
+        $self->throw_msg('scaffold.cache.memcached', 'noload', $ex);
 
     };
     

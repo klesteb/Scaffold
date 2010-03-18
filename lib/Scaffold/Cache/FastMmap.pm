@@ -5,6 +5,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
+use Try::Tiny;
 use Cache::FastMmap;
 
 use Scaffold::Class
@@ -76,7 +77,7 @@ sub init {
     my $page_size  = $self->config('pagesize') || '256k';
     my $share_file = $self->config('filename') || '/tmp/scaffold.cache';
 
-    eval {
+    try {
 
         $self->{handle} = Cache::FastMmap->new(
             num_pages      => $num_pages,
@@ -87,12 +88,11 @@ sub init {
             unlink_on_exit => 0,
         );
 
-        1;
+    } catch {
 
-    } or do {
+        my $ex = $_;
 
-        my $ex = $@;
-        $self->throw_msg('scaffold.cache.fastmmap', 'noload', $@);
+        $self->throw_msg('scaffold.cache.fastmmap', 'noload', $ex);
 
     };
 
