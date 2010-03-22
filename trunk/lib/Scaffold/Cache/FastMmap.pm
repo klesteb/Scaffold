@@ -32,7 +32,6 @@ sub purge {
 
     return $self->handle->purge();
 
-    
 }
 
 sub clear {
@@ -48,7 +47,7 @@ sub incr {
     my $namespace = $self->namespace;
     my $skey = $namespace . ':' . $key;
 
-    $self->handle->get_and_set($skey, sub { return 1});
+    $self->handle->get_and_set($skey, sub { return ++$_[1] });
 
 }
 
@@ -58,7 +57,16 @@ sub decr {
     my $namespace = $self->namespace;
     my $skey = $namespace . ':' . $key;
 
-    $self->handle->get_and_set($skey, sub {return 0 });
+    $self->handle->get_and_set(
+        $skey, 
+        sub {
+            if ($_[1] > 0) {
+                return --$_[1] ;
+            } else {
+                return 0;
+            }
+        }
+    );
 
 }
 

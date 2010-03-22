@@ -45,7 +45,7 @@ sub pre_action {
                     $self->scaffold->lockmgr->unlock($lock);
 
                 } else { 
-
+warn "user is not valie\n";
                     $self->scaffold->lockmgr->unlock($lock);
                     $hobj->redirect($login_rootp); 
 
