@@ -25,7 +25,7 @@ use Scaffold::Class
   constants  => 'TRUE FALSE',
   messages => {
       'nomodule'  => "module: %s not loaded, because: %s",
-      'nodefine'  => "a module for \"%s\" was not defined", 
+      'nodefine'  => "a handler for \"%s\" was not defined", 
       'noplugin'  => "plugin: %s not initialized, because: %s",
       'nohandler' => "handler: %s for location %s was not loaded, because: %s",
   },
@@ -52,6 +52,7 @@ sub dispatch {
     my $class;
     my $response;
     my $location;
+    my $processed = FALSE;
     my $url = $request->path_info;
     my $uri = lc($url);
     my @path = split('/', $uri);
@@ -64,14 +65,14 @@ sub dispatch {
         while (@path) {
 
             $location = join('/', @path);
-warn "location = $location\n";
-            
+
             if (defined($locations->{$location})) {
 
                 if (my $mod = $locations->{$location}) {
 
                     $class = $self->_init_handler($mod, $location);
                     $response = $class->handler($self, $location, ref($class));
+                    $processed = TRUE;
                     last;
 
                 } else {
@@ -85,6 +86,8 @@ warn "location = $location\n";
             pop(@path);
 
         }
+
+        $self->throw_msg(NODEFINE, 'nodefine', $url) if (! $processed);
 
     } catch {
 

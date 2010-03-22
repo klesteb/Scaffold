@@ -22,6 +22,7 @@ my $builder = Module::Build->new(
         'CGI::Simple::Cookie'  => '1.112',
         'Cache::FastMmap'      => '1.34',
         'Cache::Memcached'     => '1.28',
+        'Try::Tiny'            => '0.04',
     },
     add_to_cleanup      => [ 'Scaffold-*' ],
     create_makefile_pl => 'traditional',
