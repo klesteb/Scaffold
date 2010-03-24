@@ -121,9 +121,10 @@ sub init_module {
 
         } catch {
 
+            my $x = $_;
             my $ex = Badger::Exception->new(
                 type => 'scaffold.utils.init_module',
-                info => "unable to load module: $module"
+                info => $x
             );
 
             $ex->throw;
