@@ -23,7 +23,7 @@ sub do_api {
     my $json;
     my $actions;
     my $introspection = $self->introspect();
-    my $params = $self->scaffold->request->params;
+    my $params = $self->scaffold->request->parameters->mixed();
 
     foreach my $action (keys %{$instrospection}) {
 
@@ -45,7 +45,7 @@ sub do_api {
 
     }
 
-    $url = $self->scaffold->request->uri;
+    $url = $self->scaffold->request->path_info;
     $url =~ s/api/router/;
 
     $code = {
