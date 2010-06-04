@@ -210,11 +210,11 @@ sub exceptions {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-    
+
 sub _cleanroot {
     my ($self, $uri, $root) = @_;
 
-    $uri =~ s!^$root!!g;
+    $uri =~ s!^$root!!gi;
     $uri =~ s/\/\//\//g;
     $uri =~ s/^\///;
 
@@ -247,8 +247,6 @@ sub _pre_action {
 
 sub _perform_action {
     my ($self, $action , $p1, @p) = @_;
-
-    my $output;
 
     $self->stash->view->reinit();
 

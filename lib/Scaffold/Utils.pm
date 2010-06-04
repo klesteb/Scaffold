@@ -1,4 +1,3 @@
-
 package Scaffold::Utils;
 
 use strict;
