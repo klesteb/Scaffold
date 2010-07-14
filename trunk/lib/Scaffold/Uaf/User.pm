@@ -81,6 +81,8 @@ Example:
 
 =back
 
+=back
+
 =head1 MUTATORS
 
 =over 4
