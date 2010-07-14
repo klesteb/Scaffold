@@ -52,9 +52,8 @@ lib/Scaffold/Uaf/Manager.pm
 lib/Scaffold/Uaf/Rule.pm
 lib/Scaffold/Uaf/User.pm
 lib/Scaffold/Utils.pm
-Makefile.PL
 MANIFEST
-META.yml
+MANIFEST.SKIP
 README
 t/00-load.t
 t/boilerplate.t
