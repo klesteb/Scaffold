@@ -1,6 +1,11 @@
 Revision history for Scaffold
 
-0.01    14-Jul-2010
+0.01    14-Jul-2010 K.Esteb
         First version, released on an unsuspecting world.
         svn log -r 1:84
+
+0.02    23-Jul-2010 K.Esteb
+        Improved the exception handling within the Uaf modules. It should
+        not allow a resource to remain locked if an exception occurs.
+        
 
