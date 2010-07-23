@@ -54,25 +54,7 @@ sub unlock {
 sub try_lock {
     my ($self, $key) = @_;
 
-    my $stat = TRUE;
-    my $count = 0;
-
-    while ($self->engine->locked($key)) {
-
-        $count++;
-
-        if ($count < $self->limit) {
-
-            sleep $self->timeout;
-
-        } else {
-
-            $stat = FALSE;
-            last;
-
-        }
-
-    }
+    my $stat = $self->engine->locked($key) ? FALSE : TRUE;
 
     return $stat;
 

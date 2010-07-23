@@ -3,7 +3,9 @@ package Scaffold::Uaf::Manager;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
+
+use Try::Tiny;
 
 use Scaffold::Class
   version   => $VERSION,
@@ -33,32 +35,51 @@ sub pre_action {
 
     if ($uri->path !~ /^$regex/) {
 
-        if ($self->scaffold->lockmgr->lock($lock)) {
+        try {
 
-            $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
+            if ($self->scaffold->lockmgr->lock($lock)) {
 
-            if ($attempts < $self->uaf_limit) {
+                $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
 
-                if ($user = $self->uaf_is_valid()) {
+                if ($attempts < $self->uaf_limit) {
 
-                    $self->scaffold->user($user);
+                    if ($user = $self->uaf_is_valid()) {
+
+                        $self->scaffold->user($user);
+                        $self->scaffold->lockmgr->unlock($lock);
+
+                    } else { 
+
+                        $self->scaffold->lockmgr->unlock($lock);
+                        $hobj->redirect($login_rootp); 
+
+                    }
+
+                } else {
+
                     $self->scaffold->lockmgr->unlock($lock);
-
-                } else { 
-warn "user is not valie\n";
-                    $self->scaffold->lockmgr->unlock($lock);
-                    $hobj->redirect($login_rootp); 
+                    $hobj->redirect($denied_rootp); 
 
                 }
 
-            } else {
+            }
+
+        } catch {
+
+            my $ex = $_;
+
+            # capture any exceptions and release any held locks,
+            # then punt to the outside exception handler.
+
+            unless ($self->scaffold->lockmgr->try_lock($lock)) {
 
                 $self->scaffold->lockmgr->unlock($lock);
-                $hobj->redirect($denied_rootp); 
 
             }
 
-        }
+            die $ex;
+
+        };
 
     }
 

@@ -4,9 +4,10 @@ use 5.008;
 use strict;
 use warnings;
 
-use Scaffold::Uaf::User;
-
 our $VERSION = '0.03';
+
+use Try::Tiny;
+use Scaffold::Uaf::User;
 
 use Scaffold::Class
   version   => $VERSION,
