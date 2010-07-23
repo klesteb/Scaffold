@@ -83,7 +83,8 @@ Releases the lock on a resource.
 
 =item try_lock
 
-Tests to see if the lock on a resource is available.
+Tests to see if the lock on a resource is available, returns true if the lock
+is available.
 
  $self->scaffold->lockmgr->try_lock($lock);
 
