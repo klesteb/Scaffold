@@ -6,6 +6,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use DateTime;
+use Try::Tiny;
 use Digest::MD5;
 use Digest::HMAC;
 
@@ -89,42 +90,61 @@ sub do_validate {
     
     $url = $login_rootp;
 
-    if ($self->scaffold->lockmgr->lock($lock)) {
+    try {
 
-        $count = $self->scaffold->session->get('uaf_login_attempts');
-        $count++;
+        if ($self->scaffold->lockmgr->lock($lock)) {
 
-        $self->scaffold->session->set('uaf_login_attempts', $count);
+            $count = $self->scaffold->session->get('uaf_login_attempts');
+            $count++;
 
-        $user = $self->uaf_validate($params->{username}, $params->{password});
+            $self->scaffold->session->set('uaf_login_attempts', $count);
 
-        if (defined($user)) {
+            $user = $self->uaf_validate($params->{username}, $params->{password});
 
-            $self->scaffold->session->set('uaf_user', $user);
+            if (defined($user)) {
 
-            if ($count < $self->uaf_limit) {
+                $self->scaffold->session->set('uaf_user', $user);
 
-                $self->scaffold->session->set('uaf_login_attempts', 0);
-                $self->uaf_set_token($user);
-                $url = $app_rootp;
+                if ($count < $self->uaf_limit) {
+
+                    $self->scaffold->session->set('uaf_login_attempts', 0);
+                    $self->uaf_set_token($user);
+                    $url = $app_rootp;
+
+                } else {
+
+                    $url = $denied_rootp;
+
+                }
 
             } else {
 
-                $url = $denied_rootp;
+                $url = ($count < $self->uaf_limit) ? $login_rootp : $denied_rootp;
 
             }
 
-        } else {
-
-            $url = ($count < $self->uaf_limit) ? $login_rootp : $denied_rootp;
+            $self->scaffold->lockmgr->unlock($lock);
 
         }
 
-        $self->scaffold->lockmgr->unlock($lock);
+        $self->redirect($url);
 
-    }
+    } catch {
 
-    $self->redirect($url);
+        my $ex = $_;
+
+        # capture any exceptions and release any held locks,
+        # then punt to the outside exception handler.
+
+        unless ($self->scaffold->lockmgr->try_lock($lock)) {
+
+            $self->scaffold->lockmgr->unlock($lock);
+
+        }
+
+        die $ex;
+
+    };
 
 }
 
