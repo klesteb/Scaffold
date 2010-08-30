@@ -11,7 +11,7 @@ use Scaffold::Class
   base      => 'Scaffold::Lockmgr',
   constants => 'TRUE FALSE',
   messages => {
-      nosemaphores => 'unable to aquire a semaphore set: reason %s',
+      'nosemaphores' => 'unable to aquire a semaphore set: reason %s',
   }
 ;
 
@@ -195,7 +195,7 @@ sub init {
 
     	$self->throw_msg(
             'scaffold.lockmgr.unixmutex',
-            nosemaphores,
+            'nosemaphores',
             $ex
         );
 
