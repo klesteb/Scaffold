@@ -19,6 +19,8 @@ use Scaffold::Class
   },
 ;
 
+use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
@@ -70,6 +72,8 @@ sub encrypt {
     my $c_text;
 
     local $^W = 0;
+
+warn Dumper(@to_encrypt);
 
     try {
 
