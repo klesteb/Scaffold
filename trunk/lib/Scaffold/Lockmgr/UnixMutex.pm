@@ -2,6 +2,7 @@ package Scaffold::Lockmgr::UnixMutex;
 
 our $VERSION = '0.01';
 
+use Try::Tiny;
 use IPC::Semaphore;
 use IPC::SysV qw( IPC_CREAT S_IRWXU IPC_NOWAIT SEM_UNDO );
 
@@ -9,6 +10,9 @@ use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Lockmgr',
   constants => 'TRUE FALSE',
+  messages => {
+      nosemaphores => 'unable to aquire a semaphore set: reason %s',
+  }
 ;
 
 # ----------------------------------------------------------------------
@@ -18,7 +22,7 @@ use Scaffold::Class
 sub allocate {
     my ($self, $key) = @_;
 
-    my $size = $self->config('size');
+    my $size = $self->config('nsems');
 
     if (! exists($self->{locks}->{$key})) {
 
@@ -129,29 +133,29 @@ sub try_lock {
 sub init {
     my ($self, $config) = @_;
 
-    if (! defined($config->{size})) {
+    if (! defined($config->{nsems})) {
 
         if ($^O eq "aix") {
 
-            $config->{size} = 250;
+            $config->{nsems} = 250;
 
         } elsif ($^O eq 'linux') {
 
-            $config->{size} = 250;
+            $config->{nsems} = 250;
 
         } elsif ($^O eq 'bsd') {
 
-            $config->{size} = 8;
+            $config->{nsems} = 8;
 
         } else {
 
-            $config->{size} = 16;
+            $config->{nsems} = 16;
 
         }
 
     }
 
-    if (! defined($config->{name})) {
+    if (! defined($config->{key})) {
 
         my $hash;
         my $name = 'scaffold';
@@ -162,7 +166,7 @@ sub init {
 
         }
 
-        $config->{name} = $hash;
+        $config->{key} = $hash;
 
     }
 
@@ -171,19 +175,33 @@ sub init {
     $self->{limit}   = $config->{limit} || 10;
     $self->{timeout} = $config->{timeout} || 10;
 
-    for (my $x = 0; $x < $config->{size}; $x++) {
+    for (my $x = 0; $x < $config->{nsems}; $x++) {
 
         $self->{locks}->{available}[$x] = 1;
 
     }
 
-    $self->{engine} = IPC::Semaphore->new(
-        $config->{name},
-        $config->{size},
-        (S_IRWXU | IPC_CREAT)
-    );
+    try {
 
-    $self->engine->setval(0, $config->{size});
+        $self->{engine} = IPC::Semaphore->new(
+            $config->{key},
+            $config->{nsems},
+            (S_IRWXU | IPC_CREAT)
+        );
+
+    } catch {
+
+        my $ex = $_;
+
+    	$self->throw_msg(
+            'scaffold.lockmgr.unixmutex',
+            nosemaphores,
+            $ex
+        );
+
+    };
+    
+    $self->engine->setval(0, $config->{nsems});
 
     return $self;
 
