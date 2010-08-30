@@ -1,0 +1,263 @@
+package Scaffold::Lockmgr::UnixMutex;
+
+our $VERSION = '0.01';
+
+use IPC::Semaphore;
+use IPC::SysV qw( IPC_CREAT S_IRWXU IPC_NOWAIT SEM_UNDO );
+
+use Scaffold::Class
+  version   => $VERSION,
+  base      => 'Scaffold::Lockmgr',
+  constants => 'TRUE FALSE',
+;
+
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
+
+sub allocate {
+    my ($self, $key) = @_;
+
+    my $size = $self->config('size');
+
+    if (! exists($self->{locks}->{$key})) {
+
+        for (my $x = 0; $x < $size; $x++) {
+
+            if ($self->{locks}->{available}[$x] == 1) {
+
+                $self->{locks}->{available}[$x] = 0;
+                $self->{locks}->{$key}->{semno} = $x;
+
+                last;
+
+            }
+
+        }
+
+    }
+
+}
+
+sub deallocate {
+    my ($self, $key) = @_;
+
+    my $semno;
+
+    if (exists($self->{locks}->{$key})) {
+
+        $semno = $self->{locks}->{$key}->{semno};
+        $self->{locks}->{available}[$semno] = 1;
+
+    }
+
+}
+
+sub lock {
+    my ($self, $key) = @_;
+
+    my $semno;
+    my $count = 0;
+    my $stat = TRUE;
+
+    if (exists($self->{locks}->{$key})) {
+
+        $semno = $self->{locks}->{$key}->{semno};
+
+        while (! $self->engine->op($semno, -1, IPC_NOWAIT | SEM_UNDO)) {
+
+            $count++;
+
+            if ($count < $self->limit) {
+
+                sleep $self->timeout;
+
+            } else {
+
+                $stat = FALSE;
+                last;
+
+            }
+
+        }
+
+    } else {
+
+        $stat = FALSE;
+
+    }
+
+    return $stat;
+
+}
+
+sub unlock {
+    my ($self, $key) = @_;
+
+    my $semno;
+
+    if (exists($self->{locks}->{$key})) {
+
+        $semno = $self->{locks}->{$key}->{semno};
+        $self->engine->op($semno, 1, 0);
+
+    }
+
+}
+
+sub try_lock {
+    my ($self, $key) = @_;
+
+    my $semno;
+    my $stat = FALSE;
+
+    if (exists($self->{locks}->{$key})) {
+
+        $semno = $self->{locks}->{$key}->{semno};
+        $stat = $self->engine->getcnt($semno) ? FALSE : TRUE;
+
+    }
+
+    return $stat;
+
+}
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
+sub init {
+    my ($self, $config) = @_;
+
+    if (! defined($config->{size})) {
+
+        if ($^O eq "aix") {
+
+            $config->{size} = 250;
+
+        } elsif ($^O eq 'linux') {
+
+            $config->{size} = 250;
+
+        } elsif ($^O eq 'bsd') {
+
+            $config->{size} = 8;
+
+        } else {
+
+            $config->{size} = 16;
+
+        }
+
+    }
+
+    if (! defined($config->{name})) {
+
+        my $hash;
+        my $name = 'scaffold';
+
+        for (my $x = 0; $x < length($name); $x++) {
+
+            $hash += ord(substr($name, $x, 1));
+
+        }
+
+        $config->{name} = $hash;
+
+    }
+
+    $self->{config}  = $config;
+    $self->{owner}   = $$;
+    $self->{limit}   = $config->{limit} || 10;
+    $self->{timeout} = $config->{timeout} || 10;
+
+    for (my $x = 0; $x < $config->{size}; $x++) {
+
+        $self->{locks}->{available}[$x] = 1;
+
+    }
+
+    $self->{engine} = IPC::Semaphore->new(
+        $config->{name},
+        $config->{size},
+        (S_IRWXU | IPC_CREAT)
+    );
+
+    $self->engine->setval(0, $config->{size});
+
+    return $self;
+
+}
+
+sub DESTROY {
+    my $self = shift;
+
+    return unless $self->{owner} == $$;
+    $self->engine->remove();
+
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+Scaffold::Lockmgr::UnixMutex - Use SysV semaphores for resource locking.
+
+=head1 DESCRIPTION
+
+This implenments general purpose locking with SysV semaphores. 
+
+=head1 SEE ALSO
+
+ Scaffold
+ Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
+ Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
+
+=head1 AUTHOR
+
+Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2010 by Kevin L. Esteb
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.5 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
