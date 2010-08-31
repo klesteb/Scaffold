@@ -2,7 +2,7 @@ package Scaffold::Uaf::Login;
 
 our $VERSION = '0.01';
 
-use 5.008008;
+use 5.8.8;
 use DateTime;
 use Try::Tiny;
 use Digest::MD5;
@@ -34,7 +34,7 @@ sub do_main {
     $title = $self->uaf_login_title;
     $wrapper = $self->uaf_login_wrapper;
     $template = $self->uaf_login_template;
-    
+
     if ($self->scaffold->lockmgr->lock($lock)) {
 
         $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;

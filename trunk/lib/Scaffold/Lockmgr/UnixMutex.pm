@@ -2,6 +2,7 @@ package Scaffold::Lockmgr::UnixMutex;
 
 our $VERSION = '0.01';
 
+use 5.8.8;
 use Try::Tiny;
 use IPC::Semaphore;
 use IPC::SysV qw( IPC_CREAT S_IRWXU IPC_NOWAIT SEM_UNDO );
@@ -52,6 +53,7 @@ sub deallocate {
 
         $semno = $self->{locks}->{$key}->{semno};
         $self->{locks}->{available}[$semno] = 1;
+        delete $self->{locks}->{$key};
 
     }
 
@@ -118,7 +120,7 @@ sub try_lock {
     if (exists($self->{locks}->{$key})) {
 
         $semno = $self->{locks}->{$key}->{semno};
-        $stat = $self->engine->getcnt($semno) ? FALSE : TRUE;
+        $stat = $self->engine->getncnt($semno) ? FALSE : TRUE;
 
     }
 
@@ -200,7 +202,7 @@ sub init {
         );
 
     };
-    
+
     $self->engine->setval(0, $config->{nsems});
 
     return $self;
@@ -210,7 +212,7 @@ sub init {
 sub DESTROY {
     my $self = shift;
 
-    return unless $self->{owner} == $$;
+#    return unless $self->{owner} == $$;
     $self->engine->remove();
 
 }

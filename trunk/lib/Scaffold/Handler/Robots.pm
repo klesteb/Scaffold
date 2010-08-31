@@ -2,7 +2,7 @@ package Scaffold::Handler::Robots;
 
 our $VERSION = '0.01';
 
-use 5.008008;
+use 5.8.8;
 use Scaffold::Class
   version    => $VERSION,
   base       => 'Scaffold::Handler',

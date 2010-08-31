@@ -2,7 +2,7 @@ package Scaffold::Stash::Cookies;
 
 our $VERSION = '0.01';
 
-use 5.008008;
+use 5.8.8;
 use CGI::Simple::Cookie;
 
 use Scaffold::Class

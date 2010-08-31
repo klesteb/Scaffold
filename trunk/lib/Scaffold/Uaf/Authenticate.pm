@@ -2,7 +2,7 @@ package Scaffold::Uaf::Authenticate;
 
 our $VERSION = '0.03';
 
-use 5.008008;
+use 5.8.8;
 use Try::Tiny;
 use Scaffold::Uaf::User;
 
@@ -48,7 +48,7 @@ sub uaf_is_valid {
     $ip = $self->scaffold->request->address;
 
     if ($token = $self->stash->cookies->get(TOKEN_ID)) {
-        
+
         $new_token = $token->value;
         $old_ip = $self->scaffold->session->get('uaf_remote_ip') || '';
         $old_token = $self->scaffold->session->get('uaf_token') || '';
@@ -109,7 +109,7 @@ sub uaf_invalidate {
 sub uaf_set_token {
     my ($self, $user) = @_;
 
-    my $salt = $user->attribute('salt');
+    my $salt = $user->attribute('salt') || '';
     my $token = encrypt($user->username, ':', time(), ':', $salt, $$);
 
     $self->stash->cookies->set(

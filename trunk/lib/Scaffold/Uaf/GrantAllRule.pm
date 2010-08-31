@@ -1,6 +1,6 @@
 package Scaffold::Uaf::GrantAllRule;
 
-use 5.008008;
+use 5.8.8;
 
 use Scaffold::Class
   version => '0.01',

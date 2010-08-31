@@ -2,7 +2,7 @@ package Scaffold::Stash;
 
 our $VERSION = '0.01';
 
-use 5.008008;
+use 5.8.8;
 use Scaffold::Stash::View;
 use Scaffold::Stash::Cookies;
 use Scaffold::Stash::Controller;

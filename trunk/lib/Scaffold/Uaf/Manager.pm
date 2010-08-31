@@ -2,7 +2,7 @@ package Scaffold::Uaf::Manager;
 
 our $VERSION = '0.02';
 
-use 5.008008;
+use 5.8.8;
 use Try::Tiny;
 
 use Scaffold::Class
