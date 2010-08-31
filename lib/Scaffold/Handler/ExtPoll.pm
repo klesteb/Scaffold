@@ -1,10 +1,8 @@
 package Scaffold::Handler::ExtPoll;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use DateTime;
 use Scaffold::Class
   version => $VERSION,
@@ -80,6 +78,7 @@ Scaffold::Handler::ExtPoll - A handler to for the Ext.direct poller
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

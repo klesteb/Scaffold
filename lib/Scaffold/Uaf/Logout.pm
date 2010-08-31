@@ -1,10 +1,8 @@
 package Scaffold::Uaf::Logout;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Handler',
@@ -96,6 +94,7 @@ It also invalidates the session.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

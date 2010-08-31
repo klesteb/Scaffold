@@ -1,10 +1,8 @@
 package Scaffold::Utils;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use Try::Tiny;
 use Crypt::CBC;
 use Badger::Exception trace => 1;
@@ -208,6 +206,7 @@ load and initializes a module
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

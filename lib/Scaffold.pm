@@ -277,6 +277,7 @@ See, simple, no muss, no fuss.
 
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
 
  Scaffold::Plugins
 

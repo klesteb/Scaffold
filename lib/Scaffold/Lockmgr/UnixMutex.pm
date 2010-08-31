@@ -223,9 +223,62 @@ __END__
 
 Scaffold::Lockmgr::UnixMutex - Use SysV semaphores for resource locking.
 
+=head1 SYNOPSIS
+
+ use Scaffold::Server;
+ use Scaffold::Lockmgr::UnixMutex;
+
+ my $psgi_handler;
+
+ main: {
+
+    my $server = Scaffold::Server->new(
+        lockmgr => Scaffold::Lockmgr::UnixMutex->new(
+            key     => 1234,
+            nsems   => 32,
+            timeout => 10,
+            limit   => 10
+        },
+    );
+
+    $psgi_hander = $server->engine->psgi_handler();
+
+ }
+
 =head1 DESCRIPTION
 
-This implenments general purpose locking with SysV semaphores. 
+This implenments general purpose resource locking with SysV semaphores. 
+
+=head1 CONFIGURATION
+
+=over 4
+
+=item key
+
+This is a numeric key to identify the semaphore set. The default is a hash
+of "scaffold".
+
+=item nsems
+
+The number of semaphores in the semaphore set. The default is dependent 
+on platform. 
+
+    linux - 250
+    aix   - 250
+    bsd   - 8
+    other - 16
+
+=item timeout
+
+The number of seconds to sleep if the lock is not available. Default is 10
+seconds.
+
+=item limit
+
+The number of attempts to try the lock. If the limit is passed an exception
+is thrown. The default is 10.
+
+=back
 
 =head1 SEE ALSO
 

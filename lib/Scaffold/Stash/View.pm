@@ -1,10 +1,8 @@
 package Scaffold::Stash::View;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
@@ -42,22 +40,89 @@ __END__
 
 =head1 NAME
 
-Scaffold::Stash::View - 
-
-=head1 SYNOPSIS
+Scaffold::Stash::View - The internal view of an output page.
 
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
+This is the interface between the handlers and the templating system.
+
+=head1 MUTATORS
 
 =over 4
+
+=item title 
+
+The title for the page.
+
+=item template 
+
+The template to use for the page.
+
+=item data 
+
+The data that the template will process for the page.
+
+=item template_disabled 
+
+Temporary disable the templating system. .i.e. to send raw data to the
+browser.
+
+=item template_wrapper
+
+The wrapper to use for the template.
+
+=item content_type 
+
+The content type for the page. The default is 'text/html'.
+
+=item cache 
+
+Boolean switch as to wither to cache this page.
+
+=item cache_key
+
+The key to use to return the page from cache.
 
 =back
 
 =head1 SEE ALSO
 
+ Scaffold
  Scaffold::Base
+ Scaffold::Cache
+ Scaffold::Cache::FastMmap
+ Scaffold::Cache::Manager
+ Scaffold::Cache::Memcached
  Scaffold::Class
+ Scaffold::Constants
+ Scaffold::Engine
+ Scaffold::Handler
+ Scaffold::Handler::Favicon
+ Scaffold::Handler::Robots
+ Scaffold::Handler::Static
+ Scaffold::Lockmgr
+ Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
+ Scaffold::Plugins
+ Scaffold::Render
+ Scaffold::Render::Default
+ Scaffold::Render::TT
+ Scaffold::Server
+ Scaffold::Session::Manager
+ Scaffold::Stash
+ Scaffold::Stash::Controller
+ Scaffold::Stash::Cookie
+ Scaffold::Stash::View
+ Scaffold::Uaf::Authenticate
+ Scaffold::Uaf::AuthorizeFactory
+ Scaffold::Uaf::Authorize
+ Scaffold::Uaf::GrantAllRule
+ Scaffold::Uaf::Login
+ Scaffold::Uaf::Logout
+ Scaffold::Uaf::Manager
+ Scaffold::Uaf::Rule
+ Scaffold::Uaf::User
+ Scaffold::Utils
 
 =head1 AUTHOR
 
