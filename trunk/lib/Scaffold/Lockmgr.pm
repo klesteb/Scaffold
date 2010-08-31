@@ -1,10 +1,8 @@
 package Scaffold::Lockmgr;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',

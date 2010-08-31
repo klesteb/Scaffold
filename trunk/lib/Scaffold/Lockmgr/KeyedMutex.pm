@@ -1,8 +1,5 @@
 package Scaffold::Lockmgr::KeyedMutex;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
 use KeyedMutex;
@@ -99,12 +96,58 @@ __END__
 
 =head1 NAME
 
-Scaffold::Lockmgr::KeyedMutex - Use KeyedMutex as the backend.
+Scaffold::Lockmgr::KeyedMutex - Use the KeyedMutex daemon for resource locking.
+
+=head1 SYNOPSIS
+
+ use Scaffold::Server;
+ use Scaffold::Lockmgr::KeyedMutex;
+
+ my $psgi_handler;
+
+ main: {
+
+    my $server = Scaffold::Server->new(
+        lockmgr => Scaffold::Lockmgr::KeyedMutex->new(
+            port    => 9506,
+            address => 127.0.0.1,
+            timeout => 10,
+            limit   => 10
+        },
+    );
+
+    $psgi_hander = $server->engine->psgi_handler();
+
+ }
 
 =head1 DESCRIPTION
 
 This implenments general purpose locking using KeyedMutex. KeyedMutex is a 
 distributed locking daemon with a perl interface module. 
+
+=head1 CONFIGURATION
+
+=over 4
+
+=item port
+
+The IP port number to talk to the daemon on. Default is 9506.
+
+=item address
+
+The IP address or host name where the daemon is located. Default is 127.0.0.1.
+
+=item timeout
+
+The number of seconds to sleep if the lock is not available. Default is 10
+seconds.
+
+=item limit
+
+The number of attempts to try the lock. If the limit is passed an exception
+is thrown. The default is 10.
+
+=back
 
 =head1 SEE ALSO
 
@@ -125,6 +168,7 @@ distributed locking daemon with a perl interface module.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

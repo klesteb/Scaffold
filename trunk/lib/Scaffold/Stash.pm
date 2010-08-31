@@ -1,10 +1,8 @@
 package Scaffold::Stash;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use Scaffold::Stash::View;
 use Scaffold::Stash::Cookies;
 use Scaffold::Stash::Controller;
@@ -73,6 +71,7 @@ Scaffold::Stash - The base class for the stash within Scaffold
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

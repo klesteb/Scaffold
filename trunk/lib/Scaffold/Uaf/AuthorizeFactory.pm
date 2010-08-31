@@ -1,8 +1,6 @@
 package Scaffold::Uaf::AuthorizeFactory;
 
-use strict;
-use warnings;
-
+use 5.008008;
 use Scaffold::Uaf::GrantAllRule;
 
 use Scaffold::Class
@@ -52,6 +50,7 @@ is a good idea to replace this module with something better.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

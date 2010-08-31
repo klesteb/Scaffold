@@ -1,10 +1,8 @@
 package Scaffold::Handler;
 
-use warnings;
-use strict;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use Switch;
 use Try::Tiny;
 use Scaffold::Stash;
@@ -584,6 +582,7 @@ can be overridden.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

@@ -1,11 +1,8 @@
 package Scaffold::Uaf::Authenticate;
 
-use 5.008;
-use strict;
-use warnings;
-
 our $VERSION = '0.03';
 
+use 5.008008;
 use Try::Tiny;
 use Scaffold::Uaf::User;
 
@@ -332,6 +329,7 @@ These accessors return the corresponding config items.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

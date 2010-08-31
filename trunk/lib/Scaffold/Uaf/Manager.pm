@@ -1,10 +1,8 @@
 package Scaffold::Uaf::Manager;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.02';
 
+use 5.008008;
 use Try::Tiny;
 
 use Scaffold::Class
@@ -144,6 +142,7 @@ Checks to see if the current session is authenticated, redirects as needed.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

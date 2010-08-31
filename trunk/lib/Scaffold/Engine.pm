@@ -1,10 +1,8 @@
 package Scaffold::Engine;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
+use 5.008008;
 use Plack::Loader;
 use Plack::Builder;
 
@@ -262,6 +260,7 @@ Runs Scaffold::Server as a standalone application.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default

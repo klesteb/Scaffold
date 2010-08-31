@@ -2,7 +2,9 @@ package Scaffold::Base;
 
 our $VERSION = '0.01';
 
+use 5.008008;
 use Data::Dumper;
+
 use Scaffold::Class
   base     => 'Badger::Base',
   version  => $VERSION,
@@ -214,6 +216,7 @@ This method is used to return items from the interal config cache.
  Scaffold::Handler::Static
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
+ Scaffold::Lockmgr::UnixMutex
  Scaffold::Plugins
  Scaffold::Render
  Scaffold::Render::Default
