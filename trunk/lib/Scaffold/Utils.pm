@@ -71,8 +71,6 @@ sub encrypt {
 
     local $^W = 0;
 
-warn Dumper(@to_encrypt);
-
     try {
 
         $c = Crypt::CBC->new( 
