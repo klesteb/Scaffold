@@ -2,7 +2,7 @@ package Scaffold::Server;
 
 our $VERSION = '0.01';
 
-use 5.008008;
+use 5.8.8;
 use Try::Tiny;
 use Plack::Response;
 use Scaffold::Engine;
@@ -11,7 +11,7 @@ use Scaffold::Stash::Manager;
 use Scaffold::Render::Default;
 use Scaffold::Cache::FastMmap;
 use Scaffold::Session::Manager;
-use Scaffold::Lockmgr::KeyedMutex;
+use Scaffold::Lockmgr::UnixMutex;
 
 use Scaffold::Class
   version    => $VERSION,
@@ -130,6 +130,18 @@ sub init {
 
     }
 
+    # init the lockmgr
+
+    if (my $lockmgr = $self->config('lockmgr')) {
+
+        $self->{lockmgr} = $lockmgr;
+
+    } else {
+
+        $self->{lockmgr} = Scaffold::Lockmgr::UnixMutex->new();
+
+    }
+
     push(@{$self->{plugins}}, Scaffold::Cache::Manager->new());
     push(@{$self->{plugins}}, Scaffold::Stash::Manager->new());
 
@@ -154,18 +166,6 @@ sub init {
     } else {
 
         $self->_init_plugin('Scaffold::Session::Manager');
-
-    }
-
-    # init the lockmgr
-
-    if (my $lockmgr = $self->config('lockmgr')) {
-
-        $self->{lockmgr} = $lockmgr;
-
-    } else {
-
-        $self->{lockmgr} = Scaffold::Lockmgr::KeyedMutex->new();
 
     }
 

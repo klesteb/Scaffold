@@ -2,8 +2,8 @@ package Scaffold::Lockmgr::KeyedMutex;
 
 our $VERSION = '0.01';
 
+use 5.8.8;
 use KeyedMutex;
-
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Lockmgr',

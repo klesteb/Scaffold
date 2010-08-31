@@ -2,7 +2,7 @@ package Scaffold::Handler::ExtPoll;
 
 our $VERSION = '0.01';
 
-use 5.008008;
+use 5.8.8;
 use DateTime;
 use Scaffold::Class
   version => $VERSION,

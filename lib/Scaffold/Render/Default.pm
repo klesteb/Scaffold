@@ -2,7 +2,7 @@ package Scaffold::Render::Default;
 
 our $VERSION = '0.01';
 
-use 5.08008;
+use 5.8.8;
 use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Render'

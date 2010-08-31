@@ -2,7 +2,7 @@ package Scaffold::Base;
 
 our $VERSION = '0.01';
 
-use 5.008008;
+use 5.8.8;
 use Data::Dumper;
 
 use Scaffold::Class
