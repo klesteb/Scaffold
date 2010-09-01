@@ -16,7 +16,7 @@ main: {
 	    static_search => 'html:html/resources',
 	},
         locations => {
-            '/'            => 'App::HelloWorld',
+            '/'            => 'App::Main',
             '/robots.txt'  => 'Scaffold::Handler::Robots',
             '/favicon.ico' => 'Scaffold::Handler::Favicon',
             '/static'      => 'Scaffold::Handler::Static',
