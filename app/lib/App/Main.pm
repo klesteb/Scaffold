@@ -1,4 +1,4 @@
-package App::HelloWorld;
+package App::Main;
 
 use strict;
 use warnings;
@@ -20,11 +20,11 @@ sub do_main {
     my $self = shift;
 
     my $data = {
-	css     => '/static/css/default.css',
-	header  => 'Example Web Site',
-	menu    => 'main_menu.tt',
-	content => 'content.tt',
-	footer  => 'copyright.tt',
+        css     => '/static/css/default.css',
+        header  => 'Example Web Site',
+        menu    => 'main_menu.tt',
+        content => 'content.tt',
+        footer  => 'copyright.tt',
     };
 
     $self->stash->view->title("Scaffold");
@@ -44,22 +44,19 @@ __END__
 
 =head1 NAME
 
-App::HelloWorld - A test handler for Scaffold
+App::Main - A test handler for Scaffold
 
 =head1 SYNOPSIS
 
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
+=head1 METHODS
 
 =over 4
 
 =back
 
 =head1 SEE ALSO
-
- Scaffold::Base
- Scaffold::Class
 
 =head1 AUTHOR
 

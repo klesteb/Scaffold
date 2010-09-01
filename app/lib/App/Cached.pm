@@ -52,22 +52,19 @@ __END__
 
 =head1 NAME
 
-App::HelloWorld - A test handler for Scaffold
+App::Cached - A test handler for Scaffold
 
 =head1 SYNOPSIS
 
 =head1 DESCRIPTION
 
-=head1 ACCESSORS
+=head1 METHODS
 
 =over 4
 
 =back
 
 =head1 SEE ALSO
-
- Scaffold::Base
- Scaffold::Class
 
 =head1 AUTHOR
 
