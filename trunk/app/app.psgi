@@ -28,6 +28,9 @@ main: {
         render => Scaffold::Render::TT->new(
             include_path => 'html:html/resources/templates',
         ),
+	lockmgr => Scaffold::Lockmgr::UnixMutex->new(
+	    key => 1234
+	)
     );
 
     $psgi_handler = $server->engine->psgi_handler();

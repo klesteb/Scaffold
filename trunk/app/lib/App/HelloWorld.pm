@@ -20,7 +20,7 @@ sub do_main {
     my $self = shift;
 
     $self->stash->view->title("Scaffold");
-    $self->stash->view->template("main.tt");
+    $self->stash->view->template("index.tt");
     $self->stash->view->data("<p>Hello World!!</p>");
     $self->stash->view->template_wrapper("wrapper.tt");
 
