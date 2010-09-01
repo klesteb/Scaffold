@@ -1,9 +1,3 @@
-  <head>
-[% INCLUDE meta.inc -%]
-    <title>[% view.title %]</title>
-    <link href="[% view.data.css %]" rel="stylesheet" type="text/css" />
-  </head>
-  <body>
     <div id="header">
       <h1>[% view.title %]</h1>
       <h2>[% view.data.header %]</h2>
@@ -17,4 +11,3 @@
     <div id="footer">
 [% INCLUDE $view.data.footer -%]
     </div>
-  </body>
