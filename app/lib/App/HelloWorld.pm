@@ -19,9 +19,17 @@ use Data::Dumper;
 sub do_main {
     my $self = shift;
 
+    my $data = {
+	css     => '/static/css/default.css',
+	header  => 'Example Web Site',
+	menu    => 'main_menu.tt',
+	content => 'content.tt',
+	footer  => 'copyright.tt',
+    };
+
     $self->stash->view->title("Scaffold");
-    $self->stash->view->template("index.tt");
-    $self->stash->view->data("<p>Hello World!!</p>");
+    $self->stash->view->template("main.tt");
+    $self->stash->view->data($data);
     $self->stash->view->template_wrapper("wrapper.tt");
 
 }

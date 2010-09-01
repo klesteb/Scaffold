@@ -1,9 +1,20 @@
   <head>
 [% INCLUDE meta.inc -%]
     <title>[% view.title %]</title>
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link href="[% view.data.css %]" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    [% view.data %]
+    <div id="header">
+      <h1>[% view.title %]</h1>
+      <h2>[% view.data.header %]</h2>
+    </div>
+    <div id="menu">
+[% INCLUDE $view.data.menu -%]
+    </div>
+    <div id="content">
+[% INCLUDE $view.data.content -%]
+    </div>
+    <div id="footer">
+[% INCLUDE $view.data.footer -%]
+    </div>
   </body>
