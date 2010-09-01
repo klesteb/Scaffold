@@ -4,7 +4,7 @@
     </div>
     <div id="content">
       <form method="post" action="/login/validate" name="login">
-        <div id="login" class="login">
+        <div id="loginout" class="login">
           <fieldset>
             <legend>Please Login</legend>
             <div class="username">
@@ -25,5 +25,5 @@
       </form>
     </div>
     <div id="footer">
-[% INCLUDE copyright.tt -%]
+[% INCLUDE footer.tt -%]
     </div>

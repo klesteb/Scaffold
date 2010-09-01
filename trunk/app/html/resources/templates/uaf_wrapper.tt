@@ -4,8 +4,8 @@
   <head>
 [% INCLUDE meta.inc -%]
     <title>[% view.title %]</title>
-    <link href="/stactic/css/default.css" rel="stylesheet" type="text/css" />
-    <link href="/stactic/css/loginout.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/default.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/loginout.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
 [% INCLUDE $view.template -%]
