@@ -1,0 +1,30 @@
+header {
+    height: 50px;
+    width: 44em;
+    background-color: #666;
+    margin-bottom: 10px;
+}
+
+#nav {
+    float: left;
+    width: 11em;
+    height: 150px;
+    background-color: #999;
+    margin-bottom: 10px;
+}
+
+#content {
+    margin-left: 13em;
+    height: 150px;
+    width: 31em;
+    background-color: #999;
+}
+
+#footer {
+    clear: both;
+    height: 50px;
+    width: 44em;
+    background-color: #666;
+    margin-bottom: 10px;
+}
+
