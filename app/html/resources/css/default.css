@@ -53,8 +53,6 @@ a:hover {
 /** MENU */
 
 #menu {
-	float: left;
-	width: 15%;
 	padding: 1em;
 }
 
@@ -75,14 +73,12 @@ a:hover {
 /** CONTENT */
 
 #content {
-	float: left;
-	width: 70%;
+    overflow: auto;
 }
 
 /** FOOTER */
 
 #footer {
-	clear: both;
 	padding: 0em 1em;
 	background-color: #CCCCCC;
 }

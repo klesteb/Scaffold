@@ -4,7 +4,8 @@
   <head>
 [% INCLUDE meta.inc -%]
     <title>[% view.title %]</title>
-    <link href="[% view.data.css %]" rel="stylesheet" type="text/css" />
+    <link href="/static/css/layout.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/default.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
 [% INCLUDE $view.template -%]

@@ -2,7 +2,7 @@
       <h1>Scaffold</h1>
       <h2>An Example Web Site</h2>
     </div>
-    <div id="content">
+    <div id="container">
       <form method="post" action="/login/validate" name="login">
         <div id="loginout" class="login">
           <fieldset>
@@ -18,7 +18,7 @@
             <div class="message">
               <p>Enter your username and password to log in.</p>
             </div>
-            <label for="submit"</label>
+            <label for="submit"></label>
             <input type="submit" value="OK">
           </fieldset>
         </div>
