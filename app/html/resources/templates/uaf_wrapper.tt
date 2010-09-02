@@ -9,6 +9,8 @@
     <link href="/static/css/loginout.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
+    <div id="page">
 [% INCLUDE $view.template -%]
+    </div>
   </body>
 </html>
