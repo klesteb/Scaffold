@@ -1,5 +1,5 @@
       <div id="left">
-        <h2>Welcome to the Scaffold Example</h2>
+        <h2>Welcome to the Scaffold Example Site</h2>
         <p>Suspendisse potenti. Donec nulla est, laoreet quis, pellentesque in, congue in, dui. Nunc rhoncus placerat augue. Donec justo odio, eleifend varius, volutpat venenatis, sagittis ut, orci. Donec nulla est, laoreet quis, pellentesque in, congue in, dui. Nunc rhoncus placerat augue. Donec justo odio, eleifend varius, volutpat venenatis, sagittis ut, orci. Nullam et orci in erat viverra ornare. Nunc pellentesque. Sed vestibulum blandit nisl. Quisque elementum convallis purus. Quisque pellentesque semper massa.</p>
         <ul>
           <li><a href="#">Suspendisse quis gravida massa felis.</a></li>
@@ -22,4 +22,5 @@
           <li><a href="#">Quis Gravida Massa</a></li>
           <li><a href="#">Inerat Viverra Ornare</a></li>
         </ul>
+	<p>This sites theme was developed from the "PlainAndSimple" template by <a href="http://www.freecsstemplates.org">Free CSS Templates</a>.</p>
       </div>
