@@ -1,16 +1,12 @@
 package App::Main;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.01';
 
 use Scaffold::Class
   version => $VERSION,
-  base    => 'Scaffold::Handler'
+  base    => 'Scaffold::Handler',
+  mixin   => 'Scaffold::Uaf::Authenticate',
 ;
-
-use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -25,9 +21,9 @@ sub do_main {
         content => 'content.tt',
     };
 
+    $self->stash->view->data($data);
     $self->stash->view->title("Scaffold");
     $self->stash->view->template("main.tt");
-    $self->stash->view->data($data);
     $self->stash->view->template_wrapper("wrapper.tt");
 
 }

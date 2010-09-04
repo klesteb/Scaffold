@@ -49,11 +49,15 @@ sub deallocate {
 
     my $semno;
 
-    if (exists($self->{locks}->{$key})) {
+    if (defined($key)) {
 
-        $semno = $self->{locks}->{$key}->{semno};
-        $self->{locks}->{available}[$semno] = 1;
-        delete $self->{locks}->{$key};
+	if (exists($self->{locks}->{$key})) {
+
+	    $semno = $self->{locks}->{$key}->{semno};
+	    $self->{locks}->{available}[$semno] = 1;
+	    delete $self->{locks}->{$key};
+
+	}
 
     }
 

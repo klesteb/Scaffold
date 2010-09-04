@@ -32,6 +32,7 @@ sub do_main {
 
         $self->uaf_invalidate();
         $self->scaffold->lockmgr->unlock($lock);
+	$self->scaffold->lockmgr->deallocate($lock);
 
     } else {
 

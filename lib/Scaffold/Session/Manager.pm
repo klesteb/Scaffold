@@ -57,9 +57,9 @@ sub pre_action {
 sub pre_exit {
     my ($self, $hobj) = @_;
 
-    my $response = $self->scaffold->response;
     my $session = $self->scaffold->session;
     my $lockmgr = $self->scaffold->lockmgr;
+    my $response = $self->scaffold->response;
 
     $lockmgr->deallocate($session->session_id);
     $session->set('access', time());
