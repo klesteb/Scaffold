@@ -18,7 +18,6 @@ app/html/robots.txt
 app/lib/App/Main.pm
 Build.PL
 Changes
-init.d/keyedmutexd
 lib/Scaffold.pm
 lib/Scaffold/Base.pm
 lib/Scaffold/Cache.pm
@@ -59,9 +58,7 @@ lib/Scaffold/Uaf/Manager.pm
 lib/Scaffold/Uaf/Rule.pm
 lib/Scaffold/Uaf/User.pm
 lib/Scaffold/Utils.pm
-Makefile.PL
 MANIFEST
-META.yml
 README
 t/00-load.t
 t/boilerplate.t
