@@ -193,7 +193,7 @@ sub init {
             $config->{key},
             $config->{nsems},
             (S_IRWXU | IPC_CREAT)
-        );
+        ) or die $!;
 
     } catch {
 
@@ -216,8 +216,11 @@ sub init {
 sub DESTROY {
     my $self = shift;
 
-#    return unless $self->{owner} == $$;
-    $self->engine->remove();
+    if (defined($self->{engine})) {
+
+	$self->engine->remove();
+
+    }
 
 }
 
