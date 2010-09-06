@@ -12,5 +12,5 @@ Revision history for Scaffold
 0.03    05-Sep-2010 K.Esteb
         Added Lockmgr/UnixMutex.pm and made it the default lock manager.
 	Improved the look of the example web site.
-	svn log -r 89:106
+	svn log -r 89:110
 	
