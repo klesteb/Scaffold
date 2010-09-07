@@ -85,7 +85,13 @@ sub dispatch {
 
         }
 
-        $self->throw_msg(NODEFINE, 'nodefine', $url) if (! $processed);
+        if (! $processed) {
+
+            my $mod = $self->config('default');
+            $class = $self->_init_handler($mod, $location);
+            $response = $class->handler($self, $location, ref($class));
+
+        }
 
     } catch {
 
@@ -333,6 +339,12 @@ sub _set_config_defaults {
 
     }
 
+    if (! defined($self->{config}->{configs}->{default})) {
+
+        $self->{config}->{configs}->{default} = 'Scaffold::Handler::Default';
+
+    }
+
 }
 
 sub _unexpected_exception {
@@ -435,6 +447,7 @@ handling.
  Scaffold::Constants
  Scaffold::Engine
  Scaffold::Handler
+ Scaffold::Handler::Default
  Scaffold::Handler::Favicon
  Scaffold::Handler::Robots
  Scaffold::Handler::Static
