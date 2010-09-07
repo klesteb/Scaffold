@@ -5,6 +5,7 @@ our $VERSION = '0.01';
 use 5.8.8;
 use Data::Dumper;
 
+use Scaffold;
 use Scaffold::Class
   base     => 'Badger::Base',
   version  => $VERSION,
@@ -159,7 +160,7 @@ sub _error_page {
 ##SCAFFOLD_DUMP##
                 </pre>    
             </div>    
-            <div class="name">Running on Scaffold $Scaffold::Base::VERSION</div>
+            <div class="name">Running on Scaffold $Scaffold::VERSION</div>
         </div>
     </body>
 </html>! 
@@ -211,6 +212,7 @@ This method is used to return items from the interal config cache.
  Scaffold::Constants
  Scaffold::Engine
  Scaffold::Handler
+ Scaffold::Handler::Default
  Scaffold::Handler::Favicon
  Scaffold::Handler::Robots
  Scaffold::Handler::Static

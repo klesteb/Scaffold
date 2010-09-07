@@ -87,7 +87,7 @@ sub dispatch {
 
         if (! $processed) {
 
-            my $mod = $self->config('default');
+            my $mod = $self->config('default_handler');
             $class = $self->_init_handler($mod, $location);
             $response = $class->handler($self, $location, ref($class));
 
@@ -339,9 +339,9 @@ sub _set_config_defaults {
 
     }
 
-    if (! defined($self->{config}->{configs}->{default})) {
+    if (! defined($self->{config}->{default_handler})) {
 
-        $self->{config}->{configs}->{default} = 'Scaffold::Handler::Default';
+        $self->{config}->{default_handler} = 'Scaffold::Handler::Default';
 
     }
 

@@ -18,7 +18,7 @@ use Scaffold::Class
 sub do_default {
     my ($self, @params) = @_;
 
-    $self->not_found(File(@params));
+    $self->bad_url(File(@params));
 
 }
 
@@ -43,7 +43,7 @@ Scaffold::Handler::Default - The default handler
          static_search => 'html:html/static',
          cache_static  => FALSE,
     },
-    default => 'Scaffold::Handler::Default',
+    default_handler => 'Scaffold::Handler::Default',
     locations => {
         '/'            => 'App::Main',
         '/robots.txt'  => 'Scaffold::Handler::Robots',
@@ -55,8 +55,8 @@ Scaffold::Handler::Default - The default handler
 =head1 DESCRIPTION
 
 This handler provides a "default" action for any locations that are not 
-specified in the "locations" config directive. By default it displays a
-"404" page not found error.
+specified in the "locations" config directive. By default it displays the
+Scaffold error page with the "bad" url.
 
 =head1 SEE ALSO
 
@@ -70,10 +70,10 @@ specified in the "locations" config directive. By default it displays a
  Scaffold::Constants
  Scaffold::Engine
  Scaffold::Handler
+ Scaffold::Handler::Default
  Scaffold::Handler::Favicon
  Scaffold::Handler::Robots
  Scaffold::Handler::Static
- Scaffold::Handler::Default
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
  Scaffold::Lockmgr::UnixMutex
