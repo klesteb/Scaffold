@@ -1,0 +1,16 @@
+Revision history for Scaffold
+
+0.01    14-Jul-2010 K.Esteb
+        First version, released on an unsuspecting world.
+        svn log -r 1:84
+
+0.02    23-Jul-2010 K.Esteb
+        Improved the exception handling within the Uaf modules. It should
+        not allow a resource to remain locked if an exception occurs.
+        svn log -r 85:88
+        
+0.03    05-Sep-2010 K.Esteb
+        Added Lockmgr/UnixMutex.pm and made it the default lock manager.
+        Improved the look of the example web site.
+        svn log -r 89:114
+	
