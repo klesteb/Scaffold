@@ -1,15 +1,14 @@
-package Scaffold::Handler::Static;
+package Scaffold::Handler::Default;
 
 our $VERSION = '0.01';
 
 use 5.8.8;
-use MIME::Types 'by_suffix';
 
 use Scaffold::Class
   version    => $VERSION,
+  filesystem => 'File',
   base       => 'Scaffold::Handler',
   constants  => 'TRUE FALSE',
-  filesystem => 'File'
 ;
 
 # ----------------------------------------------------------------------
@@ -19,44 +18,7 @@ use Scaffold::Class
 sub do_default {
     my ($self, @params) = @_;
 
-    my $found = FALSE;
-    my $cache = $self->scaffold->cache;
-    my $static_search = $self->scaffold->config('configs')->{static_search};
-    my $cache_static = $self->scaffold->config('configs')->{cache_static};
-    my @paths = split(':', $static_search);
-
-    foreach my $path (@paths) {
-
-        my $file = File($path, @params);
-
-        if ($file->exists) {
-	    
-            my $d;
-            my ($mediatype, $encoding) = by_suffix($file);
-            $found = TRUE;
-
-            if (! ($d = $cache->get($file))) {
-
-                $d = $file->read();
-
-                if ($cache_static) {
-
-                    $self->stash->view->cache(1);
-                    $self->stash->view->cache_key($file);
-
-                }
-
-            }
-
-            $self->stash->view->data($d);
-            $self->stash->view->template_disabled(1);
-            $self->stash->view->content_type(($mediatype || 'text/plain'));
-
-        }
-
-    }
-
-    $self->not_found(File(@params)) if (! $found);
+    $self->not_found(File(@params));
 
 }
 
@@ -70,7 +32,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Handler::Static - A handler for static files
+Scaffold::Handler::Default - The default handler
 
 =head1 SYNOPSIS
 
@@ -81,6 +43,7 @@ Scaffold::Handler::Static - A handler for static files
          static_search => 'html:html/static',
          cache_static  => FALSE,
     },
+    default => 'Scaffold::Handler::Default',
     locations => {
         '/'            => 'App::Main',
         '/robots.txt'  => 'Scaffold::Handler::Robots',
@@ -91,13 +54,9 @@ Scaffold::Handler::Static - A handler for static files
 
 =head1 DESCRIPTION
 
-This handler will return "static" files back to the browser. Where they are 
-located is controlled by the configs option "static_search". This is a colon 
-seperated search list of directories to search. Think of the PATH 
-environment variable. The first matching file is sent. By default 
-"static" files will be cached. This can be turned off with
-the configs options "cache_static", which has a TRUE/FALSE value. This is a
-global setting.
+This handler provides a "default" action for any locations that are not 
+specified in the "locations" config directive. By default it displays a
+"404" page not found error.
 
 =head1 SEE ALSO
 
@@ -111,10 +70,10 @@ global setting.
  Scaffold::Constants
  Scaffold::Engine
  Scaffold::Handler
- Scaffold::Handler::Default
  Scaffold::Handler::Favicon
  Scaffold::Handler::Robots
  Scaffold::Handler::Static
+ Scaffold::Handler::Default
  Scaffold::Lockmgr
  Scaffold::Lockmgr::KeyedMutex
  Scaffold::Lockmgr::UnixMutex
@@ -145,7 +104,7 @@ Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009 by Kevin L. Esteb
+Copyright (C) 2010 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.5 or,
