@@ -73,6 +73,7 @@ Scaffold::Handler::ExtPoll - A handler to for the Ext.direct poller
  Scaffold::Constants
  Scaffold::Engine
  Scaffold::Handler
+ Scaffold::Handler::Default
  Scaffold::Handler::Favicon
  Scaffold::Handler::Robots
  Scaffold::Handler::Static

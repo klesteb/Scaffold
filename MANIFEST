@@ -30,6 +30,7 @@ lib/Scaffold/Engine.pm
 lib/Scaffold/Handler.pm
 lib/Scaffold/Handler/ExtDirect.pm
 lib/Scaffold/Handler/ExtPoll.pm
+lib/Scaffold/Handler/Default.pm
 lib/Scaffold/Handler/Favicon.pm
 lib/Scaffold/Handler/Robots.pm
 lib/Scaffold/Handler/Static.pm
