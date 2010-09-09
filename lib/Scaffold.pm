@@ -271,6 +271,7 @@ See, simple, no muss, no fuss.
  Scaffold::Handler
  Scaffold::Handler::ExtDirect
  Scaffold::Handler::ExtPoll
+ Scaffold::Handler::Default
  Scaffold::Handler::Favicon
  Scaffold::Handler::Robots
  Scaffold::Handler::Static
