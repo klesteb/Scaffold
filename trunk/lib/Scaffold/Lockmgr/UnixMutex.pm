@@ -1,20 +1,31 @@
 package Scaffold::Lockmgr::UnixMutex;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use 5.8.8;
 use Try::Tiny;
 use IPC::Semaphore;
-use IPC::SysV qw( IPC_CREAT S_IRWXU IPC_NOWAIT SEM_UNDO );
+use IPC::SysV qw( IPC_CREAT S_IRWXU IPC_NOWAIT IPC_RMID SEM_UNDO );
 
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Lockmgr',
-  constants => 'TRUE FALSE',
+  constants => 'TRUE FALSE LOCK',
+  constant => {
+      BUFSIZ => 256,
+  },
   messages => {
-      'nosemaphores' => 'unable to aquire a semaphore set: reason %s',
+      'allocate'     => "unable to allocate a lock, reason: %s",
+      'deallocate'   => "unable to deallocate a lock, reason: %s",
+      'nosharedmem'  => "unable to aquire shared memory, reason: %s",
+      'nosemaphores' => "unable to aquire a semaphore set, reason: %s",
+      'shmwrite'     => "unable to write to shared memory, reason: %s",
+      'shmread'      => "unable to read from shared memory, reason: %s",
   }
 ;
+
+my $BLANK = pack('A256', '');
+my $LOCK  = pack('A256', LOCK);
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -23,43 +34,80 @@ use Scaffold::Class
 sub allocate {
     my ($self, $key) = @_;
 
+    my $buffer;
+    my $skey = pack('A256', $key);
     my $size = $self->config('nsems');
 
-    if (! exists($self->{locks}->{$key})) {
+    try {
 
-        for (my $x = 0; $x < $size; $x++) {
+        $self->engine->op(0, -1, 0);
 
-            if ($self->{locks}->{available}[$x] == 1) {
+        for (my $x = 1; $x < $size; $x++) {
 
-                $self->{locks}->{available}[$x] = 0;
-                $self->{locks}->{$key}->{semno} = $x;
+            shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+            if ($buffer eq $BLANK) {
 
+                shmwrite($self->{shmem}, $skey, $x, BUFSIZ) or die $!;
                 last;
 
             }
 
         }
 
-    }
+        $self->engine->op(0, 1, 0);
+
+    } catch {
+
+        my $ex = $_;
+
+        $self->engine->op(0, 1, 0);
+        $self->throw_msg(
+            'scaffold.lockmgr.unixmutex.allocate',
+            'allocate',
+            $ex
+        );
+
+    };
 
 }
 
 sub deallocate {
     my ($self, $key) = @_;
 
-    my $semno;
+    my $buffer;
+    my $skey = pack('A256', $key);
+    my $size = $self->config('nsems');
 
-    if (defined($key)) {
+    try {
 
-	if (exists($self->{locks}->{$key})) {
+        $self->engine->op(0, -1, 0);
 
-	    $semno = $self->{locks}->{$key}->{semno};
-	    $self->{locks}->{available}[$semno] = 1;
-	    delete $self->{locks}->{$key};
+        for (my $x = 1; $x < $size; $x++) {
 
-	}
+            shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+            if ($buffer eq $skey) {
 
-    }
+                shmwrite($self->{shmem}, $BLANK, $x, BUFSIZ) or die $!;
+                last;
+
+            }
+
+        }
+
+        $self->engine->op(0, 1, 0);
+
+    } catch {
+
+        my $ex = $_;
+
+        $self->engine->op(0, 1, 0);
+        $self->throw_msg(
+            'scaffold.lockmgr.unixmutex.deallocate',
+            'deallocate',
+            $ex
+        );
+
+    };
 
 }
 
@@ -70,11 +118,9 @@ sub lock {
     my $count = 0;
     my $stat = TRUE;
 
-    if (exists($self->{locks}->{$key})) {
+    if (($semno = $self->_get_semaphore($key)) > 0) {
 
-        $semno = $self->{locks}->{$key}->{semno};
-
-        while (! $self->engine->op($semno, -1, IPC_NOWAIT | SEM_UNDO)) {
+        while ($self->engine->getncnt($semno)) {
 
             $count++;
 
@@ -91,6 +137,8 @@ sub lock {
 
         }
 
+        $self->engine->op($semno, -1, 0) if ($stat);
+
     } else {
 
         $stat = FALSE;
@@ -106,13 +154,12 @@ sub unlock {
 
     my $semno;
 
-    if (exists($self->{locks}->{$key})) {
+    if (($semno = $self->_get_semaphore($key)) > 0) {
 
-        $semno = $self->{locks}->{$key}->{semno};
         $self->engine->op($semno, 1, 0);
 
     }
-
+    
 }
 
 sub try_lock {
@@ -121,9 +168,8 @@ sub try_lock {
     my $semno;
     my $stat = FALSE;
 
-    if (exists($self->{locks}->{$key})) {
+    if (($semno = $self->_get_sempahore($key)) > 0) {
 
-        $semno = $self->{locks}->{$key}->{semno};
         $stat = $self->engine->getncnt($semno) ? FALSE : TRUE;
 
     }
@@ -138,6 +184,10 @@ sub try_lock {
 
 sub init {
     my ($self, $config) = @_;
+
+    my $size;
+    my $buffer;
+    my $access = (S_IRWXU | IPC_CREAT);
 
     if (! defined($config->{nsems})) {
 
@@ -181,25 +231,21 @@ sub init {
     $self->{limit}   = $config->{limit} || 10;
     $self->{timeout} = $config->{timeout} || 10;
 
-    for (my $x = 0; $x < $config->{nsems}; $x++) {
-
-        $self->{locks}->{available}[$x] = 1;
-
-    }
-
     try {
 
         $self->{engine} = IPC::Semaphore->new(
             $config->{key},
             $config->{nsems},
-            (S_IRWXU | IPC_CREAT)
+            $access
         ) or die $!;
+
+        $self->engine->setall((1) x $config->{nsems}) or die $!;
 
     } catch {
 
         my $ex = $_;
 
-    	$self->throw_msg(
+        $self->throw_msg(
             'scaffold.lockmgr.unixmutex',
             'nosemaphores',
             $ex
@@ -207,7 +253,35 @@ sub init {
 
     };
 
-    $self->engine->setval(0, $config->{nsems});
+    try {
+
+        $size = $config->{nsems} * BUFSIZ;
+        $self->{shmem} = shmget($config->{key}, $size, $access) or die $!;
+
+        shmread($self->{shmem}, $buffer, 0, BUFSIZ) or die $!;
+        if ($buffer ne $LOCK) {
+
+            shmwrite($self->{shmem}, $LOCK, 0, BUFSIZ) or die $!;
+
+            for (my $x = 1; $x < $config->{nsems}; $x++) {
+
+                shmwrite($self->{shmem}, $BLANK, $x, BUFSIZ) or die $!;
+
+            }
+
+        }
+
+    } catch {
+
+        my $ex = $_;
+
+        $self->throw_msg(
+            'scaffold.lockmgr.unixmutex',
+            'nosharedmem',
+            $ex
+        );
+
+    };
 
     return $self;
 
@@ -218,9 +292,58 @@ sub DESTROY {
 
     if (defined($self->{engine})) {
 
-	$self->engine->remove();
+        $self->engine->remove();
 
     }
+
+    if (defined($self->{shmem})) {
+
+        shmctl($self->{shmem}, IPC_RMID, 0);
+
+    }
+
+}
+
+sub _get_semaphore {
+    my ($self, $key) = @_;
+
+    my $buffer;
+    my $stat = -1;
+    my $skey = pack('A256', $key);
+    my $size = $self->config('nsems');
+
+    try {
+
+        $self->engine->op(0, -1, 0);
+
+        for (my $x = 1; $x < $size; $x++) {
+
+            shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+            if ($buffer eq $skey) {
+
+                $stat = $x;
+                last;
+
+            }
+
+        }
+
+        $self->engine->op(0, 1, 0);
+
+    } catch {
+
+        my $ex = $_;
+
+        $self->engine->op(0, 1, 0);
+        $self->throw_msg(
+            'scaffold.lockmgr.unixmutex._get_semaphore',
+            'shhmread',
+            $ex
+        );
+
+    };
+
+    return $stat;
 
 }
 
