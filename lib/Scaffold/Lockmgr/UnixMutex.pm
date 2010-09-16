@@ -5,7 +5,7 @@ our $VERSION = '0.02';
 use 5.8.8;
 use Try::Tiny;
 use IPC::Semaphore;
-use IPC::SysV qw( IPC_CREAT S_IRWXU IPC_NOWAIT IPC_RMID SEM_UNDO );
+use IPC::SysV qw( IPC_CREAT IPC_RMID );
 
 use Scaffold::Class
   version   => $VERSION,
@@ -168,7 +168,7 @@ sub try_lock {
     my $semno;
     my $stat = FALSE;
 
-    if (($semno = $self->_get_sempahore($key)) > 0) {
+    if (($semno = $self->_get_semaphore($key)) > 0) {
 
         $stat = $self->engine->getncnt($semno) ? FALSE : TRUE;
 
@@ -187,7 +187,12 @@ sub init {
 
     my $size;
     my $buffer;
-    my $access = (S_IRWXU | IPC_CREAT);
+
+    # We are being really liberal here... but apache pukes on the
+    # defaults and there is no easy, portable, way to change ownership 
+    # with shmctl/semctl on 5.8.8.
+
+    my $access = ( 0666 | IPC_CREAT ); 
 
     if (! defined($config->{nsems})) {
 
