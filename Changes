@@ -14,3 +14,8 @@ Revision history for Scaffold
         Improved the look of the example web site.
         svn log -r 89:114
 	
+0.04    17-Sep-2010 K.Esteb
+        Fixed Lockmgr/UnixMutex.pm so that the named resources are stored in
+        shared memory, instead of a hash within the object.
+        svn log -r 115:119
+        
