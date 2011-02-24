@@ -112,6 +112,7 @@ and authorization modules.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -131,7 +132,7 @@ and authorization modules.
 
 =head1 AUTHOR
 
-Kevin Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

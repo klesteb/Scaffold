@@ -62,12 +62,21 @@ Scaffold::Handler::Robots - A handler to handle "robots.txt" files
     configs => {
         doc_rootp => 'html',
     },
-    locations => {
-        '/'            => 'App::Main',
-        '/robots.txt'  => 'Scaffold::Handler::Robots',
-        '/favicon.ico' => 'Scaffold::Handler::Favicon',
-        '/static'      => 'Scaffold::Handler::Static',
-    },
+    locations => [
+        {
+            route   => qr{^/$},
+            handler => 'App::Main'
+        },{ 
+            route   => qr{^/robots.txt$},
+            handler => 'Scaffold::Handler::Robots',
+        },{
+            route   => qr{^/favicon.ico$},
+            handler => 'Scaffold::Handler::Favicon',
+        },{
+            route   => qr{^/static/(.*)$},
+            handler => 'Scaffold::Handler::Static',
+        }
+    ] 
  );
 
 =head1 DESCRIPTION
@@ -100,6 +109,7 @@ instead of disk.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -119,7 +129,7 @@ instead of disk.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

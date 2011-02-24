@@ -167,7 +167,7 @@ Checks to see if the current session is authenticated, redirects as needed.
 
 =head1 AUTHOR
 
-Kevin L. Esteb <kesteb@wsipc.org>
+Kevin L. Esteb E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

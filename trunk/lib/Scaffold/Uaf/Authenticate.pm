@@ -335,6 +335,7 @@ These accessors return the corresponding config items.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -354,7 +355,7 @@ These accessors return the corresponding config items.
 
 =head1 AUTHOR
 
-Kevin L. Esteb <kesteb@wsipc.org>
+Kevin L. Esteb E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

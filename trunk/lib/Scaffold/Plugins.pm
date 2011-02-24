@@ -70,16 +70,12 @@ Scaffold::Plugins - The base class for Scaffold plugins
        'App::Plugin1',
        'App::Plugin2',
     ],
-    locations => {
-        '/'            => 'App::Main',
-        '/robots.txt'  => 'Scaffold::Handler::Robots',
-        '/favicon.ico' => 'Scaffold::Handler::Favicon',
-        '/static'      => 'Scaffold::Handler::Static',
-    },
  );
 
 =head1 DESCRIPTION
 
+The base class for Plugin within Scaffold. This class should be inherited and
+extended to develop your own plugins.
 
 =head1 METHODS
 
@@ -120,6 +116,7 @@ Scaffold::Plugins - The base class for Scaffold plugins
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -139,7 +136,7 @@ Scaffold::Plugins - The base class for Scaffold plugins
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

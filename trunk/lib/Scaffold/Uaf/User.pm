@@ -118,6 +118,7 @@ Example:
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -137,7 +138,7 @@ Example:
 
 =head1 AUTHOR
 
-Kevin L. Esteb
+Kevin L. Esteb E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -55,6 +55,7 @@ and utiltiy functions that are needed by the Scaffold environment.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -74,7 +75,7 @@ and utiltiy functions that are needed by the Scaffold environment.
 
 =head1 AUTHOR
 
-Kevin Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

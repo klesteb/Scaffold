@@ -38,22 +38,20 @@ use Data::Dumper;
 # ----------------------------------------------------------------------
 
 sub handler {
-    my ($class, $sobj, $location, $module) = @_;
+    my ($class, $sobj, $module, @params) = @_;
 
     $class->{scaffold} = $sobj;
     $class->{stash} = Scaffold::Stash->new(
         request => $class->scaffold->request
     );
 
-    my $configs = $class->scaffold->config('configs');
-    my $uri = $class->scaffold->request->uri;
-    my $root = $configs->{'app_rootp'};
+    my $location;
+    my $root = $sobj->config('configs')->{'app_rootp'};
 
-    $class->{page_title} = $uri->path;
+    $class->{page_title} = $location = $sobj->request->uri->path;
 
     my $state = STATE_PRE_ACTION;
-    my @p = $class->_cleanroot($uri->path, $location);
-    my $p1 = ( shift(@p) || 'main');
+    my $p1 = ( shift(@params) || 'main' );
 
     my $action = 'do_' . $p1;
 
@@ -70,7 +68,7 @@ sub handler {
                     $state = $class->_pre_action();
                 }
                 case STATE_ACTION {
-                    $state = $class->_perform_action($action, $p1, @p);
+                    $state = $class->_perform_action($action, $p1, @params);
                 }
                 case STATE_POST_ACTION {
                     $state = $class->_post_action();
@@ -232,17 +230,6 @@ sub exceptions {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub _cleanroot {
-    my ($self, $uri, $root) = @_;
-
-    $uri =~ s!^$root!!gi;
-    $uri =~ s/\/\//\//g;
-    $uri =~ s/^\///;
-
-    return(split('/', $uri));
-
-}
 
 sub _pre_action {
     my ($self) = @_;
@@ -631,7 +618,7 @@ can be overridden.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
