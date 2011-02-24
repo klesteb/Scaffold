@@ -160,15 +160,30 @@ Scaffold::Engine - The Scaffold interface to Plack/psgi
 
   my $psgi_handler;
   my $server = Scaffold::Server->new(
-     locations => {
-         '/'            => 'App::HelloWorld',
-         '/test'        => 'App::Cached',
-         '/robots.txt'  => 'Scaffold::Handler::Robots',
-         '/favicon.ico' => 'Scaffold::Handler::Favicon',
-         '/static'      => 'Scaffold::Handler::Static',
-         '/login'       => 'Scaffold::Uaf::Login',
-         '/logout'      => 'Scaffold::Uaf::Logout',
-     },
+     locations => [
+         {
+             route   => qr{^/$},
+             handler => 'App::HelloWorld',
+         },{
+             route   => qr{^/test$},
+             handler => 'App::Cached',
+         },{
+             route   => qr{^/robots.txt$},
+             handler => 'Scaffold::Handler::Robots',
+         },{
+             route   => qr{^/favicon.ico$},
+             handler => 'Scaffold::Handler::Favicon',
+         },{
+             route   => qr{^/static/(.*)$},
+             handler => 'Scaffold::Handler::Static',
+         },{
+            route   => qr{^/login/(.*)$},
+            handler => 'Scaffold::Uaf::Login',
+         },{
+            route   => qr{^/logout$},
+            handler => 'Scaffold::Uaf::Logout',
+         }
+     ],
      authorization => {
          authenticate => 'Scaffold::Uaf::Manager',
          authorize    => 'Scaffold::Uaf::Authorize',
@@ -192,15 +207,30 @@ Scaffold::Engine - The Scaffold interface to Plack/psgi
              port => 8080,
          }
      },
-     locations => {
-         '/'            => 'App::HelloWorld',
-         '/test'        => 'App::Cached',
-         '/robots.txt'  => 'Scaffold::Handler::Robots',
-         '/favicon.ico' => 'Scaffold::Handler::Favicon',
-         '/static'      => 'Scaffold::Handler::Static',
-         '/login'       => 'Scaffold::Uaf::Login',
-         '/logout'      => 'Scaffold::Uaf::Logout',
-     },
+     locations => [
+         {
+             route   => qr{^/$},
+             handler => 'App::HelloWorld',
+         },{
+             route   => qr{^/test$},
+             handler => 'App::Cached',
+         },{
+             route   => qr{^/robots.txt$},
+             handler => 'Scaffold::Handler::Robots',
+         },{
+             route   => qr{^/favicon.ico$},
+             handler => 'Scaffold::Handler::Favicon',
+         },{
+             route   => qr{^/static/(.*)$},
+             handler => 'Scaffold::Handler::Static',
+         },{
+            route   => qr{^/login/(.*)$},
+            handler => 'Scaffold::Uaf::Login',
+         },{
+            route   => qr{^/logout$},
+            handler => 'Scaffold::Uaf::Logout',
+         }
+     ],
      authorization => {
          authenticate => 'Scaffold::Uaf::Manager',
          authorize    => 'Scaffold::Uaf::Authorize',
@@ -266,6 +296,7 @@ Runs Scaffold::Server as a standalone application.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -285,7 +316,7 @@ Runs Scaffold::Server as a standalone application.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

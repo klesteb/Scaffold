@@ -41,15 +41,24 @@ Scaffold::Handler::Default - The default handler
  my $server = Scaffold::Server->new(
     configs => {
          static_search => 'html:html/static',
-         cache_static  => FALSE,
+         static_cache  => FALSE,
     },
     default_handler => 'Scaffold::Handler::Default',
-    locations => {
-        '/'            => 'App::Main',
-        '/robots.txt'  => 'Scaffold::Handler::Robots',
-        '/favicon.ico' => 'Scaffold::Handler::Favicon',
-        '/static'      => 'Scaffold::Handler::Static',
-    },
+    locations => [
+        {
+            route   => qr{^/$},
+            handler => 'App::Main'
+        },{ 
+            route   => qr{^/robots.txt$},
+            handler => 'Scaffold::Handler::Robots',
+        },{
+            route   => qr{^/favicon.ico$},
+            handler => 'Scaffold::Handler::Favicon',
+        },{
+            route   => qr{^/static/(.*)$},
+            handler => 'Scaffold::Handler::Static',
+        }
+    ] 
  );
 
 =head1 DESCRIPTION
@@ -81,6 +90,7 @@ Scaffold error page with the "bad" url.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -100,7 +110,7 @@ Scaffold error page with the "bad" url.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

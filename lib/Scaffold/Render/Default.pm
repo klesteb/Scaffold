@@ -34,12 +34,6 @@ Scaffold::Render::Default - The default renderer for Scaffold.
 =head1 SYNOPSIS
 
     my $server = Scaffold::Server->new(
-        locations => {
-            '/'            => 'App::Main',
-            '/robots.txt'  => 'Scaffold::Handler::Robots',
-            '/favicon.ico' => 'Scaffold::Handler::Favicon',
-            '/static'      => 'Scaffold::Handler::Static',
-        },
         render => Scaffold::Render::Default->new(),
     );
 
@@ -70,6 +64,7 @@ This is the default renderer. It does nothing more the pass the data back.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -89,7 +84,7 @@ This is the default renderer. It does nothing more the pass the data back.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
