@@ -1,4 +1,4 @@
-Scaffold version 0.04
+Scaffold version 0.05
 =======================
 
 Scaffold provides a framework to build web based applications. It tries 
@@ -8,7 +8,8 @@ following features:
  * A comprehensive object structure.
  * A caching subsystem. 
  * Session management
- * A locking resource manager
+ * A resource lock manager
+ * URL dispatching using 'routes'
  * Freedom to choose an ORM
  * Bindings to the Template Toolkit
  * Web server independence
