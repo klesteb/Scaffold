@@ -22,5 +22,5 @@ Revision history for Scaffold
 0.05    24-Feb-2011 K.Esteb
         Added Scaffold::Routes to parse the URL using regex. Should be
         more flexiable now. At least the dispatching logic is now simpler.
-        svn log -r 120:122
+        svn log -r 120:123
         

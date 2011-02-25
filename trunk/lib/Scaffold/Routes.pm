@@ -107,7 +107,7 @@ handlers, depending on regex parsing of the incomming url.
 
 This returns the configured routes.
 
-=backu
+=back
 
 =head1 METHODS
 
@@ -168,7 +168,7 @@ found, it returns the handler and any resulting parameters.
 
 Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
-=ACKNOWLEDGMENTS
+=head1 ACKNOWLEDGMENTS
 
 Based on Sleep::Routes by Peter Stuifzand <peter@stuifzand.eu>
 
