@@ -302,9 +302,9 @@ sub _set_config_defaults {
 
     }
 
-    if (! defined($self->{config}->{configs}->{static_cache})) {
+    if (! defined($self->{config}->{configs}->{static_cached})) {
 
-        $self->{config}->{configs}->{static_cache} = TRUE;
+        $self->{config}->{configs}->{static_cached} = TRUE;
 
     }
 

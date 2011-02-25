@@ -22,7 +22,7 @@ sub do_default {
     my $found = FALSE;
     my $cache = $self->scaffold->cache;
     my $static_search = $self->scaffold->config('configs')->{static_search};
-    my $cache_static = $self->scaffold->config('configs')->{cache_static};
+    my $static_cached = $self->scaffold->config('configs')->{static_cached};
     my @paths = split(':', $static_search);
 
     foreach my $path (@paths) {
@@ -39,7 +39,7 @@ sub do_default {
 
                 $d = $file->read();
 
-                if ($cache_static) {
+                if ($static_cached) {
 
                     $self->stash->view->cache(1);
                     $self->stash->view->cache_key($file);
@@ -79,7 +79,7 @@ Scaffold::Handler::Static - A handler for static files
  my $server = Scaffold::Server->new(
     configs => {
          static_search => 'html:html/static',
-         static_cache  => FALSE,
+         static_cached => FALSE,
     },
     locations => [
         {
@@ -105,7 +105,7 @@ located is controlled by the configs option "static_search". This is a colon
 seperated search list of directories to search. Think of the PATH 
 environment variable. The first matching file is sent. By default 
 "static" files will be cached. This can be turned off with
-the configs options "static_cache", which has a TRUE/FALSE value. This is a
+the configs options "static_cached", which has a TRUE/FALSE value. This is a
 global setting.
 
 =head1 SEE ALSO
