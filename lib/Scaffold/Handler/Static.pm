@@ -30,7 +30,7 @@ sub do_default {
         my $file = File($path, @params);
 
         if ($file->exists) {
-	    
+
             my $d;
             my ($mediatype, $encoding) = by_suffix($file);
             $found = TRUE;
