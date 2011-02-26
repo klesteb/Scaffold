@@ -114,6 +114,7 @@ Places the stashed cookies into the respone header.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
@@ -134,7 +135,7 @@ Places the stashed cookies into the respone header.
 
 =head1 AUTHOR
 
-Kevin L. Esteb <kesteb@wsipc.org>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

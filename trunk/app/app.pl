@@ -21,7 +21,7 @@ main: {
         },
         locations => [
             {
-                route   => qr{^/'$},
+                route   => qr{^/$},
                 handler => 'App::Main',
             },{
                route   => qr{^/robots.txt$},
@@ -34,6 +34,9 @@ main: {
                handler => 'Scaffold::Handler::Static',
             },{
                 route   => qr{^/login/(\w+)$},
+                handler => => 'Scaffold::Uaf::Login',
+            },{
+                route   => qr{^/login$},
                 handler => => 'Scaffold::Uaf::Login',
             },{
                 route   => qr{^/logout$},
