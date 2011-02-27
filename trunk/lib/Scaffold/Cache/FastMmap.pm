@@ -129,7 +129,7 @@ Scaffold::Cache::FastMmap - Caching is based on fastmmap.
 =head1 DESCRIPTION
 
 This module initializes the Cache::FastMmap module and uses it for the caching
-subsystem within Scaffold. The synopsis shows the defaults that are used in 
+engine within Scaffold. The synopsis shows the defaults that are used in 
 initialization.
 
 =head1 SEE ALSO
