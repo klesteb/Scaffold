@@ -134,7 +134,9 @@ sub load_class {
     my ($class, $prefix) = @_;
 
     if ( $class !~ s/^\+// && $prefix ) {
+
         $class = "$prefix\::$class";
+
     }
 
     my $file = $class;
@@ -317,6 +319,8 @@ Runs Scaffold::Server as a standalone application.
 =head1 AUTHOR
 
 Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
+
+Coded adapted from PlackX::Engine by Takatoshi Kitano <kitano.tk@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 

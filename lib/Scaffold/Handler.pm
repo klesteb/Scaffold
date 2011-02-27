@@ -423,19 +423,22 @@ __END__
 
 =head1 NAME
 
-Scaffold::Handler - The base class for Scaffold URL handlers
+Scaffold::Handler - The base class for Scaffold Handlers
 
 =head1 SYNOPSIS
 
  use Scaffold::Server;
 
  my $server = Scaffold::Server->new(
-    locations => {
-        '/'            => 'App::Main',
-        '/robots.txt'  => 'Scaffold::Handler::Robots',
-        '/favicon.ico' => 'Scaffold::Handler::Favicon',
-        '/static'      => 'Scaffold::Handler::Static',
-    },
+    locations => [
+        {
+            route   => qr{^/$},
+            handler => 'App::Main'
+        },{
+            route   => qr{^/something/(\w+)/(\d+)$},
+            handler => 'App::Something'
+        }
+    ]
  );
 
  ...
@@ -451,8 +454,28 @@ Scaffold::Handler - The base class for Scaffold URL handlers
  sub do_main
      my ($self) = @_;
 
-    $self-view->template_disable(1);
+    $self->view->template_disable(1);
     $self->view->data('<p>Hello World</p>');
+
+ }
+
+ 1;
+
+ package App::Something;
+
+ use Scaffold::Class
+   version => '0.01',
+   base    => 'Scaffold::Handler',
+   filesystem => 'File',
+ ;
+
+ sub do_main
+     my ($self, $action, $id) = @_;
+
+    my $text = sprintf("action = %s, id = %s\n", $action, $id);
+
+    $self->view->template_disable(1);
+    $self->view->data($text);
 
  }
 
@@ -460,72 +483,123 @@ Scaffold::Handler - The base class for Scaffold URL handlers
 
 =head1 DESCRIPTION
 
-There are many ways to dispatch and handle requests for a particular URL. 
-Scaffold does a simple direct mapping of URL to handler. When the dispatch()
-method in Scaffold::Server is invoked it is passed a Plack::Request object. 
-The object contains the URL of the request. dispatch() will then parse that 
-URL and looks in "locations" for a corresponding handler. If a handler is 
-found, that handlers, handler() method is evoked, which further parses the URL 
-to determine which methods are called within the handler.
+This is the base class for all handlers within Scaffold. Your application will
+inherit and extend this class. Handlers are the basis of your application.  
 
-So, for example a request to "/" is made. This would evoke the App::Main 
-handler. The handler for App::Main would determine that it should call 
-do_main(). do_main() is always called for the root of a URL. If do_main() 
-doesn't exist then a call to do_default() will be tried. If neither of these
-methods exist a "declined" exception is thrown. 
+=head2 The Request Lifecycle
 
-So, now a request to "/photos' is made. This would also evoke App::Main. Which 
-would determine that it should call the do_photos() method. Since there is 
-none, it would try to evoke do_default() passing "photos" as the first 
-parameter. Since do_default() also doesnt' exist, it will throw a 
-"declined" exception.
+When a request comes into Scaffold it is first processed by L<Scaffold::Server|Scaffold::Server>
+which takes the incomming url and passes it to L<Scaffold::Routes|Scaffold::Routes>.
+Scaffold::Routes parses the url depending on the regex from the "route" verbs 
+in the "locations" stanzia of the configuration. If a match is found it returns
+the "handler" associated with the route and any parameters extracted from
+the url. The server then calls the handler's handler() method passing the
+parameters in @_;
 
-Now we add a do_photos() method:
+=head2 Plugins
 
- sub do_photos {
-     my ($self, $dir, $wanted) = @_;
+Scaffold handlers have an internal state machine. At certain steps, plugins are
+called. Scaffold loads three plugins at startup. They are 
+L<Scaffold::Cache::Manager|Scaffold::Cache::Manager>,
+L<Scaffold::Session::Manager|Scaffold::Session::Manager> and L<Scaffold::Stash::Manager|Scaffold::Stash::Manager>.
+These plugins help maintain the Scaffold environment. Plugins are guranteed to
+run in the order they are defined.
 
-     my $photo;
-     my $file = File($dir, $wanted . '.png');
+=head2 The State Machine
 
-     if ($file->exists) {
-
-         $photo = $file->read;
-
-         $self->view->data($photo);
-         $self->view->template_disable(1);
-         $self->view->content_type('image/png');
-
-     } else {
-
-         $self->not_found($file);
-
-     }
-
- }
-
-The method, do_photos() wants two parameters passed to it. They will be
-parsed out of the URL. So a request to "/photos/family/25" is made. The 
-App::Main handler is called. The do_photos() method is invoked passing 
-"family" and "25" as the two parameters. If the do_photos() method didn't 
-exist and a do_default method did, it would be passed three parameters; 
-"photos", "family" and "25".
-
-Handlers also run plugins. Plugins are envoked at specific times during the
-request's life cycle. They may be used as filters or to perform specific 
-actions.
-
-=head1 METHODS
+The following are the steps that the state machine performs. 
 
 =over 4
 
-=item handler 
+=item pre_action
+
+Plugins are called during this phase. For example Scaffold::Cache::Manager
+and Scaffold::Session::Manager run in this phase.
+
+=item action
+
+Your main line code is called during this phase. Please see below to 
+understand how it is called.
+
+=item post_action
+
+Plugins are called during this phase.
+
+=item pre_render
+
+Plugins are called during this phase.
+
+=item render
+
+Your defined render is called to process items in the view stash.
+
+=item post_render
+
+Plugins are called during this phase.
+
+=item pre_exit
+
+Plugins are called during this phase. For example Scaffold::Stash::Manager and
+Scaffold::Session::Manager run during this phase. This is also the last phase 
+before the response is returned back to Scaffold::Server.
+
+=back
+
+=head2 The Action Phase
+
+The action phase is where your mainline application code is called. During 
+this phase one of three options can happen. They are the following.
+
+=over 4
+
+=item Option 1
+
+If any parameters where extracted from the url, the first one is assumed
+to be the method that will be called in the handler. This paramenter is
+then prepended with "do_" and is checked with can() to see if it is defined.
+If the method is defined it is called with the remaining parameters passed 
+in @_;
+
+=item Option 2
+
+If the above method is not defined then "do_main" is checked for with can().
+If it is defined, it is called with all the parameters passed in @_.
+
+=item Option 3 
+
+If "do_main" is not defined then "do_default" is checked for with can(). If it
+is defined, it is called with all the parameters passed in @_. If it doesn't
+exist an exception is thrown and a nice error page is displayed.
+
+=back
+
+=head2 Extending and Overriding
+
+Since Scaffold::Handler is inherited, you can override any of the methods
+that the default handler defines. For example you can override the 
+exceptions() method to handle your applications exceptions.
+
+=head2 Where's the MVC
+
+Scaffold handlers don't enforce the MVC pattern. You can certainly write your
+code in that fashion. There is nothing stopping you. The handler can be 
+considered the controller, the render phase could be considered the view, 
+all you would have to do is create the model. Remember, Scaffold is 
+about flexiablity, not comformity to predefined methodolgies.
+
+=head1 METHODS
+
+The following are the methods that you inherit from Scaffold::Handler.
+
+=over 4
+
+=item handler(sobj, ref(handler) params) 
 
 The main entry point. This method contains the state machine that handles the
 life cycle of a request. It runs the plugins sends the output thru a renderer
 for format and returns the response back to the dispatcher.
 
-=item redirect
+=item redirect(url)
 
 The method performs a 302 redirect with the specified URL. A fully qualified 
 URL is returned in the response header.
@@ -538,7 +612,7 @@ by the browser, this method is a prime candiate to override in a single page
 JavaScript application. In that case it may return a data structure that has
 meaning to the JavaScript application.
 
-=item moved_permanently
+=item moved_permanently(url)
 
 The method performs a 301 redirect with the specified URL. A fully qualified 
 URL is returned in the response header.
@@ -547,7 +621,7 @@ URL is returned in the response header.
 
 This is considered an exception and normal processing stops.
 
-=item declined
+=item declined()
 
 This method performs a 404 response, along with an error page. The error page
 shows the location and the handler that was supposed to run along with a dump
@@ -557,7 +631,7 @@ of various objects within Scaffold.
 
 This is considered an exception and normal processing stops.
 
-=item not_found
+=item not_found(file)
 
 This method performs a 404 response, along with an error page. The error page
 shows the name of the file that was not found along with a dump of various
@@ -567,7 +641,7 @@ objects within Scaffold.
 
 This is considered an exception and normal processing stops.
 
-=item exceptions
+=item exceptions()
 
 This method performs exception handling. The methods redirect(), 
 moved_permanently(), declined() and not_found() throw exceptions. They are 
@@ -599,11 +673,13 @@ can be overridden.
  Scaffold::Render
  Scaffold::Render::Default
  Scaffold::Render::TT
+ Scaffold::Routes
  Scaffold::Server
  Scaffold::Session::Manager
  Scaffold::Stash
  Scaffold::Stash::Controller
  Scaffold::Stash::Cookie
+ Scaffold::Stash::Manager
  Scaffold::Stash::View
  Scaffold::Uaf::Authenticate
  Scaffold::Uaf::AuthorizeFactory
