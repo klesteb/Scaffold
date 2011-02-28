@@ -45,8 +45,7 @@ sub pre_action {
     if (not $user) {
 
         $user = defined($self->scaffold->request->user) ? 
-          $self->scaffold->request->user                : 
-          'guest';
+          $self->scaffold->request->user : 'guest';
 
     }
 
@@ -69,10 +68,15 @@ sub pre_exit {
     my $lockmgr  = $self->scaffold->lockmgr;
     my $response = $self->scaffold->response;
 
-    $lockmgr->deallocate($session->session_id);
     $session->set('access', time());
-    $session->response_filter($response);
 
+    if (defined($session->session_id)) {
+
+        $lockmgr->deallocate($session->session_id);
+
+    }
+
+    $session->response_filter($response);
     $session->finalize();          # must be the last thing done!!
 
     return PLUGIN_NEXT;
