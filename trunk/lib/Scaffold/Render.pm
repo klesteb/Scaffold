@@ -43,8 +43,8 @@ Scaffold::Render - The base class for rendering.
 =head1 DESCRIPTION
 
 This is the base class for rendering output. If no renderer is specified, 
-Scaffold will use Scaffold::Render::Default. The View object of the Handlers
-stash is used to control the render process. 
+Scaffold will use Scaffold::Render::Default. The View object of the 
+handlers stash is used to control the render process. 
 
 =head1 METHODS
 

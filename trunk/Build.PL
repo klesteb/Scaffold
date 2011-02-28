@@ -5,7 +5,7 @@ use Module::Build;
 my $builder = Module::Build->new(
     module_name         => 'Scaffold',
     license             => 'perl',
-    dist_author         => 'Kevin L. Esteb <kesteb@wsipc.org>',
+    dist_author         => 'Kevin L. Esteb <kevin@kesteb.us>',
     dist_version_from   => 'lib/Scaffold.pm',
     build_requires => {
         'Test::More'    => '0.00',

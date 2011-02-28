@@ -41,6 +41,7 @@ lib/Scaffold/Plugins.pm
 lib/Scaffold/Render.pm
 lib/Scaffold/Render/Default.pm
 lib/Scaffold/Render/TT.pm
+lib/Scaffold/Routes.pm
 lib/Scaffold/Server.pm
 lib/Scaffold/Session/Manager.pm
 lib/Scaffold/Session/Store/Cache.pm

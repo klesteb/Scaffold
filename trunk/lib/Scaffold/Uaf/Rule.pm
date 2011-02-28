@@ -43,7 +43,7 @@ Scaffold::Uaf::Rule - A base class for rules.
 =head1 DESCRIPTION
 
 Each rule is a custom-written class that implements some aspect of your site's
-access logic. Rules can choose to grant or deny a request. 
+authorization logic. Rules can choose to grant or deny a request. 
 
  package Sample::Test;
 
@@ -115,6 +115,7 @@ request.
  Scaffold::Stash
  Scaffold::Stash::Controller
  Scaffold::Stash::Cookie
+ Scaffold::Stash::Manager
  Scaffold::Stash::View
  Scaffold::Uaf::Authenticate
  Scaffold::Uaf::AuthorizeFactory

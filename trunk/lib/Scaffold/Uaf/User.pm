@@ -65,7 +65,7 @@ data source.
 
 =over 4
 
-=item new
+=item new()
 
 This method initializes the user object. It takes one parameter, the username.
 
@@ -84,7 +84,7 @@ Example:
 
 =over 4
 
-=item attribute
+=item attribute()
 
 Set/Returns a user object attribute.
 
@@ -124,6 +124,7 @@ Example:
  Scaffold::Stash
  Scaffold::Stash::Controller
  Scaffold::Stash::Cookie
+ Scaffold::Stash::Manager
  Scaffold::Stash::View
  Scaffold::Uaf::Authenticate
  Scaffold::Uaf::AuthorizeFactory

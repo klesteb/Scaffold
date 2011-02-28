@@ -8,6 +8,7 @@ use Template;
 use Scaffold::Class
   version  => $VERSION,
   base     => 'Scaffold::Render',
+  utils    => 'self_params',
   constant => {
       RENDER => 'scaffold.handler.render',
   }
@@ -44,12 +45,22 @@ sub process {
 # ----------------------------------------------------------------------
 
 sub init {
-    my ($self, $config) = @_;
+    my ($self, $config) = self_params(@_);
 
     $self->{config} = $config;
 
+    # make sure all the config keys are uppercase for TT.
+
+    foreach my $key (keys %$config) {
+
+        $config->{uc($key)} = delete $config->{$key};
+
+    }
+
+    # initialize TT
+
     $self->{engine} = Template->new(
-        INCLUDE_PATH => $self->config('include_path'),
+        $config
     ) or $self->throw_msg(RENDER, 'render', 'TT', $Template::ERROR);
 
     return $self;
@@ -67,12 +78,6 @@ Scaffold::Render::TT - Use the Template Toolkit to render pages.
 =head1 SYNOPSIS
 
     my $server = Scaffold::Server->new(
-        locations => {
-            '/'            => 'App::Main',
-            '/robots.txt'  => 'Scaffold::Handler::Robots',
-            '/favicon.ico' => 'Scaffold::Handler::Favicon',
-            '/static'      => 'Scaffold::Handler::Static',
-        },
         render => Scaffold::Render::TT->new(
             include_path => 'html:html/resources/templates',
         ),
@@ -80,10 +85,9 @@ Scaffold::Render::TT - Use the Template Toolkit to render pages.
 
 =head1 DESCRIPTION
 
-This module loads the Template Toolkit as the renderer. It takes only one config
-parameter and that is "include_path". Which is a colon seperated list of 
-directories that will be searched for templates. The first matching template
-that is found is the one that will be used.
+This module loads the Template Toolkit as the renderer. It uses any of 
+TT's configuration items and passes them thru. It also uppercases any of 
+the configuration keywords to make TT happy.
 
 =head1 SEE ALSO
 

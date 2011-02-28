@@ -32,7 +32,7 @@ sub do_main {
 
         $self->uaf_invalidate();
         $self->scaffold->lockmgr->unlock($lock);
-	$self->scaffold->lockmgr->deallocate($lock);
+        $self->scaffold->lockmgr->deallocate($lock);
 
     } else {
 
@@ -107,6 +107,7 @@ It also invalidates the session.
  Scaffold::Stash
  Scaffold::Stash::Controller
  Scaffold::Stash::Cookie
+ Scaffold::Stash::Manager
  Scaffold::Stash::View
  Scaffold::Uaf::Authenticate
  Scaffold::Uaf::AuthorizeFactory
