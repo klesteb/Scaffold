@@ -360,9 +360,7 @@ Scaffold::Server - The Scaffold web engine
  --------
 
  use lib 'lib';
- use lib '../lib';
  use Scaffold::Server;
- use Scaffold::Render::TT;
 
  my $psgi_handler;
 
@@ -370,33 +368,27 @@ Scaffold::Server - The Scaffold web engine
 
     my $server = Scaffold::Server->new(
         locations => [
-            {
-                route   => qr{^/$},
-                handler => 'App::Main',
-            },{
+            }
                 route   => qr{^/robots.txt$},
                 handler => 'Scaffold::Handler::Robots',
             },{
                 route   => qr{^/favicon.ico$},
                 handler => 'Scaffold::Handler::Favicon',
             },{
-                route   => qr{^/static/(.*)$},
-                handler => 'Scaffold::Handler::Static',
-            },{
                 route   => qr{^/login/(.*)$},
                 handler => 'Scaffold::Uaf::Login',
             },{
                 route   => qr{^/logout$},
                 handler => 'Scaffold::Uaf::Logout',
+            },{
+                route   => qr{^/(.*)$},
+                handler => 'Scaffold::Handler::Static',
             }
         ],
         authorization => {
             authenticate => 'Scaffold::Uaf::Manager',
             authorize    => 'Scaffold::Uaf::AuthorizeFactory',
-        },
-        render => Scaffold::Render::TT->new(
-            include_path => 'html:html/resources/templates',
-        ),
+        }
     );
 
     $psgi_hander = $server->engine->psgi_handler();
@@ -416,7 +408,7 @@ authentication for access.
 This module is the main entry point for an application built with Scaffold. 
 It parses the configuration, loads the various components, makes the various 
 connections for the CacheManager, the LockManager, initializes the 
-SessionManager and will connect to the database of your choice.
+SessionManager and store the connect to the database of your choice.
 
 =head1 METHODS
 

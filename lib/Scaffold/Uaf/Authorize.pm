@@ -21,7 +21,7 @@ sub add_rule {
 
 }
 
-sub can {
+sub xcan {
     my ($self, $user, $action, $resource) = @_;
 
     my ($granted, $denied) = (0,0);
@@ -102,7 +102,7 @@ Then later in the main line code.
 
  my $manager = $self->scaffold->authz;
 
- if ($manager->can($user, "read", "/etc/shadow")) {
+ if ($manager->xcan($user, "read", "/etc/shadow")) {
     open DATA, "</etc/shadow";
      ...
  }
@@ -117,7 +117,7 @@ In the code of the system itself, you want to surround sensitive operations
 with code that determines if the current user is allowed to do that operation.
 
 This module attempts to make such a system possible. The module requires that 
-you write implementations of rules for your system that are subclasses of 
+you write implementations rules for your system that are subclasses of 
 Scaffold::Uaf::Rule. The rules can be written to use any data types, 
 which are abstractly known as "users", "actions", and "resources." 
 
@@ -138,14 +138,22 @@ define anything as a resource.
 
 These are the steps needed to create an Authorize object:
 
-1. Decide what sections of your code will need to be protected, and 
+=over 4
+
+=item Step 1 
+
+Decide what sections of your code will need to be protected, and
 decide what to do if the user doesn't have access. For example if a 
 screen should just hide fields, then the application code needs to 
 reflect that.
  
-2. Create an Authorize object for your application.
+=item Step 2
 
-3. Surround sensitive sections of code with something like:
+ Create an Authorize object for your application.
+
+=item Step 3
+
+Surround sensitive sections of code with something like:
 
  if ($manager->can($user, "view salary", $payrollRecord)) {
 
@@ -157,7 +165,9 @@ reflect that.
 
  }
 
-4. Create rules that spell out the behavior you want and add them
+=item Step 4
+
+Create rules that spell out the behavior you want and add them
 to your application's Authorization object. The basic idea is that
 a rule can grant permission, or deny it. If it neither grants or 
 denies, then the object will take the safe route and say that the 
@@ -181,7 +191,8 @@ salaries might look like:
      return 0 if (!$user->isa("Scaffold::Uaf::User") ||
                   !$self->isa("Scaffold::Uaf::Rule"));
 
-     if ($action eq "view salary" && $resource->isa("Payroll::Record")) {
+     if (($action eq "view salary") && 
+         ($resource->isa("Payroll::Record"))) {
 
         if ($user->username() eq $resource->getEmployeeName()) {
 
@@ -204,15 +215,17 @@ Then in your subclass of AuthorizeFactory:
  $viewRule = new SalaryViewRule;
  $manager->add_rule($viewRule);
 
+=back
+
 =head1 METHODS
 
 =over 4
 
-=item new
+=item new()
 
-This method intializes the object. It takes the Gantry object as a parameter.
+This method intializes the object. 
 
-=item can(user, action, resource)
+=item xcan(user, action, resource)
 
 This is the primary method of the Authorization object. It asks if the 
 specified user can do the specified action on the specified resource. 
@@ -221,7 +234,7 @@ Example:
 
 =over 4
 
- $manager->can($user, "eat", "cake");
+ $manager->xcan($user, "eat", "cake");
 
 =back
 
@@ -239,7 +252,7 @@ Example:
 
 =back
 
-=item rules
+=item rules()
 
 This method should be overridden and your rules applied to the object. See the
 above examples for usage.
@@ -275,6 +288,7 @@ above examples for usage.
  Scaffold::Stash
  Scaffold::Stash::Controller
  Scaffold::Stash::Cookie
+ Scaffold::Stash::Manager
  Scaffold::Stash::View
  Scaffold::Uaf::Authenticate
  Scaffold::Uaf::AuthorizeFactory

@@ -160,10 +160,10 @@ Scaffold::Uaf::Login - A handler for the /login url.
 
 This handler handles the url "/login" and any actions on that url. By default
 this method display a simple login page which contains a login form. That form 
-is submitted back to the "/login/validate" url, where the username and password are 
-processed. This processing is done by the uaf_validate() method. If validation is 
-succesful an User object is created. This object is then stored within the 
-session store so uaf_is_valid() can access it when doing  
+is submitted back to the "/login/validate" url, where the username and 
+password are processed. This processing is done by the uaf_validate() method. 
+If validation is succesful an User object is created. This object is then 
+stored within the session store so uaf_is_valid() can access it when doing  
 authentication. Also an initial security token is created. 
 
 This method also implements a simple three tries at login attempts. If after 
@@ -233,6 +233,7 @@ with the session cookies.
  Scaffold::Stash
  Scaffold::Stash::Controller
  Scaffold::Stash::Cookie
+ Scaffold::Stash::Manager
  Scaffold::Stash::View
  Scaffold::Uaf::Authenticate
  Scaffold::Uaf::AuthorizeFactory

@@ -42,7 +42,15 @@ sub pre_action {
     $create  = $session->get('create');
     $access  = $session->get('access');
 
-    $session->set('user', $self->scaffold->request->user) if (not $user);
+    if (not $user) {
+
+        $user = defined($self->scaffold->request->user) ? 
+          $self->scaffold->request->user                : 
+          'guest';
+
+    }
+
+    $session->set('user', $user);
     $session->set('address', $self->scaffold->request->address) if (not $address);
     $session->set('create', time()) if (not $create);
     $session->set('access', time()) if (not $access);
@@ -57,8 +65,8 @@ sub pre_action {
 sub pre_exit {
     my ($self, $hobj) = @_;
 
-    my $session = $self->scaffold->session;
-    my $lockmgr = $self->scaffold->lockmgr;
+    my $session  = $self->scaffold->session;
+    my $lockmgr  = $self->scaffold->lockmgr;
     my $response = $self->scaffold->response;
 
     $lockmgr->deallocate($session->session_id);
