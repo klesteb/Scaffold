@@ -85,7 +85,7 @@ sub do_validate {
     my $lock = $self->scaffold->session->session_id;
     my $params = $self->scaffold->request->parameters->as_hashref();
     my $app_rootp = $self->scaffold->config('configs')->{app_rootp};
-    
+
     $url = $login_rootp;
 
     try {
