@@ -17,7 +17,7 @@ use Scaffold::Class
                 uaf_login_template uaf_denied_title uaf_denied_wrapper 
                 uaf_denied_template uaf_logout_title uaf_logout_template 
                 uaf_logout_wrapper uaf_cookie_path uaf_cookie_domain 
-                uaf_cookie_secure',
+                uaf_cookie_secure uaf_handle',
   mixins    => 'uaf_filter uaf_limit uaf_timeout uaf_secret uaf_login_rootp 
                 uaf_denied_rootp uaf_expired_rootp uaf_validate_rootp 
                 uaf_logout_rootp uaf_login_title uaf_login_wrapper 
@@ -25,7 +25,8 @@ use Scaffold::Class
                 uaf_denied_template uaf_logout_title uaf_logout_template 
                 uaf_logout_wrapper uaf_cookie_path uaf_cookie_domain 
                 uaf_cookie_secure uaf_is_valid uaf_validate uaf_invalidate 
-                uaf_set_token uaf_avoid uaf_init uaf_check_credentials'
+                uaf_set_token uaf_avoid uaf_init uaf_check_credentials
+                uaf_handle'
 ;
 
 use Data::Dumper;
@@ -154,6 +155,7 @@ sub uaf_init {
     $self->{uaf_filter}         = $config->{uaf_filter} || 
       qr/^${app_rootp}\/(login|static|favicon.ico|robots.txt).*/;
 
+    $self->{uaf_handle}         = $config->{uaf_handle} || 'uaf';
     $self->{uaf_login_rootp}    = $app_rootp . '/login';
     $self->{uaf_logout_rootp}   = $app_rootp . '/logout';
     $self->{uaf_denied_rootp}   = $self->{uaf_login_rootp} . '/denied';
