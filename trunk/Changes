@@ -28,4 +28,5 @@ Revision history for Scaffold
         Changed when the scaffold object is injected into handlers and
         plugins. This now happens when they are initiated instead of
         when they are being called.
+        svn log -r 130:134
 
