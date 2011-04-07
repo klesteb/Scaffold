@@ -101,7 +101,7 @@ sub encrypt {
 }
 
 sub init_module {
-    my ($module) = @_;
+    my ($module, $sobj) = @_;
 
     my $obj;
     my @parts;
@@ -116,7 +116,7 @@ sub init_module {
 
             require $filename . '.pm';
             $module->import();
-            $obj = $module->new();
+            $obj = $module->new(scaffold => $sobj);
 
         } catch {
 
