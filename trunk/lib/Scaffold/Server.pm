@@ -62,13 +62,13 @@ sub dispatch {
         if ($handler ne '') {
 
             $class = $self->_init_handler($handler, $location);
-            $response = $class->handler($self, ref($class), @params);
+            $response = $class->handler(ref($class), @params);
 
         } else {
 
             $handler = $self->config('default_handler');
             $class = $self->_init_handler($handler, $location);
-            $response = $class->handler($self, ref($class), @params);
+            $response = $class->handler(ref($class), @params);
 
         }
 
@@ -127,8 +127,8 @@ sub init {
 
     }
 
-    push(@{$self->{plugins}}, Scaffold::Cache::Manager->new());
-    push(@{$self->{plugins}}, Scaffold::Stash::Manager->new());
+    $self->_init_plugin('Scaffold::Cache::Manager');
+    $self->_init_plugin('Scaffold::Stash::Manager');
 
     # init rendering
 
@@ -215,7 +215,7 @@ sub _init_plugin {
 
     try {
 
-        my $obj = init_module($plugin);
+        my $obj = init_module($plugin, $self);
         push(@{$self->{plugins}}, $obj);
 
     } catch {
@@ -235,7 +235,7 @@ sub _init_module {
 
     try {
 
-        $obj = init_module($module);
+        $obj = init_module($module, $self);
 
     } catch {
 
@@ -262,7 +262,7 @@ sub _init_handler {
 
         } else {
 
-            $obj = init_module($handler);
+            $obj = init_module($handler, $self);
 
             $self->{config}->{handlers}->{$handler} = $obj;
 

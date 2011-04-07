@@ -53,6 +53,16 @@ sub pre_exit {
 # Private Methods
 # ----------------------------------------------------------------------
 
+sub init {
+    my ($self, $config) = @_;
+
+    $self->{config}   = $config;
+    $self->{scaffold} = $config->{scaffold};
+
+    return $self;
+
+}
+
 1;
 
 __END__
