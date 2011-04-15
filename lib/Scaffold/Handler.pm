@@ -150,8 +150,7 @@ sub exceptions {
 
     my $page;
     my $ref = ref($ex);
-warn "exceptions - $ex\n";
-    
+
     if ($ref && $ex->isa('Badger::Exception')) {
 
         my $type = $ex->type;
