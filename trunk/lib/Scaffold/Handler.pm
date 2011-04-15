@@ -222,6 +222,10 @@ sub exceptions {
 
         }
 
+    } else {
+
+        die $ex;
+
     }
 
 }
