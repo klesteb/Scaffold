@@ -219,17 +219,8 @@ sub exceptions {
                 $self->scaffold->response->status('404');
                 $self->scaffold->response->body($page);
             }
-            else {
-
-                die $ex;
-
-            }
 
         }
-
-    } else {
-
-        die $ex;
 
     }
 
