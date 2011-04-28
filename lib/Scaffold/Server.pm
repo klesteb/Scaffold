@@ -50,14 +50,14 @@ sub dispatch {
 
     my $class;
     my $response;
-    my $handler = '';
-    my @params = ();
     my $url = $request->path_info;
     my $location = $request->uri->path;
 
     try {
 
-        ($handler, @params) = $self->routes->dispatcher($url);
+        my ($handler, @params) = $self->routes->dispatcher($url);
+warn "handler = $handler\n";
+warn Dumper(@params);
 
         if ($handler ne '') {
 

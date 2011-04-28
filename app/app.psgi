@@ -32,10 +32,7 @@ main: {
                route   => qr{^/static/(.*)$},
                handler => 'Scaffold::Handler::Static',
             },{
-                route   => qr{^/login/(\w+)$},
-                handler => => 'Scaffold::Uaf::Login',
-            },{
-                route   => qr{^/login$},
+                route   => qr{^/login$|^/login/(\w+)$},
                 handler => => 'Scaffold::Uaf::Login',
             },{
                 route   => qr{^/logout$},
