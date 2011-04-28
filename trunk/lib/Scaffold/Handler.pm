@@ -40,20 +40,16 @@ use Data::Dumper;
 sub handler {
     my ($class, $module, @params) = @_;
 
-    $class->{stash} = Scaffold::Stash->new(
-        request => $class->scaffold->request
-    );
-
     my $location;
+    my $state = STATE_PRE_ACTION;
     my $root = $class->scaffold->config('configs')->{'app_rootp'};
+
+    my $p1 = ( shift(@params) || 'main' );
+    my $action = 'do_' . $p1;
 
     $class->{page_title} = $location = $class->scaffold->request->uri->path;
 
-    my $state = STATE_PRE_ACTION;
-    my $p1 = ( shift(@params) || 'main' );
-
-    my $action = 'do_' . $p1;
-
+    $self->stash->view->reinit();
     $class->scaffold->response->status('200');
     $class->scaffold->response->header('Content-Type' => 'text/html');
 
@@ -232,12 +228,15 @@ sub exceptions {
 
 sub init {
     my ($self, $config) = @_;
-    
+
     $self->{config} = $config;
     $self->{scaffold} = $config->{scaffold};
-    
+    $self->{stash} = Scaffold::Stash->new(
+        request => $config->{scaffold}->request
+    );
+
     return $self;
-    
+
 }
 
 sub _pre_action {
@@ -264,8 +263,6 @@ sub _pre_action {
 
 sub _perform_action {
     my ($self, $action , $p1, @p) = @_;
-
-    $self->stash->view->reinit();
 
     if ($self->can($action)) {
 
