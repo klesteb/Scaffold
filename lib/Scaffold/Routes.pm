@@ -54,6 +54,7 @@ sub _parse_url {
 
         if (my (@vars) = $url =~ m/$_->{route}/i) {
 
+            $vars[0] = '' if (! defined($vars[0]));
             $vars[0] = '' if ($vars[0] eq 1);
             return ($_->{handler}, @vars);
 

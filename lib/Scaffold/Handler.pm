@@ -45,7 +45,7 @@ sub handler {
     my $root = $class->scaffold->config('configs')->{'app_rootp'};
 
     my $p1 = ( shift(@params) || 'main' );
-    my $action = 'do_' . (defined($p1) ? $p1 : 'main');
+    my $action = 'do_' . $p1;
 
     $class->{page_title} = $location = $class->scaffold->request->uri->path;
 
