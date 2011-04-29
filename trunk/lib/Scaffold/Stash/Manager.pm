@@ -18,13 +18,13 @@ use Data::Dumper;
 sub pre_exit {
     my ($self, $hobj) = @_;
 
-    my @cookies = $self->stash->cookies->get();
+    my @cookies = $hobj->stash->cookies->get();
 
     foreach my $key (@cookies) {
 
         next if ($key eq SESSION_ID); # handled by Session/Manager
 
-        my $cookie = $self->stash->cookies->get($key);
+        my $cookie = $hobj->stash->cookies->get($key);
 
         my $values = {
             value => $cookie->value,
@@ -55,7 +55,7 @@ sub pre_exit {
 
         }
 
-        $self->scaffold->response->cookies->{$cookie->name} = $values;
+        $hobj->scaffold->response->cookies->{$cookie->name} = $values;
 
     }
       

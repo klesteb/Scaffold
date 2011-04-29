@@ -6,8 +6,7 @@ use 5.8.8;
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Base',
-  constants => ':plugins',
-  mutators  => 'scaffold stash',
+  constants => ':plugins'
 ;
 
 # ----------------------------------------------------------------------
@@ -15,35 +14,35 @@ use Scaffold::Class
 # ----------------------------------------------------------------------
 
 sub pre_action {
-    my ($self) = @_;
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub post_action {
-    my ($self) = @_;
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub pre_render {
-    my ($self) = @_;
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub post_render {
-    my ($self) = @_;
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
 }
 
 sub pre_exit {
-    my ($self) = @_;
+    my ($self, $hobj) = @_;
 
     return PLUGIN_NEXT;
 
@@ -52,16 +51,6 @@ sub pre_exit {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub init {
-    my ($self, $config) = @_;
-
-    $self->{config}   = $config;
-    $self->{scaffold} = $config->{scaffold};
-
-    return $self;
-
-}
 
 1;
 

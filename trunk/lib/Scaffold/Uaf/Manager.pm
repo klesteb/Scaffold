@@ -19,15 +19,15 @@ use Scaffold::Class
 sub pre_action {
     my ($self, $hobj) = @_;
 
-    $self->uaf_init();
+    $hobj->uaf_init();
 
     my $user;
     my $attempts;
-    my $regex = $self->uaf_filter;
-    my $uri = $self->scaffold->request->uri;
-    my $login_rootp = $self->uaf_login_rootp;
-    my $denied_rootp = $self->uaf_denied_rootp;
-    my $lock = $self->scaffold->session->session_id;
+    my $regex = $hobj->uaf_filter;
+    my $uri = $hobj->scaffold->request->uri;
+    my $login_rootp = $hobj->uaf_login_rootp;
+    my $denied_rootp = $hobj->uaf_denied_rootp;
+    my $lock = $hobj->scaffold->session->session_id;
 
     # authenticate the session, this happens with each access
 
@@ -35,27 +35,27 @@ sub pre_action {
 
         try {
 
-            if ($self->scaffold->lockmgr->lock($lock)) {
+            if ($hobj->scaffold->lockmgr->lock($lock)) {
 
-                $attempts = $self->scaffold->session->get('uaf_login_attempts') || 0;
+                $attempts = $hobj->scaffold->session->get('uaf_login_attempts') || 0;
 
-                if ($attempts < $self->uaf_limit) {
+                if ($attempts < $hobj->uaf_limit) {
 
-                    if ($user = $self->uaf_is_valid()) {
+                    if ($user = $hobj->uaf_is_valid()) {
 
-                        $self->scaffold->user($user);
-                        $self->scaffold->lockmgr->unlock($lock);
+                        $hobj->scaffold->user($user);
+                        $hobj->scaffold->lockmgr->unlock($lock);
 
                     } else { 
 
-                        $self->scaffold->lockmgr->unlock($lock);
+                        $hobj->scaffold->lockmgr->unlock($lock);
                         $hobj->redirect($login_rootp); 
 
                     }
 
                 } else {
 
-                    $self->scaffold->lockmgr->unlock($lock);
+                    $hobj->scaffold->lockmgr->unlock($lock);
                     $hobj->redirect($denied_rootp); 
 
                 }
@@ -69,9 +69,9 @@ sub pre_action {
             # capture any exceptions and release any held locks,
             # then punt to the outside exception handler.
 
-            unless ($self->scaffold->lockmgr->try_lock($lock)) {
+            unless ($hobj->scaffold->lockmgr->try_lock($lock)) {
 
-                $self->scaffold->lockmgr->unlock($lock);
+                $hobj->scaffold->lockmgr->unlock($lock);
 
             }
 

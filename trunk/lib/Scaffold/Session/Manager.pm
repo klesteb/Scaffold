@@ -29,12 +29,12 @@ sub pre_action {
 
     my $session = HTTP::Session->new(
         store => Scaffold::Session::Store::Cache->new(
-            cache => $self->scaffold->cache,
+            cache => $hobj->scaffold->cache,
         ),
         state => HTTP::Session::State::Cookie->new(
             name => SESSION_ID
         ),
-        request => $self->scaffold->request
+        request => $hobj->scaffold->request
     );
 
     $user    = $session->get('user');
@@ -44,18 +44,18 @@ sub pre_action {
 
     if (not $user) {
 
-        $user = defined($self->scaffold->request->user) ? 
-          $self->scaffold->request->user : 'guest';
+        $user = defined($hobj->scaffold->request->user) ? 
+          $hobj->scaffold->request->user : 'guest';
 
     }
 
     $session->set('user', $user);
-    $session->set('address', $self->scaffold->request->address) if (not $address);
+    $session->set('address', $hobj->scaffold->request->address) if (not $address);
     $session->set('create', time()) if (not $create);
     $session->set('access', time()) if (not $access);
 
-    $self->scaffold->session($session);
-    $self->scaffold->lockmgr->allocate($session->session_id);
+    $hobj->scaffold->session($session);
+    $hobj->scaffold->lockmgr->allocate($session->session_id);
 
     return PLUGIN_NEXT;
 
@@ -64,9 +64,9 @@ sub pre_action {
 sub pre_exit {
     my ($self, $hobj) = @_;
 
-    my $session  = $self->scaffold->session;
-    my $lockmgr  = $self->scaffold->lockmgr;
-    my $response = $self->scaffold->response;
+    my $session  = $hobj->scaffold->session;
+    my $lockmgr  = $hobj->scaffold->lockmgr;
+    my $response = $hobj->scaffold->response;
 
     $session->set('access', time());
 
