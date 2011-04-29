@@ -329,13 +329,29 @@ sub _set_config_defaults {
 sub _unexpected_exception {
     my ($self, $ex) = @_;
 
-    my $text = qq(
-        Unexpected exception caught<br />
-        <span style='font-size: .8em'>
-        Type: $ex->type<br />
-        Info: $ex->info<br />
-        </span>
-    );
+    my $text;
+    my $ref = ref($ex);
+
+    if ($ref && $ex->isa('Badger::Exception')) {
+
+        $text = qq(
+            Unexpected exception caught<br />
+            <span style='font-size: .8em'>
+            Type: $ex->type<br />
+            Info: $ex->info<br />
+            </span>
+        );
+        
+    } else {
+        
+        $text = qq(
+            Unexpected exception caught<br />
+            <span style='font-size: .8em'>
+            Message: $ex<br />
+            </span>
+        );
+        
+    }
 
     my $page = $self->custom_error($self, 'Unexcpected Exception', $text);
 
