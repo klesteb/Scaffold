@@ -56,8 +56,6 @@ sub dispatch {
     try {
 
         my ($handler, @params) = $self->routes->dispatcher($url);
-warn "handler = $handler\n";
-warn Dumper(@params);
 
         if ($handler ne '') {
 

@@ -16,7 +16,7 @@ use Scaffold::Class
 sub pre_action {
     my ($self, $hobj) = @_;
 
-    $self->scaffold->cache->purge();
+    $hobj->scaffold->cache->purge();
 
     return PLUGIN_NEXT;
 
