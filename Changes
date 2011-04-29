@@ -25,9 +25,11 @@ Revision history for Scaffold
         svn log -r 120:129
         
 0.06    02-Apr-2011 K.Esteb
-        Changed when the scaffold object is injected into handlers and
-        plugins. This now happens when they are initiated instead of
-        when they are being called.
-        Fixed a problem with capturing exceptions.
-        svn log -r 130:137
+        Changed when the scaffold object is injected into handlers. This 
+        now happens when they are initiated instead of when they are being 
+        called. 
+        Fixed a minor error with routes. Routes can now be like this:
+           qr{!/login$|^/login/(\w+)$}
+        And they will parse correctly. 
+        svn log -r 130:144
 
