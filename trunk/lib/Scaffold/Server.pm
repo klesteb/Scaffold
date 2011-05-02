@@ -57,9 +57,6 @@ sub dispatch {
 
         my ($handler, @params) = $self->routes->dispatcher($url);
 
-warn "Server - handler = $handler\n";
-warn Dumper(@params);
-        
         if ($handler ne '') {
 
             $class = $self->_init_handler($handler, $location);
