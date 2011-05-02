@@ -40,13 +40,14 @@ use Data::Dumper;
 sub handler {
     my ($class, $module, @params) = @_;
 
+    my $action;
     my $location;
     my $state = STATE_PRE_ACTION;
+    my $p1 = ( shift(@params) || 'main' );
     my $root = $class->scaffold->config('configs')->{'app_rootp'};
 
-    my $p1 = ( shift(@params) || 'main' );
     $p1 = 'main' if ($p1 eq '1');
-    my $action = 'do_' . $p1;
+    $action = 'do_' . $p1;
 
     $class->{stash} = Scaffold::Stash->new(
         request => $class->scaffold->request
