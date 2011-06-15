@@ -35,3 +35,6 @@ Revision history for Scaffold
         routes.
         svn log -r 130:148
 
+0.07    15-Jun-2011 K.Esteb
+        Started to implement the caching of static template output. 
+        

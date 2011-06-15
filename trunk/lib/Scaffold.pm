@@ -4,7 +4,7 @@ use 5.8.8;
 use warnings;
 use strict;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 1; 
 
