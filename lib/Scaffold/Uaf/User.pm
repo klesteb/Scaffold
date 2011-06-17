@@ -17,7 +17,7 @@ sub attribute {
     my ($self, $key, $value) = @_;
 
     $self->{attributes}->{$key} = $value if (defined($value));
-    return $self->{$key};
+    return $self->{attributes}->{$key};
 
 }
     
