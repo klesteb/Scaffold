@@ -345,11 +345,19 @@ sub _process_render {
 
     # render the output
 
-    if ($view->cache) {
+    if (! $view->template_disabled) {
 
-        if ($page = $cache->get($view->cache_key)) {
+        if ($view->cache) {
 
-            $self->scaffold->response->body($page);
+            if ($page = $cache->get($view->cache_key)) {
+
+                $self->scaffold->response->body($page);
+
+            } else {
+
+                $self->_process_page($page);
+
+            }
 
         } else {
 
@@ -359,7 +367,7 @@ sub _process_render {
 
     } else {
 
-        $self->_process_page($page);
+        $self->scaffold->response->body($page);
 
     }
 
