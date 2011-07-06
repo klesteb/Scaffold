@@ -29,7 +29,7 @@ Revision history for Scaffold
         now happens when they are initiated instead of when they are being 
         called. 
         Fixed a minor error with routes. Routes can now be like this:
-           qr{!/login$|^/login/(\w+)$}
+          qr{!/login$|^/login/(\w+)$}
         And they will parse correctly. 
         Removed all undef's from the parameter array returned from
         routes.
@@ -37,4 +37,6 @@ Revision history for Scaffold
 
 0.07    15-Jun-2011 K.Esteb
         Started to implement the caching of static template output. 
+        The invocation of the method within the handler now uses 
+        lower case for the method name.
         
