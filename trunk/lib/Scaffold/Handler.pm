@@ -265,9 +265,11 @@ sub _pre_action {
 sub _perform_action {
     my ($self, $action , $p1, @p) = @_;
 
-    if ($self->can($action)) {
-        
-        $self->$action(@p);
+    my $method = lc($action);
+
+    if ($self->can($method)) {
+
+        $self->$method(@p);
 
     } elsif ($self->can('do_default')) {
 
