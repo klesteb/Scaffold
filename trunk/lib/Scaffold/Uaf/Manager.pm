@@ -69,7 +69,7 @@ sub pre_action {
             # capture any exceptions and release any held locks,
             # then punt to the outside exception handler.
 
-            unless ($hobj->scaffold->lockmgr->try_lock($lock)) {
+            if ($hobj->scaffold->lockmgr->try_lock($lock)) {
 
                 $hobj->scaffold->lockmgr->unlock($lock);
 
