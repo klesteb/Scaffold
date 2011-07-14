@@ -134,7 +134,7 @@ sub do_validate {
         # capture any exceptions and release any held locks,
         # then punt to the outside exception handler.
 
-        unless ($self->scaffold->lockmgr->try_lock($lock)) {
+        if ($self->scaffold->lockmgr->try_lock($lock)) {
 
             $self->scaffold->lockmgr->unlock($lock);
 
