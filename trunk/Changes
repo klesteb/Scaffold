@@ -39,4 +39,7 @@ Revision history for Scaffold
         Started to implement the caching of static template output. 
         The invocation of the method within the handler now uses 
         lower case for the method name.
+        Changed several instances where "unless" was being used instead
+        of "if" when checking for held locks.
         
+
