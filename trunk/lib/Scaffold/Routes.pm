@@ -70,7 +70,7 @@ sub _parse_url {
 
     }
 
-    return;
+    return ('', @temp);
 
 }
 
