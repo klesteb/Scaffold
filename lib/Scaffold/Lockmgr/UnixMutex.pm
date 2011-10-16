@@ -342,7 +342,7 @@ sub _get_semaphore {
         $self->engine->op(0, 1, 0);
         $self->throw_msg(
             'scaffold.lockmgr.unixmutex._get_semaphore',
-            'shhmread',
+            'shmread',
             $ex
         );
 
