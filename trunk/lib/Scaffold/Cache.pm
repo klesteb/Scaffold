@@ -27,17 +27,6 @@ sub get {
 
 }
 
-sub set {
-    my ($self, $key, $value) = @_;
-
-    my $namespace = $self->namespace;
-    my $expires = $self->expires;
-    my $skey = $namespace . ':' . $key;
-
-    return $self->handle->set($skey, $value, $expires);
-
-}
-
 sub delete {
     my ($self, $key) = @_;
 

@@ -1,12 +1,14 @@
 package Scaffold::Server;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use 5.8.8;
 use Try::Tiny;
+use Set::Light;
 use Plack::Response;
 use Scaffold::Engine;
 use Scaffold::Routes;
+use Badger::Class::Methods;
 use Scaffold::Cache::Manager;
 use Scaffold::Stash::Manager;
 use Scaffold::Render::Default;
@@ -93,6 +95,8 @@ sub init {
     my $engine;
     my $configs;
     my $plugins;
+    my $set = Set::Light->new(qw/authz engine cache render database plugins request response lockmgr routes session user authorization locations configs/);
+    my @accessors = keys(%$config);
 
     $self->{config} = $config;
 
@@ -187,6 +191,17 @@ sub init {
             $self->_init_plugin($plugin);
 
         }
+
+    }
+
+    # build dynamic accessors for other config items
+
+    foreach my $accessor (@accessors) {
+
+        next if ($set->has($accessor));
+
+        $self->{$accessor} = $self->config($accessor);
+        Badger::Class::Methods->accessors(__PACKAGE__, $accessor);
 
     }
 
@@ -411,7 +426,7 @@ Scaffold::Server - The Scaffold web engine
 
 Initializes and returns a handle for the psgi engine. Suitable for this command:
 
- # plackup -app app.psgi -s Standalone::Prefork
+ # plackup app.psgi
 
 Which is a great way to develop and test your web application. By the way, 
 the above configuration would run a complete static page site that needs 
@@ -422,7 +437,35 @@ authentication for access.
 This module is the main entry point for an application built with Scaffold. 
 It parses the configuration, loads the various components, makes the various 
 connections for the CacheManager, the LockManager, initializes the 
-SessionManager and store the connect to the database of your choice.
+SessionManager and stores the connection to the database of your choice.
+
+=head2 CONFIGURATION
+
+As seen above Scaffold::Server takes configuration parameters. Since 
+Scaffold::Server can generate dynamic accessors for items within that 
+configuration. Resevered words are needed. Those words are the following:
+
+    authz engine cache render database plugins request response 
+    lockmgr routes session user authorization locations configs
+
+Please do not use them when adding additional items to the configuration. For
+example, if you want to add access to a job queue such as Gearman you could do
+the following:
+
+    my $server = Scaffold::Server->new(
+         locations => [
+         ],
+         gearman => XAS::Lib::Gearman::Client->new(),
+         database => {
+         }
+    );
+
+Later in you application you can access Gearman with the following syntax:
+
+    $self->scaffold->gearman->process();
+
+Where the process() method does whatever. Configuration items are discussed 
+within the individual modules that use them. 
 
 =head1 METHODS
 

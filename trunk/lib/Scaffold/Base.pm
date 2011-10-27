@@ -10,6 +10,7 @@ use Scaffold::Class
   base     => 'Badger::Base',
   version  => $VERSION,
   messages => {
+      invparams  => "invalid paramters passed, reason: %s\n",
       evenparams => "%s requires an even number of paramters\n",
       noalias    => "can not set session alias %s\n",
       badini     => "can not load %s\n",

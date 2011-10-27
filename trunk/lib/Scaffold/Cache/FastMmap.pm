@@ -15,6 +15,16 @@ use Scaffold::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
+sub set {
+    my ($self, $key, $value) = @_;
+
+    my $namespace = $self->namespace;
+    my $skey = $namespace . ':' . $key;
+
+    return $self->handle->set($skey, $value);
+
+}
+
 sub update {
     my ($self, $key, $value) = @_;
 
