@@ -23,6 +23,7 @@ my $builder = Module::Build->new(
         'Cache::FastMmap'      => '1.34',
         'Cache::Memcached'     => '1.28',
         'Try::Tiny'            => '0.04',
+        'Set::Light'           => 0,
     },
     add_to_cleanup      => [ 'Scaffold-*' ],
     create_makefile_pl => 'traditional',
