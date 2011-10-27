@@ -205,8 +205,12 @@ sub init {
 
     }
 
+    # map the routes to handlers
+
     my $routes = $self->config('locations');
     $self->{routes} = Scaffold::Routes->new(routes => $routes);
+
+    # off to the races we go
 
     $engine = $self->config('engine');
 
