@@ -43,3 +43,10 @@ Revision history for Scaffold
         of "if" when checking for held locks.
         svn log -r 149:160
 
+0.08    10-Nov-2011 K.Esteb
+        Fixed a problem where the cache was not being cleared correctly.
+          UnixMutex.pm was using the wrong set() method.
+        Fixed returning an uninitialized value in Routes.pm
+        Fixed an error message in UnixMutex.pm
+        svn log -r 161:167
+
