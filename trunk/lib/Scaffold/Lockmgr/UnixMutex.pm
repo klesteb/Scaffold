@@ -6,7 +6,7 @@ use 5.8.8;
 use Try::Tiny;
 use IPC::Semaphore;
 use Errno qw( EAGAIN EINTR );
-use IPC::SysV qw( IPC_CREAT IPC_RMID SEM_UNDO IPC_NOWAIT);
+use IPC::SysV qw( IPC_CREAT IPC_RMID SEM_UNDO IPC_NOWAIT );
 
 use Scaffold::Class
   version   => $VERSION,
@@ -16,6 +16,7 @@ use Scaffold::Class
       BUFSIZ => 256,
   },
   messages => {
+      'baselock'     => "unable to aquire the base lock",
       'allocate'     => "unable to allocate a lock, reason: %s",
       'deallocate'   => "unable to deallocate a lock, reason: %s",
       'nosharedmem'  => "unable to aquire shared memory, reason: %s",
@@ -41,21 +42,30 @@ sub allocate {
 
     try {
 
-        $self->_lock_semaphore(0);
+        if ($self->_lock_semaphore(0)) {
 
-        for (my $x = 1; $x < $size; $x++) {
+            for (my $x = 1; $x < $size; $x++) {
 
-            shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
-            if ($buffer eq $BLANK) {
+                shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+                if ($buffer eq $BLANK) {
 
-                shmwrite($self->{shmem}, $skey, $x, BUFSIZ) or die $!;
-                last;
+                    shmwrite($self->{shmem}, $skey, $x, BUFSIZ) or die $!;
+                    last;
+
+                }
 
             }
 
-        }
+            $self->_unlock_semaphore(0);
 
-        $self->_unlock_semaphore(0);
+        } else {
+
+            $self->throw_msg(
+                'scaffold.lockmgr.unixmutex.allocate',
+                'baselock',
+            );
+
+        }
 
     } catch {
 
@@ -81,21 +91,30 @@ sub deallocate {
 
     try {
 
-        $self->_lock_semaphore(0);
+        if ($self->_lock_semaphore(0)) {
 
-        for (my $x = 1; $x < $size; $x++) {
+            for (my $x = 1; $x < $size; $x++) {
 
-            shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
-            if ($buffer eq $skey) {
+                shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+                if ($buffer eq $skey) {
 
-                shmwrite($self->{shmem}, $BLANK, $x, BUFSIZ) or die $!;
-                last;
+                    shmwrite($self->{shmem}, $BLANK, $x, BUFSIZ) or die $!;
+                    last;
+
+                }
 
             }
 
-        }
+            $self->_unlock_semaphore(0);
 
-        $self->_unlock_semaphore(0);
+        } else {
+
+            $self->throw_msg(
+                'scaffold.lockmgr.unixmutex.deallocate',
+                'baselock',
+            );
+
+        }
 
     } catch {
 
@@ -302,21 +321,30 @@ sub _get_semaphore {
 
     try {
 
-        $self->_lock_semaphore(0);
+        if ($self->_lock_semaphore(0)) {
 
-        for (my $x = 1; $x < $size; $x++) {
+            for (my $x = 1; $x < $size; $x++) {
 
-            shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
-            if ($buffer eq $skey) {
+                shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+                if ($buffer eq $skey) {
 
-                $stat = $x;
-                last;
+                    $stat = $x;
+                    last;
+
+                }
 
             }
 
-        }
+            $self->_unlock_semaphore(0);
 
-        $self->_unlock_semaphore(0);
+        } else {
+
+            $self->throw_msg(
+                'scaffold.lockmgr.unixmutex._get_semaphore',
+                'baselock',
+            );
+
+        }
 
     } catch {
 
