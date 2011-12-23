@@ -50,3 +50,8 @@ Revision history for Scaffold
         Fixed an error message in UnixMutex.pm
         svn log -r 161:167
 
+0.09    22-Dec-2011 K.Esteb
+        Rewrote UnixMutex.pm to work properly. This should resolve
+        problems with ramdom lockup and semaphore errors.
+        svn log -r 168:170
+        
