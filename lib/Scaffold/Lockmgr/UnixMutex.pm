@@ -5,13 +5,16 @@ our $VERSION = '0.03';
 use 5.8.8;
 use Try::Tiny;
 use IPC::Semaphore;
+use IPC::SharedMem;
 use Errno qw( EAGAIN EINTR );
-use IPC::SysV qw( IPC_CREAT IPC_RMID SEM_UNDO IPC_NOWAIT );
+use IPC::SysV qw( IPC_CREAT IPC_RMID IPC_SET SEM_UNDO IPC_NOWAIT );
 
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Lockmgr',
   constants => 'TRUE FALSE LOCK',
+  utils     => 'numlike',
+  accessors => 'shmem',
   constant => {
       BUFSIZ => 256,
   },
@@ -46,10 +49,10 @@ sub allocate {
 
             for (my $x = 1; $x < $size; $x++) {
 
-                shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+                $buffer = $self->shmem->read($x, BUFSIZ) or die $!;
                 if ($buffer eq $BLANK) {
 
-                    shmwrite($self->{shmem}, $skey, $x, BUFSIZ) or die $!;
+                    $self->shmem->write($skey, $x, BUFSIZ) or die $!;
                     last;
 
                 }
@@ -95,10 +98,10 @@ sub deallocate {
 
             for (my $x = 1; $x < $size; $x++) {
 
-                shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+                $buffer = $self->shmem->read($x, BUFSIZ) or die $!;
                 if ($buffer eq $skey) {
 
-                    shmwrite($self->{shmem}, $BLANK, $x, BUFSIZ) or die $!;
+                    $self->shmem->write($BLANK, $x, BUFSIZ) or die $!;
                     last;
 
                 }
@@ -187,14 +190,52 @@ sub try_lock {
 sub init {
     my ($self, $config) = @_;
 
+    my $gid;
+    my $uid;
+    my $mode;
     my $size;
     my $buffer;
 
-    # We are being really liberal here... but apache pukes on the
-    # defaults and there is no easy, portable, way to change ownership 
-    # with shmctl/semctl on 5.8.8.
+    unless (defined($config->{mode})) {
 
-    my $access = ( 0666 | IPC_CREAT ); 
+        # We are being really liberal here... but apache pukes on the
+        # defaults.
+
+        $mode = ( 0666 | IPC_CREAT ); 
+        
+    }
+
+    if (defined($config->{uid})) {
+
+        $uid = $config->{gid};
+
+        unless (numlike($config->{gid})) {
+
+            $uid = getpwnam($config->{uid});
+
+        }
+
+    } else {
+
+        $uid = $>;
+
+    }
+
+    if (defined($config->{gid})) {
+
+        $gid = $config->{gid};
+
+        unless (numlike($config->{gid})) {
+
+            $gid = getgrpnam($config->{gid});
+
+        }
+
+    } else {
+
+        $gid = $);
+
+    };
 
     if (! defined($config->{nsems})) {
 
@@ -234,7 +275,6 @@ sub init {
     }
 
     $self->{config}  = $config;
-    $self->{owner}   = $$;
     $self->{limit}   = $config->{limit} || 10;
     $self->{timeout} = $config->{timeout} || 10;
 
@@ -243,7 +283,12 @@ sub init {
         $self->{engine} = IPC::Semaphore->new(
             $config->{key},
             $config->{nsems},
-            $access
+            $mode
+        ) or die $!;
+
+        $self->engine->set(
+            uid  => $uid,
+            gid  => $gid
         ) or die $!;
 
         $self->engine->setall((1) x $config->{nsems}) or die $!;
@@ -263,16 +308,26 @@ sub init {
     try {
 
         $size = $config->{nsems} * BUFSIZ;
-        $self->{shmem} = shmget($config->{key}, $size, $access) or die $!;
 
-        shmread($self->{shmem}, $buffer, 0, BUFSIZ) or die $!;
+        $self->{shmem} = IPC::SharedMem::Exetended->new(
+            $config->{key}, 
+            $size, 
+            $mode
+        ) or die $!;
+
+        $self->shmem->set(
+            uid  => $uid,
+            gid  => $gid
+        ) or die $!;
+
+        $buffer = $self->shmem->read(0, BUFSIZ) or die $!;
         if ($buffer ne $LOCK) {
 
-            shmwrite($self->{shmem}, $LOCK, 0, BUFSIZ) or die $!;
+            $self->shmem->write($LOCK, 0, BUFSIZ) or die $!;
 
             for (my $x = 1; $x < $config->{nsems}; $x++) {
 
-                shmwrite($self->{shmem}, $BLANK, $x, BUFSIZ) or die $!;
+                $self->shmem->write($BLANK, $x, BUFSIZ) or die $!;
 
             }
 
@@ -305,7 +360,7 @@ sub DESTROY {
 
     if (defined($self->{shmem})) {
 
-        shmctl($self->{shmem}, IPC_RMID, 0);
+        $self->shmem->remove();
 
     }
 
@@ -325,7 +380,7 @@ sub _get_semaphore {
 
             for (my $x = 1; $x < $size; $x++) {
 
-                shmread($self->{shmem}, $buffer, $x, BUFSIZ) or die $!;
+                $buffer = $self->shmem->read($x, BUFSIZ) or die $!;
                 if ($buffer eq $skey) {
 
                     $stat = $x;
@@ -405,6 +460,42 @@ sub _unlock_semaphore {
 
 }
 
+# ----------------------------------------------------------------------
+# Private Extension of IPC::SharedMem
+# ----------------------------------------------------------------------
+
+package IPC::SharedMem::Extended;
+
+use base 'IPC::SharedMem';
+
+sub set {
+    my $self = shift;
+    my $ds;
+
+    if (@_ == 1) {
+
+        $ds = shift;
+
+    } else {
+
+        croak 'Bad arg count' if @_ % 2;
+        my %arg = @_;
+
+        $ds = $self->stat or return undef;
+
+        while (my ($key, $val) = each %arg) {
+
+            $ds->$key($val);
+
+        }
+
+    }
+
+    my $v = shmctl($self->id, IPC_SET, $ds->pack);
+    $v ? 0 + $v : undef;
+
+}
+
 1;
 
 __END__
@@ -467,6 +558,21 @@ seconds.
 
 The number of attempts to try the lock. If the limit is passed an exception
 is thrown. The default is 10.
+
+=item uid
+
+The uid to create the semaphores and shared memory segments. Defaults to
+effetive uid.
+
+=item gid
+
+The gid to create the semaphores and shared memory segments. Defaults to
+effetive gid.
+
+=item mode
+
+The permissions used with by the semaphores and shared memory segments. 
+Defaults to ( 0666 | IPC_CREAT ).
 
 =back
 
