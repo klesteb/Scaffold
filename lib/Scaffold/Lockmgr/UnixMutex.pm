@@ -529,18 +529,18 @@ is thrown. The default is 10.
 
 =item uid
 
-The uid to create the semaphores and shared memory segments. Defaults to
+The uid used to create the semaphores and shared memory segments. Defaults to
 effetive uid.
 
 =item gid
 
-The gid to create the semaphores and shared memory segments. Defaults to
+The gid used to create the semaphores and shared memory segments. Defaults to
 effetive gid.
 
 =item mode
 
-The permissions used with by the semaphores and shared memory segments. 
-Defaults to ( 0666 | IPC_CREAT ).
+The access permissions which are used by the semaphores and 
+shared memory segments. Defaults to ( 0666 | IPC_CREAT ).
 
 =back
 
