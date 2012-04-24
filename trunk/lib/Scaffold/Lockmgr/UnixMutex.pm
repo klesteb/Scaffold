@@ -290,11 +290,7 @@ sub init {
 
         if ((my $rc = $self->engine->set(uid => $uid, gid => $gid)) != 0) {
 
-            $self->throw_msg(
-                'scaffold.lockmgr.unixmutex',
-                'nosemaphores',
-                "unable to set ownership on semaphores - $rc"
-            );
+            die "unable to set ownership on shared memory - $rc";
 
         };
 
@@ -324,11 +320,7 @@ sub init {
 
         if ((my $rc = $self->shmem->set(uid => $uid, gid => $gid)) != 0) {
 
-            $self->throw_msg(
-                'scaffold.lockmgr.unixmutex',
-                'nosemaphores',
-                "unable to set ownership on shared memory - $rc"
-            );
+            die "unable to set ownership on shared memory - $rc";
 
         };
 
