@@ -36,6 +36,7 @@ lib/Scaffold/Handler/Robots.pm
 lib/Scaffold/Handler/Static.pm
 lib/Scaffold/Lockmgr.pm
 lib/Scaffold/Lockmgr/KeyedMutex.pm
+lib/Scaffold/Lockmgr/SharedMem.pm
 lib/Scaffold/Lockmgr/UnixMutex.pm
 lib/Scaffold/Plugins.pm
 lib/Scaffold/Render.pm

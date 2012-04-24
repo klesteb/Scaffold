@@ -2,10 +2,9 @@ package Scaffold::Lockmgr::UnixMutex;
 
 our $VERSION = '0.03';
 
-use 5.8.8;
 use Try::Tiny;
 use IPC::Semaphore;
-use IPC::SharedMem;
+use Scaffold::Lockmgr::SharedMem;
 use Errno qw( EAGAIN EINTR );
 use IPC::SysV qw( IPC_CREAT IPC_RMID IPC_SET SEM_UNDO IPC_NOWAIT );
 
@@ -13,7 +12,7 @@ use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Lockmgr',
   constants => 'TRUE FALSE LOCK',
-  utils     => 'numlike',
+  utils     => 'numlike textlike',
   accessors => 'shmem',
   constant => {
       BUFSIZ => 256,
@@ -259,12 +258,15 @@ sub init {
 
     }
 
-    if (! defined($config->{key})) {
+    $config->{key} = 'scaffold' unless defined $config->{key};
+
+    if (textlike($config->{key})) {
 
         my $hash;
-        my $name = 'scaffold';
+        my $name = $config->{key};
+        my $len = length($name);
 
-        for (my $x = 0; $x < length($name); $x++) {
+        for (my $x = 0; $x < $len; $x++) {
 
             $hash += ord(substr($name, $x, 1));
 
@@ -286,10 +288,15 @@ sub init {
             $mode
         ) or die $!;
 
-        $self->engine->set(
-            uid  => $uid,
-            gid  => $gid
-        ) or die $!;
+        if ((my $rc = $self->engine->set(uid => $uid, gid => $gid)) != 0) {
+
+            $self->throw_msg(
+                'scaffold.lockmgr.unixmutex',
+                'nosemaphores',
+                "unable to set ownership on semaphores - $rc"
+            );
+
+        };
 
         $self->engine->setall((1) x $config->{nsems}) or die $!;
 
@@ -309,16 +316,21 @@ sub init {
 
         $size = $config->{nsems} * BUFSIZ;
 
-        $self->{shmem} = IPC::SharedMem::Exetended->new(
+        $self->{shmem} = Scaffold::Lockmgr::SharedMem->new(
             $config->{key}, 
             $size, 
             $mode
         ) or die $!;
 
-        $self->shmem->set(
-            uid  => $uid,
-            gid  => $gid
-        ) or die $!;
+        if ((my $rc = $self->shmem->set(uid => $uid, gid => $gid)) != 0) {
+
+            $self->throw_msg(
+                'scaffold.lockmgr.unixmutex',
+                'nosemaphores',
+                "unable to set ownership on shared memory - $rc"
+            );
+
+        };
 
         $buffer = $self->shmem->read(0, BUFSIZ) or die $!;
         if ($buffer ne $LOCK) {
@@ -457,42 +469,6 @@ sub _unlock_semaphore {
     my ($self, $semno) = @_;
 
     $self->engine->op($semno, 1, SEM_UNDO) or die $!;
-
-}
-
-# ----------------------------------------------------------------------
-# Private Extension of IPC::SharedMem
-# ----------------------------------------------------------------------
-
-package IPC::SharedMem::Extended;
-
-use base 'IPC::SharedMem';
-
-sub set {
-    my $self = shift;
-    my $ds;
-
-    if (@_ == 1) {
-
-        $ds = shift;
-
-    } else {
-
-        croak 'Bad arg count' if @_ % 2;
-        my %arg = @_;
-
-        $ds = $self->stat or return undef;
-
-        while (my ($key, $val) = each %arg) {
-
-            $ds->$key($val);
-
-        }
-
-    }
-
-    my $v = shmctl($self->id, IPC_SET, $ds->pack);
-    $v ? 0 + $v : undef;
 
 }
 
