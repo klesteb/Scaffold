@@ -226,7 +226,7 @@ sub init {
 
         unless (numlike($config->{gid})) {
 
-            $gid = getgrpnam($config->{gid});
+            $gid = getgrnam($config->{gid});
 
         }
 
