@@ -73,15 +73,11 @@ sub unlock {
 
         my $ex = $_;
 
-        unless ($ex =~ m/not holding a lock/i) {
-
-            $self->throw_msg(
-                'scaffold.lockmgr.keyedmutex.unlock',
-                'error',
-                $ex
-            );
-
-        }
+        $self->throw_msg(
+            'scaffold.lockmgr.keyedmutex.unlock',
+            'error',
+            $ex
+        );
 
     };
 
