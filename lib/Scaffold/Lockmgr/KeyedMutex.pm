@@ -3,11 +3,16 @@ package Scaffold::Lockmgr::KeyedMutex;
 our $VERSION = '0.01';
 
 use 5.8.8;
+
 use KeyedMutex;
+use Try::Tiny;
 use Scaffold::Class
   version   => $VERSION,
   base      => 'Scaffold::Lockmgr',
   constants => 'TRUE FALSE',
+  messages => {
+      error => "%s"
+  }
 ;
 
 # ----------------------------------------------------------------------
@@ -20,22 +25,36 @@ sub lock {
     my $stat = TRUE;
     my $count = 0;
 
-    while (! $self->engine->lock($key)) {
+    try {
 
-        $count++;
+        while (! $self->engine->lock($key)) {
 
-        if ($count < $self->limit) {
+            $count++;
 
-            sleep $self->timeout;
+            if ($count < $self->limit) {
 
-        } else {
+                sleep $self->timeout;
 
-            $stat = FALSE;
-            last;
+            } else {
+
+                $stat = FALSE;
+                last;
+
+            }
 
         }
 
-    }
+    } catch {
+
+        my $ex = $_;
+
+        $self->throw_msg(
+            'scaffold.lockmgr.keyedmutex.lock',
+            'error',
+            $ex
+        );
+
+    };
 
     return $stat;
 
@@ -44,7 +63,29 @@ sub lock {
 sub unlock {
     my ($self, $key) = @_;
 
-    return $self->engine->release($key);
+    my $stat = TRUE;
+
+    try {
+
+        $stat = $self->engine->release($key);
+
+    } catch {
+
+        my $ex = $_;
+
+        unless ($ex =~ m/not holding a lock/i) {
+
+            $self->throw_msg(
+                'scaffold.lockmgr.keyedmutex.unlock',
+                'error',
+                $ex
+            );
+
+        }
+
+    };
+
+    return $stat;
 
 }
 
