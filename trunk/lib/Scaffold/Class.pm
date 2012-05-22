@@ -14,7 +14,7 @@ __END__
 
 =head1 NAME
 
-Scaffold::Class - A Perl extension for the Supervisor environment
+Scaffold::Class - A Perl extension for the Scaffold environment
 
 =head1 SYNOPSIS
 
