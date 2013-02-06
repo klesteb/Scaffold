@@ -157,73 +157,173 @@ sub exceptions {
         my $type = $ex->type;
         my $info = $ex->info;
 
-        switch ($type) {
-            case MOVED_PERM {
-                $self->scaffold->response->redirect($info, '301');
-            }
-            case REDIRECT {
-                $self->scaffold->response->redirect($info, '302');
-            }
-            case RENDER {
-                $page = $self->custom_error(
-                    $self->scaffold,
-                    $self->page_title,
-                    $info,
-                );
-                $self->scaffold->response->status('500');
-                $self->scaffold->response->body($page);
-            }
-            case DECLINED {
-                my $text = qq(
-                    Declined - undefined method<br />
-                    <span style='font-size: .8em'>
-                    Method: $action <br />
-                    Location: $location <br />
-                    Module: $module <br />
-                    </span>
-                );
-                $page = $self->custom_error(
-                    $self->scaffold,
-                    $self->page_title,
-                    $text,
-                );
-                $self->scaffold->response->status('404');
-                $self->scaffold->response->body($page);
-            }
-            case NOTFOUND {
-                my $text = qq(
-                    File not found<br />
-                    <span style='font-size: .8em'>
-                    File: $info<br />
-                    </span>
-                );
-                $page = $self->custom_error(
-                    $self->scaffold,
-                    $self->page_title,
-                    $text,
-                );
-                $self->scaffold->response->status('404');
-                $self->scaffold->response->body($page);
-            }
-            case BADURL {
-                my $text = qq(
-                    URL not handled<br />
-                    <span style='font-size: .8em'>
-                    URL: $info<br />
-                    </span>
-                );
-                $page = $self->custom_error(
-                    $self->scaffold,
-                    $self->page_title,
-                    $text,
-                );
-                $self->scaffold->response->status('404');
-                $self->scaffold->response->body($page);
+        if ($type eq MOVED_PERM) {
+
+            $self->scaffold->response->redirect($info, '301');
+
+        } elsif ($type eq REDIRECT) {
+
+            $self->scaffold->response->redirect($info, '302');
+
+        } elsif ($type eq RENDER) {
+
+            $page = $self->custom_error(
+                $self->scaffold,
+                $self->page_title,
+                $info,
+            );
+
+            $self->scaffold->response->status('500');
+            $self->scaffold->response->body($page);
+
+        } elsif ($type eq DECLINED) {
+
+            my $text = qq(
+                Declined - undefined method<br />
+                <span style='font-size: .8em'>
+                <table>
+                  <tr>
+                    <td>Method:</td>
+                    <td>$action</td>
+                  </tr>
+                  <tr>
+                    <td>Location:</td>
+                    <td>$location</td>
+                  </tr>
+                  <tr>
+                    <td>Module:</td>
+                    <td>$module</td>
+                  </tr>
+                </table>
+                </span>
+            );
+
+            $page = $self->custom_error(
+                $self->scaffold,
+                $self->page_title,
+                $text,
+            );
+
+            $self->scaffold->response->status('404');
+            $self->scaffold->response->body($page);
+
+        } elsif ($type eq NOTFOUND) {
+
+            my $text = qq(
+                File not found<br />
+                <span style='font-size: .8em'>
+                File: $info<br />
+                </span>
+            );
+
+            $page = $self->custom_error(
+                $self->scaffold,
+                $self->page_title,
+                $text,
+            );
+
+            $self->scaffold->response->status('404');
+            $self->scaffold->response->body($page);
+
+        } elsif ($type eq BADURL) {
+
+            my $text = qq(
+                URL not handled<br />
+                <span style='font-size: .8em'>
+                URL: $info<br />
+                </span>
+            );
+
+            $page = $self->custom_error(
+                $self->scaffold,
+                $self->page_title,
+                $text,
+            );
+
+            $self->scaffold->response->status('404');
+            $self->scaffold->response->body($page);
+
+        } else {
+
+            $page = $self->custom_error(
+                $self->scaffold,
+                $self->page_title,
+                $self->format_exception($ex, $action, $location, $module)
+            );
+
+            $self->scaffold->response->status('500');
+            $self->scaffold->response->body($page);
+
+        }
+
+    } else {
+
+        $page = $self->custom_error(
+            $self->scaffold,
+            $self->page_title,
+            $self->format_exception($ex, $action, $location, $module)
+        );
+
+        $self->scaffold->response->status('500');
+        $self->scaffold->response->body($page);
+
+    }
+
+}
+
+sub format_exception {
+    my ($self, $ex, $action, $location, $module) = @_;
+
+    my @lines;
+    my $exception;
+    my $ref = ref($ex);
+    my $trailer = '</span>';
+
+    if ($ref && $ex->isa('Badger::Exception')) {
+
+        $exception = $ex->type . ' - ' . $ex->info;
+
+        if (my $stack = $ex->stack) {
+
+            push(@lines, 'The stack trace follows:<br/><br/>');
+
+            foreach my $caller (@$stack) {
+
+                push(@lines, $self->message( caller => @$caller ));
+
             }
 
         }
 
+    } else {
+
+        $exception = sprintf("%s", $ex);
+
     }
+
+    my $header = qq(
+        Handler Exception<br/><br/>
+        <span style='font-size: .8em'>
+        <table>
+          <tr>
+            <td>Exception:</td>
+            <td>$exception</td>
+          </tr>
+          <tr>
+            <td>Location:</td>
+            <td>$location</td>
+          </tr>
+          <tr>
+            <td>Module:</td>
+            <td>$module</td>
+          </tr>
+        </table>
+    );
+
+    unshift(@lines, $header);
+    push(@lines, $trailer);
+
+    return join('', @lines);
 
 }
 
