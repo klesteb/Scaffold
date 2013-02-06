@@ -179,8 +179,7 @@ sub exceptions {
         } elsif ($type eq DECLINED) {
 
             my $text = qq(
-                Declined - undefined method<br />
-                <span style='font-size: .8em'>
+                <p>Declined - undefined method</p>
                 <table>
                   <tr>
                     <td>Method:</td>
@@ -195,7 +194,6 @@ sub exceptions {
                     <td>$module</td>
                   </tr>
                 </table>
-                </span>
             );
 
             $page = $self->custom_error(
@@ -210,10 +208,13 @@ sub exceptions {
         } elsif ($type eq NOTFOUND) {
 
             my $text = qq(
-                File not found<br />
-                <span style='font-size: .8em'>
-                File: $info<br />
-                </span>
+                <p>File not found</p>
+                <table>
+                  <tr>
+                    <td>File:</td>
+                    <td>$info</td>
+                  </tr>
+                </table>
             );
 
             $page = $self->custom_error(
@@ -228,10 +229,13 @@ sub exceptions {
         } elsif ($type eq BADURL) {
 
             my $text = qq(
-                URL not handled<br />
-                <span style='font-size: .8em'>
-                URL: $info<br />
-                </span>
+                <p>URL not handled</p>
+                <table>
+                  <tr>
+                    <td>URL:</td>
+                    <td>$info</td>
+                  </tr>
+                </table>
             );
 
             $page = $self->custom_error(
@@ -277,7 +281,7 @@ sub format_exception {
     my @lines;
     my $exception;
     my $ref = ref($ex);
-    my $trailer = '</span>';
+    my $trailer = '</p></span>';
 
     if ($ref && $ex->isa('Badger::Exception')) {
 
@@ -302,8 +306,7 @@ sub format_exception {
     }
 
     my $header = qq(
-        Handler Exception<br/><br/>
-        <span style='font-size: .8em'>
+        <p>Handler Exception</p>
         <table>
           <tr>
             <td>Exception:</td>
@@ -318,6 +321,7 @@ sub format_exception {
             <td>$module</td>
           </tr>
         </table>
+        <span style='font-size: .8em'><p>
     );
 
     unshift(@lines, $header);

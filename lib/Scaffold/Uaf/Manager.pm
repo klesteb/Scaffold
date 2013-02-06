@@ -24,9 +24,9 @@ sub pre_action {
     my $user;
     my $attempts;
     my $regex = $hobj->uaf_filter;
-    my $uri = $hobj->scaffold->request->uri;
     my $login_rootp = $hobj->uaf_login_rootp;
     my $denied_rootp = $hobj->uaf_denied_rootp;
+    my $uri = $hobj->scaffold->request->path_info;
     my $lock = $hobj->scaffold->session->session_id;
 
     # authenticate the session, this happens with each access
