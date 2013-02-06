@@ -2,7 +2,6 @@ package Scaffold::Handler::Static;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use MIME::Types 'by_suffix';
 
 use Scaffold::Class
@@ -19,7 +18,6 @@ use Scaffold::Class
 sub do_default {
     my ($self, @params) = @_;
 
-    my $found = FALSE;
     my $cache = $self->scaffold->cache;
     my $static_search = $self->scaffold->config('configs')->{static_search};
     my $static_cached = $self->scaffold->config('configs')->{static_cached};
@@ -27,15 +25,13 @@ sub do_default {
 
     foreach my $path (@paths) {
 
+        my $d;
         my $file = File($path, @params);
+        my ($mediatype, $encoding) = by_suffix($file);
 
-        if ($file->exists) {
+        unless ($d = $cache->get($file)) {
 
-            my $d;
-            my ($mediatype, $encoding) = by_suffix($file);
-            $found = TRUE;
-
-            if (! ($d = $cache->get($file))) {
+            if ($file->exists) {
 
                 $d = $file->read();
 
@@ -47,16 +43,18 @@ sub do_default {
                 }
 
             }
-
-            $self->stash->view->data($d);
-            $self->stash->view->template_disabled(1);
-            $self->stash->view->content_type(($mediatype || 'text/plain'));
-
+            
         }
+
+        $self->stash->view->data($d);
+        $self->stash->view->template_disabled(1);
+        $self->stash->view->content_type(($mediatype || 'text/plain'));
+
+        return;
 
     }
 
-    $self->not_found(File(@params)) if (! $found);
+    $self->not_found(File(@params)->path);
 
 }
 

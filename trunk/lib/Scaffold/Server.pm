@@ -21,7 +21,7 @@ use Scaffold::Class
   base       => 'Scaffold::Base',
   accessors  => 'authz engine cache render database plugins request response lockmgr routes',
   mutators   => 'session user',
-  filesystem => 'File',
+  filesystem => 'File Path',
   utils      => 'init_module',
   constants  => 'TRUE FALSE',
   messages => {
@@ -52,22 +52,21 @@ sub dispatch {
 
     my $class;
     my $response;
-    my $url = $request->path_info;
-    my $location = $request->uri->path;
-
+    my $path = $request->path_info;
+    
     try {
 
-        my ($handler, @params) = $self->routes->dispatcher($url);
+        my ($handler, @params) = $self->routes->dispatcher($path);
 
         if ($handler ne '') {
 
-            $class = $self->_init_handler($handler, $location);
+            $class = $self->_init_handler($handler, $path);
             $response = $class->handler(ref($class), @params);
 
         } else {
 
             $handler = $self->config('default_handler');
-            $class = $self->_init_handler($handler, $location);
+            $class = $self->_init_handler($handler, $path);
             $response = $class->handler(ref($class), @params);
 
         }
