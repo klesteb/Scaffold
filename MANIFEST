@@ -27,6 +27,7 @@ lib/Scaffold/Cache/Memcached.pm
 lib/Scaffold/Class.pm
 lib/Scaffold/Constants.pm
 lib/Scaffold/Engine.pm
+lib/Scaffold/Exception.pm
 lib/Scaffold/Handler.pm
 lib/Scaffold/Handler/ExtDirect.pm
 lib/Scaffold/Handler/ExtPoll.pm
