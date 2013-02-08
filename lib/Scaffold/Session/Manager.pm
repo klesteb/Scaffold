@@ -2,7 +2,6 @@ package Scaffold::Session::Manager;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use HTTP::Session;
 use HTTP::Session::State::Cookie;
 use Scaffold::Session::Store::Cache;
