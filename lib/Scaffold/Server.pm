@@ -1,8 +1,7 @@
 package Scaffold::Server;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
-use 5.8.8;
 use Try::Tiny;
 use Set::Light;
 use Plack::Response;
@@ -350,25 +349,35 @@ sub _unexpected_exception {
     my $text;
     my $ref = ref($ex);
 
-    if ($ref && $ex->isa('Badger::Exception')) {
+    if ($ref && $ex->isa('Scaffold::Exception')) {
 
         $text = qq(
-            Unexpected exception caught<br />
-            <span style='font-size: .8em'>
-            Type: $ex->type<br />
-            Info: $ex->info<br />
-            </span>
+            <p>Unexpected exception caught</p>
+            <table>
+              <tr>
+                <td>Type:</td>
+                <td>$ex->type</td>
+              </tr>
+              <tr>
+                <td>Info:</td>
+                <td>$ex->info</td>
+              </tr>
+            </table>
         );
-        
+
     } else {
-        
+
+        my $e = sprintf("%s", $ex);
         $text = qq(
-            Unexpected exception caught<br />
-            <span style='font-size: .8em'>
-            Message: $ex<br />
-            </span>
+            <p>Unexpected exception caught</p>
+            <table>
+              <tr>
+                <td>Message:</td>
+                <td>$e</td>
+              </tr>
+            </table>
         );
-        
+
     }
 
     my $page = $self->custom_error($self, 'Unexcpected Exception', $text);
@@ -400,7 +409,7 @@ Scaffold::Server - The Scaffold web engine
 
     my $server = Scaffold::Server->new(
         locations => [
-            }
+            {
                 route   => qr{^/robots.txt$},
                 handler => 'Scaffold::Handler::Robots',
             },{
@@ -442,18 +451,112 @@ It parses the configuration, loads the various components, makes the various
 connections for the CacheManager, the LockManager, initializes the 
 SessionManager and stores the connection to the database of your choice.
 
-=head2 CONFIGURATION
+=head1 CONFIGURATION
 
-As seen above Scaffold::Server takes configuration parameters. Since 
-Scaffold::Server can generate dynamic accessors for items within that 
-configuration. Resevered words are needed. Those words are the following:
+The configuration has specific items that it requires. If they are not
+present, reasonable defaults are used. They can be accessed from the
+Scaffold object. The accessors is usually the same as the configuration
+item, unless noted otherwise. The following configuration stanzas are used:
 
-    authz engine cache render database plugins request response 
-    lockmgr routes session user authorization locations configs
+=head2 cache
 
-Please do not use them when adding additional items to the configuration. For
-example, if you want to add access to a job queue such as Gearman you could do
-the following:
+This defines the caching system to use. This system must use the api defined
+in L<Scaffold::Cache|Scaffold::Cache>. The default is L<Scaffold::Cache::FastMmap|Scaffold::Cache::FastMmap> 
+with the default name space.
+
+=head2 lockmgr
+
+This defines the lock manger to use. This lock manager must use the api defined
+in L<Scaffold::Lockmgr|Scaffold::Lockmgr>. The default is L<Scaffold::Lockmgr::UnixMutex|Scaffold::Lockmgr::UnixMutex>
+with reasonable defaults. 
+
+=head2 render
+
+This defines the render to use when sending output. The render must use the api
+defined in L<Scaffold::Render|Scaffold::Render>. The default render is L<Scaffold::Render::Default|Scaffold::Render::Default>.
+
+=head2 session
+
+The session manager runs as a plugin, this allows you to define a different 
+one. It must use the api for plugins. The default is 
+L<Scaffold::Session::Manager|Scaffold::Session::Manager>.
+
+=head2 database
+
+This establishes a connection to the database. You may have multiple 
+connections defined. They can be access using database->{item}.
+
+=head2 authorization
+
+This allowes you to set up a authorization scheme. It has two sub categories.
+They are "authorize" and "authenticate". Authenticate runs as a plugin
+and must follow the plugin api. Authorize can be accessed with the "authz"
+accessor on the Scaffold object.
+
+=head2 plugins
+
+These are additional plugins that you may want to run. They must follow the
+plugin api.
+
+=head2 locations
+
+This provides routes for your application. Routes are used to direct requests
+to specific handlers. Locations are an array of hash values. The hash values
+have two items: "route" and "handler". Route is a regex to match urls against 
+and handler is the code to handle that url.
+
+=head2 engine
+
+This allows you to configure the underlaying plack interface.
+
+=head2 configs
+
+This stanza allows you to configure specific items. You can place anything 
+here to is be accessed later. The is done by:
+
+ $self->scaffold->config('configs')->{item};
+
+The following defaults are provided.
+
+=over 4
+
+=item B<app_rootp>
+
+This is the base url for the application. It defaults to "/".
+
+=item B<doc_rootp>
+
+This is where you html resides. It is a directory name, it defaults to 'html'.
+
+=item B<static_search>
+
+This is used by Scaffold::Handler::Static as a search path. It is colon
+delimted list of directories. It defaults to "html:html/static:html/templates".
+
+=item B<static_cached>
+
+This indicates wither to cache static items. It defaults to true.
+
+=item B<cache_namespace>
+
+This is the name space to use when caching. It defaults to "scaffold".
+
+=item B<favicon>
+
+This is used by L<Scaffold::Handler::Favicon|Scaffold::Handler::Favicon>. 
+It defaults to "favicon.ico".
+
+=item B<default_handler>
+
+The default handler to invoke when no routes are matched. It defaults 
+to L<Scaffold::Handler::Default|Scaffold::Handler::Default>.
+
+=back
+
+=head2 Other Items
+
+Addtional configuration items can be used. For example, if you want to add 
+access to a job queue such as Gearman you could do the following:
 
     my $server = Scaffold::Server->new(
          locations => [
@@ -467,8 +570,7 @@ Later in you application you can access Gearman with the following syntax:
 
     $self->scaffold->gearman->process();
 
-Where the process() method does whatever. Configuration items are discussed 
-within the individual modules that use them. 
+Where the process() method does whatever. 
 
 =head1 METHODS
 

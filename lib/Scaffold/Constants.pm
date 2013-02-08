@@ -1,52 +1,44 @@
 package Scaffold::Constants;
 
-use strict;
-use warnings;
+our $VERSION = '0.01';
 
-use base 'Badger::Constants';
-
-use constant {
-    LOCK              => '__LOCK__',
-    #
-    STATE_PRE_ACTION  => 1,
-    STATE_ACTION      => 2,
-    STATE_POST_ACTION => 3,
-    STATE_PRE_RENDER  => 4,
-    STATE_RENDER      => 5,
-    STATE_POST_RENDER => 6,
-    STATE_FINI        => 7,
-    #
-    PLUGIN_NEXT       => 1,
-    PLUGIN_ABORT      => 2,
-    #
-    SESSION_ID        => '__session_id__',
-    TOKEN_ID          => '__token_id__',
-};
-
-__PACKAGE__->export_all( 
-    qw( 
-        LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
-        STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-        STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID
-        TOKEN_ID 
-    )
-);
-
-__PACKAGE__->export_any(
-    qw( 
-        LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
-        STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-        STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID
-        TOKEN_ID 
-    )
-);
-
-__PACKAGE__->export_tags(
-    state   => [ qw(STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
-                STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
-                STATE_FINI) ],
-    plugins => [ qw(PLUGIN_NEXT PLUGIN_ABORT) ],
-);
+use Scaffold::Class
+  version => $VERSION,
+  base    => 'Badger::Constants',
+  constant => {
+      LOCK              => '__LOCK__',
+      #
+      STATE_PRE_ACTION  => 1,
+      STATE_ACTION      => 2,
+      STATE_POST_ACTION => 3,
+      STATE_PRE_RENDER  => 4,
+      STATE_RENDER      => 5,
+      STATE_POST_RENDER => 6,
+      STATE_FINI        => 7,
+      #
+      PLUGIN_NEXT       => 1,
+      PLUGIN_ABORT      => 2,
+      #
+      SESSION_ID        => '__session_id__',
+      TOKEN_ID          => '__token_id__',
+  },
+  exports => {
+      any => 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
+              STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
+              STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID
+              TOKEN_ID',
+      all => 'LOCK STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
+              STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
+              STATE_FINI PLUGIN_NEXT PLUGIN_ABORT SESSION_ID
+              TOKEN_ID',
+      tags => {
+          state => 'STATE_PRE_ACTION STATE_ACTION STATE_POST_ACTION 
+                    STATE_PRE_RENDER STATE_RENDER STATE_POST_RENDER 
+                    STATE_FINI',
+          plugins => 'PLUGIN_NEXT PLUGIN_ABORT'
+      }
+  }
+;          
 
 1;
 

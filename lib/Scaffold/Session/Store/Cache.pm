@@ -2,7 +2,6 @@ package Scaffold::Session::Store::Cache;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use base 'Class::Accessor::Fast';
 
 __PACKAGE__->mk_ro_accessors(qw/cache expires/);

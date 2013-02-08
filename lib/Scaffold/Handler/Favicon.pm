@@ -2,7 +2,6 @@ package Scaffold::Handler::Favicon;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use MIME::Types 'by_suffix';
 
 use Scaffold::Class

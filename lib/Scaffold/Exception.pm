@@ -1,45 +1,22 @@
-package Scaffold::Render::Default;
+package Scaffold::Exception;
 
-our $VERSION = '0.01';
-
-use Scaffold::Class
-  version => $VERSION,
-  base    => 'Scaffold::Render'
-;
-
-# ----------------------------------------------------------------------
-# Public Methods
-# ----------------------------------------------------------------------
-
-sub process {
-    my ($self, $sobj) = @_;
-
-    return $sobj->stash->view->data;
-
-}
-
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
+use base Badger::Exception;
+$Badger::Exception::TRACE = 1;
 
 1;
 
 __END__
-
+  
 =head1 NAME
 
-Scaffold::Render::Default - The default renderer for Scaffold.
-
-=head1 SYNOPSIS
-
-    my $server = Scaffold::Server->new(
-        render => Scaffold::Render::Default->new(),
-    );
-
+Scaffold::Exception - The exception class for the Scaffold environment
+  
 =head1 DESCRIPTION
 
-This is the default renderer. It does nothing more the pass the data back.
-
+This module defines the exception class for the Scaffold Environment and 
+inherits from Badger::Exception. The only differences is that it turns
+stack tracing on by default.
+  
 =head1 SEE ALSO
 
  Scaffold
@@ -80,17 +57,17 @@ This is the default renderer. It does nothing more the pass the data back.
  Scaffold::Uaf::Rule
  Scaffold::Uaf::User
  Scaffold::Utils
-
+  
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
-
+Kevin L. Esteb, E<lt>kevin(at)kesteb.usE<gt>
+  
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009 by Kevin L. Esteb
-
+Copyright (C) 2012 by Kevin L. Esteb
+  
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.5 or,
-at your option, any later version of Perl 5 you may have available.
-
+  it under the same terms as Perl itself, either Perl version 5.8.8 or,
+  at your option, any later version of Perl 5 you may have available.
+  
 =cut

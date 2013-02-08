@@ -2,7 +2,6 @@ package Scaffold::Handler::ExtDirect;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use Scaffold::Class
   version  => $VERSION,
   base     => 'Scaffold::Handler',
@@ -128,7 +127,7 @@ sub do_router {
 
                 $status->{type} = 'exception';
 
-                if ($ref && $ex->isa('Badger::Exception')) {
+                if ($ref && $ex->isa('Scaffold::Exception')) {
 
                     $status->{message} = $ex->info;
                     $status->{where}   = $ex->type;

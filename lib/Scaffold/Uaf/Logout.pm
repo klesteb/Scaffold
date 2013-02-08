@@ -2,7 +2,6 @@ package Scaffold::Uaf::Logout;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use Scaffold::Class
   version => $VERSION,
   base    => 'Scaffold::Handler',
