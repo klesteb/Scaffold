@@ -2,7 +2,6 @@ package Scaffold::Uaf::Manager;
 
 our $VERSION = '0.02';
 
-use 5.8.8;
 use Try::Tiny;
 
 use Scaffold::Class
@@ -26,12 +25,12 @@ sub pre_action {
     my $regex = $hobj->uaf_filter;
     my $login_rootp = $hobj->uaf_login_rootp;
     my $denied_rootp = $hobj->uaf_denied_rootp;
-    my $uri = $hobj->scaffold->request->path_info;
+    my $path = $hobj->scaffold->request->path_info;
     my $lock = $hobj->scaffold->session->session_id;
 
     # authenticate the session, this happens with each access
 
-    if ($uri->path !~ /^$regex/) {
+    if ($path !~ /^$regex/) {
 
         try {
 

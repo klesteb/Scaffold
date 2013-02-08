@@ -2,10 +2,8 @@ package Scaffold::Utils;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use Try::Tiny;
 use Crypt::CBC;
-use Badger::Exception trace => 1;
 
 use Scaffold::Class
   version    => $VERSION,
@@ -48,7 +46,7 @@ sub decrypt {
     } catch {
 
         my $x = $_;
-        my $ex = Badger::Exception->new(
+        my $ex = Scaffold::Exception->new(
             type => 'scaffold.utils.decrypt',
             info => $x,
         );
@@ -87,7 +85,7 @@ sub encrypt {
     } catch {
 
         my $x = $_;
-        my $ex = Badger::Exception->new(
+        my $ex = Scaffold::Exception->new(
             type => 'scaffold.utils.encrypt',
             info => $x,
         );
@@ -121,7 +119,7 @@ sub init_module {
         } catch {
 
             my $x = $_;
-            my $ex = Badger::Exception->new(
+            my $ex = Scaffold::Exception->new(
                 type => 'scaffold.utils.init_module',
                 info => $x
             );
@@ -132,7 +130,7 @@ sub init_module {
 
     } else {
 
-        my $ex = Badger::Exception->new(
+        my $ex = Scaffold::Exception->new(
             type => 'scaffold.utils.init_module',
             info => 'no module was defined'
         );

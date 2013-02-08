@@ -1,11 +1,12 @@
 package Scaffold::Base;
 
 our $VERSION = '0.01';
-
-use 5.8.8;
-use Data::Dumper;
+our $EXCEPTION = 'Scaffold::Exception';
 
 use Scaffold;
+use Data::Dumper;
+use Scaffold::Exception;
+
 use Scaffold::Class
   base     => 'Badger::Base',
   version  => $VERSION,

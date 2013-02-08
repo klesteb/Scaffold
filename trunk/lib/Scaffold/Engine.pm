@@ -2,7 +2,6 @@ package Scaffold::Engine;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use Plack::Loader;
 use Plack::Builder;
 

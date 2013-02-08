@@ -2,7 +2,6 @@ package Scaffold::Render::TT;
 
 our $VERSION = '0.01';
 
-use 5.8.8;
 use Template;
 
 use Scaffold::Class

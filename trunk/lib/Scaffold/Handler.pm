@@ -2,8 +2,6 @@ package Scaffold::Handler;
 
 our $VERSION = '0.02';
 
-use 5.8.8;
-use Switch;
 use Try::Tiny;
 use Scaffold::Stash;
 
@@ -63,30 +61,36 @@ sub handler {
         LOOP: 
         while ($state) {
 
-            switch ($state) {
-                case STATE_PRE_ACTION {
-                    $state = $class->_pre_action();
-                }
-                case STATE_ACTION {
-                    $state = $class->_perform_action($action, $p1, @params);
-                }
-                case STATE_POST_ACTION {
-                    $state = $class->_post_action();
-                }
-                case STATE_PRE_RENDER {
-                    $state = $class->_pre_render();
-                }
-                case STATE_RENDER {
-                    $state = $class->_process_render();
-                }
-                case STATE_POST_RENDER {
-                    $state = $class->_post_render();
-                }
-                case STATE_FINI {
-                    last LOOP;
-                }
-            };
-
+            if ($state == STATE_PRE_ACTION) {
+                
+                $state = $class->_pre_action();
+                
+            } elsif ($state == STATE_ACTION) {
+                
+                $state = $class->_perform_action($action, $p1, @params);
+                
+            } elsif ($state == STATE_POST_ACTION) {
+                
+                $state = $class->_post_action();
+                
+            } elsif ($state == STATE_PRE_RENDER) {
+                
+                $state = $class->_pre_render();
+                
+            } elsif ($state == STATE_RENDER) {
+                
+                $state = $class->_process_render();
+                
+            } elsif ($state == STATE_POST_RENDER) {
+                
+                $state = $class->_post_render();
+                
+            } elsif ($state == STATE_FINI) {
+                
+                last LOOP;
+                
+            }
+            
         }
 
     } catch {
@@ -152,7 +156,7 @@ sub exceptions {
     my $page;
     my $ref = ref($ex);
 
-    if ($ref && $ex->isa('Badger::Exception')) {
+    if ($ref && $ex->isa('Scaffold::Exception')) {
 
         my $type = $ex->type;
         my $info = $ex->info;
@@ -283,7 +287,7 @@ sub format_exception {
     my $ref = ref($ex);
     my $trailer = '</p></span>';
 
-    if ($ref && $ex->isa('Badger::Exception')) {
+    if ($ref && $ex->isa('Scaffold::Exception')) {
 
         $exception = $ex->type . ' - ' . $ex->info;
 

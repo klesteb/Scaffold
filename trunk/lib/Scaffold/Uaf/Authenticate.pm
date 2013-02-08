@@ -2,7 +2,6 @@ package Scaffold::Uaf::Authenticate;
 
 our $VERSION = '0.03';
 
-use 5.8.8;
 use Try::Tiny;
 use Scaffold::Uaf::User;
 

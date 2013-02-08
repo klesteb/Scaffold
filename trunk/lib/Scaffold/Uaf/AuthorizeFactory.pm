@@ -1,6 +1,5 @@
 package Scaffold::Uaf::AuthorizeFactory;
 
-use 5.8.8;
 use Scaffold::Uaf::GrantAllRule;
 
 use Scaffold::Class
