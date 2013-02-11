@@ -408,21 +408,40 @@ Scaffold::Server - The Scaffold web engine
  main: {
 
     my $server = Scaffold::Server->new(
+        configs => {
+            app_rootp => '/',
+            static_cached => 1,
+            doc_rootp => 'html',
+            favicon => 'favicon.ico',
+            cache_namespace => 'scaffold',
+            default_handler => 'Scaffold::Handler::Default'
+            static_search => 'html:html/static:html/templates',
+        },
+        cache => Scaffold::Cache::FastMmap->new(
+            namespace => 'scaffold'
+        ),
+        lockmgr => Scaffold::Lockmgr::UnixMutex->new(),
+        render => Scaffold::Render::Default->new(),
+        plugins => [
+            'Scaffold::Cache::Manager',
+            'Scaffold::Stash::Manager',
+            'Scaffold::Session::Manager'
+        ],
         locations => [
             {
-                route   => qr{^/robots.txt$},
+                route   => qr{^\/robots\.txt$},
                 handler => 'Scaffold::Handler::Robots',
             },{
-                route   => qr{^/favicon.ico$},
+                route   => qr{^\/favicon\.ico$},
                 handler => 'Scaffold::Handler::Favicon',
             },{
-                route   => qr{^/login/(.*)$},
+                route   => qr{^\/login\/(.*)$},
                 handler => 'Scaffold::Uaf::Login',
             },{
-                route   => qr{^/logout$},
+                route   => qr{^\/logout$},
                 handler => 'Scaffold::Uaf::Logout',
             },{
-                route   => qr{^/(.*)$},
+                route   => qr{^\/(.*)$},
                 handler => 'Scaffold::Handler::Static',
             }
         ],
@@ -442,7 +461,8 @@ Initializes and returns a handle for the psgi engine. Suitable for this command:
 
 Which is a great way to develop and test your web application. By the way, 
 the above configuration would run a complete static page site that needs 
-authentication for access. 
+authentication for access. Excluding the locations and authorization stanza,
+it also shows all the defaults within the configuration.
 
 =head1 DESCRIPTION
 
