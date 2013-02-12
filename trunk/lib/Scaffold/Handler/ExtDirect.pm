@@ -3,10 +3,10 @@ package Scaffold::Handler::ExtDirect;
 our $VERSION = '0.01';
 
 use Scaffold::Class
-  version  => $VERSION,
-  base     => 'Scaffold::Handler',
-  constant => 'TRUE FALSE ARRAY',
-  codec    => 'JSON',
+  version   => $VERSION,
+  base      => 'Scaffold::Handler',
+  constants => 'TRUE FALSE ARRAY',
+  codec     => 'JSON',
 ;
 
 # ----------------------------------------------------------------------
@@ -16,13 +16,15 @@ use Scaffold::Class
 sub do_api {
     my ($self) = @_;
 
+    my $js;
+    my $url;
     my $code;
     my $json;
     my $actions;
     my $introspection = $self->introspect();
     my $params = $self->scaffold->request->parameters->mixed();
 
-    foreach my $action (keys %{$instrospection}) {
+    foreach my $action (keys %{$introspection}) {
 
         my @methods;
 
@@ -49,7 +51,7 @@ sub do_api {
         url => $url,
         type => 'remoting',
         actions => $actions,
-    }
+    };
     $json = encode($code);
 
     if (($params->{format}) and ($params->{format} eq 'json')) {
@@ -82,7 +84,7 @@ sub do_router {
 
     if ($params->{POSTDATA}) {
 
-        $datum = decode(params->{POSTDATA});
+        $datum = decode($params->{POSTDATA});
         $datum = [ $datum ] if (ref($datum) ne ARRAY);
 
     } else {
@@ -134,8 +136,8 @@ sub do_router {
 
                 } else {
 
-                    $status->{message} => sprintf("%s", $ex);
-                    $status->{where}   => "Action: $action";
+                    $status->{message} = sprintf("%s", $ex);
+                    $status->{where}   = "Action: $action";
 
                 }
 
@@ -143,9 +145,9 @@ sub do_router {
 
         } else {
 
-            $status->{type}    => 'exception';
-            $status->{message} => "Unknown method: $method";
-            $status->{where}   => "Action: $action";
+            $status->{type}    = 'exception';
+            $status->{message} = "Unknown method: $method";
+            $status->{where}   = "Action: $action";
 
         }
 

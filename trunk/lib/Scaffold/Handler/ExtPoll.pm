@@ -24,7 +24,7 @@ sub do_default {
         data => sprintf("Successfully polled at: %s %s", $dt->mdy, $dt->hms),
     };
   
-    $self->stash->view->data(encode($satus));
+    $self->stash->view->data(encode($status));
     $self->stash->view->template_disabled(1);
     $self->stash->view->content_type('application/json');
 
