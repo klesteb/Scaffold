@@ -68,5 +68,7 @@ Revision history for Scaffold
           properly to dispatch to the proper handler.
         Updated documentation to better explain the config items in
           Server.pm
-        
+        17-Jan-2014 K.Esteb
+          Added a spec file.
+        svn log -r 171:192
           
