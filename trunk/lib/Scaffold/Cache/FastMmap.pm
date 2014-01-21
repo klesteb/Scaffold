@@ -85,7 +85,7 @@ sub init {
     my ($self, $config) = @_;
 
     $self->{config}    = $config;
-    $self->{namespace} = $self->config('namespace');
+    $self->{namespace} = $self->config('namespace') || 'scaffold';
     $self->{expires}   = $self->config('expires') || '1h';
 
     my $num_pages  = $self->config('pages') || '256';
