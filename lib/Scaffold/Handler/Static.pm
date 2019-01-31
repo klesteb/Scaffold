@@ -27,7 +27,8 @@ sub do_default {
 
         my $d;
         my $file = File($path, @params);
-        my ($mediatype, $encoding) = by_suffix($file);
+        my $extension = $file->extension;
+        my ($mediatype, $encoding) = by_suffix(lc($extension));
 
         unless ($d = $cache->get($file)) {
 
