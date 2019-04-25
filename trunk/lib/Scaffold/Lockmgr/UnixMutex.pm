@@ -288,7 +288,7 @@ sub init {
             $mode
         ) or die $!;
 
-        if ((my $rc = $self->engine->set(uid => $uid, gid => $gid)) != 0) {
+        if ((my $rc = $self->engine->set(uid => $uid, gid => $gid))) {
 
             die "unable to set ownership on shared memory - $rc";
 
@@ -318,7 +318,7 @@ sub init {
             $mode
         ) or die $!;
 
-        if ((my $rc = $self->shmem->set(uid => $uid, gid => $gid)) != 0) {
+        if ((my $rc = $self->shmem->set(uid => $uid, gid => $gid))) {
 
             die "unable to set ownership on shared memory - $rc";
 
