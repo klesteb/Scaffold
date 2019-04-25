@@ -17,7 +17,7 @@ app/html/resources/templates/wrapper.tt
 app/html/robots.txt
 app/lib/App/Main.pm
 Build.PL
-debian/Changes
+Changes
 debian/changelog
 debian/compat
 debian/control
