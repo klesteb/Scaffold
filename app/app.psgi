@@ -18,27 +18,25 @@ main: {
             uaf_logout_wrapper => 'uaf_wrapper.tt',
             uaf_denied_wrapper => 'uaf_wrapper.tt',
         },
-        locations => [
-            {
-                route   => qr{^/$},
-                handler => 'App::Main',
-            },{
-               route   => qr{^/robots.txt$},
-               handler => 'App::Robots',
-            },{
-               route   => qr{^/favicon.ico$},
-               handler => 'App::Favicon',
-            },{
-               route   => qr{^/static/(.*)$},
-               handler => 'App::Static',
-            },{
-                route   => qr{^/login$|^/login/(\w+)$},
-                handler => => 'Scaffold::Uaf::Login',
-            },{
-                route   => qr{^/logout$},
-                handler => 'Scaffold::Uaf::Logout',
-            }
-        ],
+        locations => [{
+            route   => qr{^/$},
+            handler => 'App::Main',
+        },{
+            route   => qr{^/robots.txt$},
+            handler => 'App::Robots',
+        },{
+            route   => qr{^/favicon.ico$},
+            handler => 'App::Favicon',
+        },{
+            route   => qr{^/static/(.*)$},
+            handler => 'App::Static',
+        },{
+            route   => qr{^/login$|^/login/(\w+)$},
+            handler => => 'Scaffold::Uaf::Login',
+        },{
+            route   => qr{^/logout$},
+            handler => 'Scaffold::Uaf::Logout',
+        }],
         authorization => {
             authenticate => 'Scaffold::Uaf::Manager',
             authorize    => 'Scaffold::Uaf::AuthorizeFactory',
