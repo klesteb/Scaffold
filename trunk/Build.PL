@@ -7,9 +7,19 @@ my $builder = Module::Build->new(
     license             => 'perl',
     dist_author         => 'Kevin L. Esteb <kevin@kesteb.us>',
     dist_version_from   => 'lib/Scaffold.pm',
+    release_status      => 'stable',
+    configure_requires => {
+        'Module::Build' => 0,
+    },
     build_requires => {
         'Test::More'    => '0.00',
         'Pod::Coverage' => '0.00',
+    },
+    meta_add => {
+        resources => {
+            homepage   => 'http://scm.kesteb.us/trac',
+            repository => 'http://scm.kesteb.us/repos/Scaffold',
+        },
     },
     install_requires => {
         'Badger'               => '0.06',
