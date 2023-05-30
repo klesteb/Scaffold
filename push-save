@@ -8,5 +8,5 @@
 #
 unset SSH_ASKPASS
 git commit -a
-git push github main
+git push github master
 
